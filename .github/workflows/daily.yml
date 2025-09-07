@@ -59,6 +59,11 @@ jobs:
           mkdir -p data/public
           printf '{"last_run_utc":"%s","status":"ok"}\n' "$(date -u +%FT%TZ)" > data/public/status.json
 
+      - name: Normalize MSTR for frontend
+        shell: bash
+        run: |
+          python backend/app/normalize_mstr.py
+
       - name: Commit updated artifacts
         if: ${{ github.ref == 'refs/heads/main' }}
         shell: bash
@@ -67,7 +72,7 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "ci: update raw EOD artifacts [skip ci]"
+            git commit -m "ci: update raw and public artifacts [skip ci]"
             git push
           else
             echo "No changes to commit"

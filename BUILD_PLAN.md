@@ -26,7 +26,7 @@ This plan delivers a 100% free, automated, daily MSTR advisor (manual execution 
 
 - DONE Day 1: Confirm repo visibility (public), enable GitHub Pages, set folders, add `.env.example`
 - DONE Day 2: Add GitHub Actions workflow (cron 22:05 UTC, Python setup/cache, retries)
-- Day 3: Implement `yfinance` pulls (MSTR, BTC-USD, SPY, QQQ, ^VIX, UUP, ^TNX); idempotent writes
+- DONE Day 3: Implement `yfinance` pulls (MSTR, BTC-USD, SPY, QQQ, ^VIX, UUP, ^TNX); idempotent writes
 - Day 4: Normalize to clean schema; write `data/public/mstr_ohlcv.json`; basic validation checks
 - Day 5: `status.json` with timestamps/sources; full end‑to‑end dry run passes
 - Day 6: Add logging/backoff/timezone handling; verify holiday behavior; schedule smoke test
