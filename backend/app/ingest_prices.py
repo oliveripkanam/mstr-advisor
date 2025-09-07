@@ -43,6 +43,9 @@ def fetch_daily_ohlcv(symbol: str, start_date: str) -> pd.DataFrame:
     )
     if df is None or df.empty:
         return pd.DataFrame()
+    # Flatten possible MultiIndex columns (some yfinance versions return level 0 as field names)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
     # Standardize column names
     df = df.rename(
         columns={
