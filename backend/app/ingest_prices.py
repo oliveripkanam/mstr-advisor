@@ -71,9 +71,14 @@ def fetch_daily_ohlcv(symbol: str, start_date: str) -> pd.DataFrame:
 def dataframe_to_records(df: pd.DataFrame, symbol: str, source: str, ingested_at: str) -> List[Dict]:
     # Coerce numeric columns and build records in one pass to avoid Series ambiguity
     df2 = df.copy()
+    # Coerce numeric cols safely even if duplicate column names exist (some providers do this)
     for col in ("open", "high", "low", "close", "volume"):
         if col in df2.columns:
-            df2[col] = pd.to_numeric(df2[col], errors="coerce")
+            obj = df2[col]
+            if isinstance(obj, pd.DataFrame):
+                # If duplicate column names exist, take the first occurrence
+                obj = obj.iloc[:, 0]
+            df2[col] = pd.to_numeric(obj, errors="coerce")
     df2["symbol"] = symbol
     df2["source"] = source
     df2["ingested_at"] = ingested_at
