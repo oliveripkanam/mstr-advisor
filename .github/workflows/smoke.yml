@@ -1,0 +1,30 @@
+name: Smoke Status
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Build status only
+        run: |
+          python backend/app/build_status.py
+
+      - name: Show status
+        run: |
+          cat data/public/status.json | sed -e 's/{/{\n  /' -e 's/,/\n  ,/g'
+

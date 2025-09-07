@@ -65,10 +65,15 @@ def build_status() -> Dict:
             dfp = pd.read_json(PUBLIC_MSTR)
             pub["rows"] = int(len(dfp))
             pub["latest"] = _safe_latest_timestamp(dfp)
-            # Staleness: latest date < today
-            today = pd.Timestamp.utcnow().date()
+            # Staleness: mark stale only on trading weekdays (simple weekend logic)
+            now_utc = pd.Timestamp.utcnow()
+            today = now_utc.date()
+            is_weekend = now_utc.dayofweek >= 5  # 5=Sat, 6=Sun
             latest = pd.to_datetime(pub["latest"]).date() if pub.get("latest") else None
-            status["stale"] = latest is None or latest < today
+            if is_weekend:
+                status["stale"] = False
+            else:
+                status["stale"] = latest is None or latest < today
         except Exception:
             pub["rows"] = None
             pub["latest"] = None
