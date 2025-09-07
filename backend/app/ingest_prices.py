@@ -4,6 +4,8 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
+import os
+import random
 from time import sleep
 from typing import Dict, List
 
@@ -23,7 +25,7 @@ TICKERS: List[str] = [
 
 START_DATE = "2018-01-01"
 OUTPUT_DIR = Path("data/raw")
-MAX_ATTEMPTS = 3
+MAX_ATTEMPTS = int(os.getenv("MAX_RETRIES", "3"))
 RETRY_SLEEP_SECONDS = 5
 
 
@@ -143,7 +145,9 @@ def ingest_symbol(symbol: str) -> int:
             logging.exception("Error ingesting %s (attempt %d/%d): %s", symbol, attempts, MAX_ATTEMPTS, exc)
             if attempts >= MAX_ATTEMPTS:
                 raise
-            sleep(RETRY_SLEEP_SECONDS)
+            # Exponential backoff with jitter
+            backoff = RETRY_SLEEP_SECONDS * (2 ** (attempts - 1))
+            sleep(backoff + random.uniform(0, 1))
     return 0
 
 
