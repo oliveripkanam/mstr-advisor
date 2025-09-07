@@ -69,23 +69,43 @@ def fetch_daily_ohlcv(symbol: str, start_date: str) -> pd.DataFrame:
 
 
 def dataframe_to_records(df: pd.DataFrame, symbol: str, source: str, ingested_at: str) -> List[Dict]:
+    # Coerce numeric columns and build records in one pass to avoid Series ambiguity
+    df2 = df.copy()
+    for col in ("open", "high", "low", "close", "volume"):
+        if col in df2.columns:
+            df2[col] = pd.to_numeric(df2[col], errors="coerce")
+    df2["symbol"] = symbol
+    df2["source"] = source
+    df2["ingested_at"] = ingested_at
+
+    ordered_cols = [
+        "timestamp",
+        "symbol",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "source",
+        "ingested_at",
+    ]
+    df2 = df2[[c for c in ordered_cols if c in df2.columns]]
+
     records: List[Dict] = []
-    for _, row in df.iterrows():
-        if pd.isna(row.get("close", None)):
-            continue
-        records.append(
-            {
-                "timestamp": str(row["timestamp"]),
-                "symbol": symbol,
-                "open": None if pd.isna(row.get("open")) else float(row.get("open")),
-                "high": None if pd.isna(row.get("high")) else float(row.get("high")),
-                "low": None if pd.isna(row.get("low")) else float(row.get("low")),
-                "close": None if pd.isna(row.get("close")) else float(row.get("close")),
-                "volume": None if pd.isna(row.get("volume")) else float(row.get("volume")),
-                "source": source,
-                "ingested_at": ingested_at,
-            }
-        )
+    for rec in df2.to_dict(orient="records"):
+        # Normalize NaNs to None and cast numerics to float
+        for k in ("open", "high", "low", "close", "volume"):
+            if k in rec:
+                val = rec[k]
+                if val is None or (isinstance(val, float) and pd.isna(val)):
+                    rec[k] = None
+                else:
+                    try:
+                        rec[k] = float(val)
+                    except Exception:
+                        rec[k] = None
+        rec["timestamp"] = str(rec.get("timestamp"))
+        records.append(rec)
     return records
 
 
