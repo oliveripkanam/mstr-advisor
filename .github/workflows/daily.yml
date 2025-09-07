@@ -33,7 +33,7 @@ jobs:
             echo "No requirements.txt yet"
           fi
 
-      - name: Run pipeline placeholder with retry
+      - name: Run ingestion with retry
         shell: bash
         env:
           MAX_ATTEMPTS: 3
@@ -43,7 +43,7 @@ jobs:
           until [ "$attempt" -ge "$MAX_ATTEMPTS" ]
           do
             echo "Run attempt $((attempt+1)) at $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-            python -c "print('Daily pipeline placeholder. Implement data pulls on Week 1 Day 3.')"
+            python backend/app/ingest_prices.py
             status=$?
             if [ $status -eq 0 ]; then
               break
@@ -53,11 +53,11 @@ jobs:
             sleep 15
           done
 
-      - name: Save status artifact (placeholder)
+      - name: Save status artifact
         shell: bash
         run: |
           mkdir -p data/public
-          printf '{"last_run_utc":"%s","status":"ok","placeholder":true}\n' "$(date -u +%FT%TZ)" > data/public/status.json
+          printf '{"last_run_utc":"%s","status":"ok"}\n' "$(date -u +%FT%TZ)" > data/public/status.json
 
       - name: Commit updated artifacts
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -67,7 +67,7 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "ci: daily scheduled workflow skeleton [skip ci]"
+            git commit -m "ci: update raw EOD artifacts [skip ci]"
             git push
           else
             echo "No changes to commit"
