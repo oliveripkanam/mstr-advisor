@@ -64,6 +64,11 @@ jobs:
         run: |
           python backend/app/normalize_mstr.py
 
+      - name: Build enhanced status.json
+        shell: bash
+        run: |
+          python backend/app/build_status.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |
