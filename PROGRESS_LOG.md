@@ -185,6 +185,11 @@ Day 4 — Backtesting Basics
   - Commit title: ci: add backtest smoke workflow
   - Commit description: On-demand baseline backtest for quick validation of changes.
 
+- Part 7: Backtests page polish
+  - Added params hash display and link to `docs/BACKTEST.md`; minor formatting.
+  - Commit title: chore: polish Backtests page (docs link + params hash)
+  - Commit description: Improve discoverability and reproducibility info.
+
 Documentation
 -------------
 - Added `docs/BACKTEST.md` describing inputs, logic, outputs, and determinism.

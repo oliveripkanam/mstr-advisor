@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { createChart, ColorType, ISeriesApi } from "lightweight-charts";
 
 type Summary = {
@@ -83,6 +84,10 @@ export default function BacktestsPage() {
             <div><div className="text-gray-600">Max DD</div><div>{(summary.max_drawdown*100).toFixed(2)}%</div></div>
             <div><div className="text-gray-600">Sharpe</div><div>{summary.sharpe.toFixed(2)}</div></div>
             <div><div className="text-gray-600">Volatility</div><div>{(summary.volatility*100).toFixed(2)}%</div></div>
+          </div>
+          <div className="mt-2 text-xs text-gray-500">Params hash: {/** @ts-ignore **/summary.params_hash}</div>
+          <div className="mt-2 text-xs">
+            <Link className="text-primary underline" href="/docs/BACKTEST">Backtester docs →</Link>
           </div>
         </div>
       )}
