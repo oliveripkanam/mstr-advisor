@@ -17,17 +17,13 @@ jobs:
         shell: bash
         run: |
           set -e
-          for f in data/public/*.json; do
-            [ -f "$f" ] || continue
-            python - <<'PY'
-import json,sys,os
-import glob
-for p in glob.glob('data/public/*.json'):
-    with open(p,'r',encoding='utf-8') as f:
-        json.load(f)
-    print('OK', os.path.basename(p))
-PY
-          done
+          python - <<'PY'
+          import json,glob,os
+          for p in glob.glob('data/public/*.json'):
+              with open(p,'r',encoding='utf-8') as f:
+                  json.load(f)
+              print('OK', os.path.basename(p))
+          PY
 
       - name: Lightweight type checks (frontend build dry-run)
         uses: actions/setup-node@v4

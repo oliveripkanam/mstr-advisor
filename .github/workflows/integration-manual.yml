@@ -15,12 +15,12 @@ jobs:
         run: |
           set -e
           python - <<'PY'
-import json,glob,os
-for p in glob.glob('data/public/*.json'):
-    with open(p,'r',encoding='utf-8') as f:
-        json.load(f)
-    print('OK', os.path.basename(p))
-PY
+          import json,glob,os
+          for p in glob.glob('data/public/*.json'):
+              with open(p,'r',encoding='utf-8') as f:
+                  json.load(f)
+              print('OK', os.path.basename(p))
+          PY
 
       - name: Frontend build dry-run
         uses: actions/setup-node@v4
