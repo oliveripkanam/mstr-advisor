@@ -104,6 +104,12 @@ jobs:
         run: |
           python backend/app/backtest_baseline.py
 
+      - name: Classify regimes and change-points
+        shell: bash
+        run: |
+          python backend/app/regimes_mstr.py
+          python backend/app/change_points.py || true
+
       # ML and labels run weekly; daily job focuses on baseline pipeline
 
       - name: Commit updated artifacts

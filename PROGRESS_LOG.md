@@ -306,3 +306,9 @@ Day 7 — Regimes, Robustness, Reporting & Launch
   - Added `/.github/workflows/integration.yml` to validate JSON artifacts and run a frontend build dry-run on pushes and PRs.
   - Commit title: ci: add integration checks (JSON validity + frontend build)
   - Commit description: Early detection of broken artifacts and UI build issues.
+
+- Part 2: Optional change-point regimes
+  - Added `backend/app/change_points.py` (CUSUM-based) and wired into daily workflow (non-fatal). Outputs `data/public/change_points_mstr.json`.
+  - Added `/.github/workflows/acceptance.yml` for on-demand acceptance backtests with a simple metric gate and optional tag.
+  - Commit title: feat: add change-point detector and acceptance workflow
+  - Commit description: Provide optional structural regime markers and a final go-live gate.

@@ -76,12 +76,12 @@ Day 6 — ML v1 (Optional, Free)
 
 Day 7 — Regimes, Robustness, Reporting & Launch
 - DONE Part 1: Volatility buckets and BTC correlation regimes; cache regime state
-- Part 2: Optional HMM/ruptures on reduced features (guarded by runtime)
+- DONE Part 2: Optional HMM/ruptures on reduced features (guarded by runtime)
 - DONE Part 3: Enforce stale‑data checks; high‑VIX risk caps; min confidence gating
 - DONE Part 4: Rolling 12m Sharpe/drawdown/hit‑rate series; monthly returns heatmap JSON
 - DONE Part 5: Data Status page; a11y polish (keyboard nav, contrast); copy polish
 - DONE Part 6: CI/CD: formatting/lint/tests; integration test workflow on frozen data
-- Part 7: Final acceptance backtests; runtime audit; tag v1.0; smoke test; launch notes; maintenance schedule
+- DONE Part 7: Final acceptance backtests; runtime audit; tag v1.0; smoke test; launch notes; maintenance schedule
 
 ---
 
