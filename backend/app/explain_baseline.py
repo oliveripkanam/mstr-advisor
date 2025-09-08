@@ -68,7 +68,18 @@ def build_drivers(tech: pd.Series, xas: pd.Series, baseline: Dict) -> List[Dict]
     if baseline:
         drivers.insert(0, {"name": "Action", "detail": baseline.get("action"), "impact": "info"})
 
-    return drivers[:6]
+    # keep top 5 items; ensure unique by (name, detail)
+    seen = set()
+    dedup: List[Dict] = []
+    for d in drivers:
+        key = (d["name"], d["detail"])
+        if key in seen:
+            continue
+        seen.add(key)
+        dedup.append(d)
+        if len(dedup) >= 5:
+            break
+    return dedup
 
 
 def build_narrative(baseline: Dict) -> str:
@@ -79,7 +90,9 @@ def build_narrative(baseline: Dict) -> str:
         parts.append(f"Confidence {int(baseline['confidence'])}%")
     if baseline.get("why"):
         parts.append(baseline["why"])
-    return ". ".join(parts)
+    text = ". ".join(parts)
+    # cap to ~160 chars for UI brevity
+    return (text[:157] + "…") if len(text) > 160 else text
 
 
 def main() -> None:

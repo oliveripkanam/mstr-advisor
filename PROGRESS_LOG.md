@@ -209,3 +209,8 @@ Day 5 — Explainability (Rules First)
   - Commit title: feat: wire explain_latest.json into Explainer UI
   - Commit description: Display baseline narrative and driver list with impact hints.
 
+- Part 3: Tone/length polish
+  - Trim narrative to ~160 chars and cap driver list to 5 unique items.
+  - Commit title: chore: polish explainer narrative and drivers
+  - Commit description: Keep copy concise and de-duplicate drivers for readability.
+
