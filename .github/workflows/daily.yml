@@ -104,6 +104,11 @@ jobs:
         run: |
           python backend/app/backtest_baseline.py
 
+      - name: Generate labels (5d)
+        shell: bash
+        run: |
+          python backend/app/labels_mstr.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |

@@ -234,3 +234,11 @@ Day 5 — Explainability (Rules First)
   - If a recommendation is suppressed (stale/low confidence), the narrative appends a short note.
   - Commit title: chore: add suppression note to explainer narrative
   - Commit description: Make gating state explicit in the explainability text.
+
+Day 6 — ML v1 (Optional, Free)
+-----------------------------------
+- Part 1: Labels (5d horizon)
+  - Added `backend/app/labels_mstr.py` to compute future 5d returns and 3-class labels (Up/Flat/Down), saved to `data/public/labels_mstr_5d.json`.
+  - Wired into daily workflow for freshness.
+  - Commit title: feat: generate 5d labels (Up/Flat/Down)
+  - Commit description: Produce training labels aligned to close without look-ahead in features.
