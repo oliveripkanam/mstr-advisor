@@ -1,0 +1,52 @@
+name: ML Regression (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ml_regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+          pip install scikit-learn
+      - name: Prepare fixed window
+        run: |
+          python backend/app/normalize_mstr.py
+          python - <<'PY'
+import json
+import pandas as pd
+p='data/public/mstr_ohlcv.json'
+df=pd.read_json(p)
+df['timestamp']=pd.to_datetime(df['timestamp'])
+cut=df['timestamp'].max()-pd.Timedelta(days=3*365)
+df=df[df['timestamp']>=cut]
+df['timestamp']=df['timestamp'].dt.strftime('%Y-%m-%d')
+df.to_json(p, orient='records')
+print('frozen rows',len(df))
+PY
+      - name: Recompute features/labels/model
+        run: |
+          python backend/app/features_mstr.py
+          python backend/app/crossasset_mstr.py
+          python backend/app/labels_mstr.py
+          python backend/app/train_ml_mstr.py
+      - name: Sanity gate on probs
+        run: |
+          python - <<'PY'
+import json
+with open('data/public/ml_latest_probs.json','r',encoding='utf-8') as f:
+    m=json.load(f)
+probs=m.get('probs',{})
+assert 0.99 <= sum(probs.values())+1e-6 <= 1.01
+assert all(0<=v<=1 for v in probs.values())
+print('ML probs OK:',probs)
+PY
+
+

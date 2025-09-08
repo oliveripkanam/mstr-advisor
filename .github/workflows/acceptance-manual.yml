@@ -1,0 +1,46 @@
+name: Acceptance (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Create/refresh v1.0 tag after checks'
+        required: false
+        default: 'false'
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+      - name: Recompute baseline backtest
+        run: |
+          python backend/app/normalize_mstr.py
+          python backend/app/backtest_baseline.py
+      - name: Gate on basic metrics
+        run: |
+          python - <<'PY'
+import json,sys
+with open('data/public/backtest_baseline.json','r',encoding='utf-8') as f:
+    s=json.load(f)
+ok=(s.get('CAGR',0)>=0 and s.get('max_drawdown',0)<=0 and abs(s.get('sharpe',0))<10)
+print('Summary:',s)
+assert ok, 'Backtest metrics out of expected range'
+PY
+      - name: Optional tag v1.0
+        if: ${{ github.event.inputs.tag == 'true' }}
+        run: |
+          git tag -f v1.0
+          git push -f origin v1.0
+
+
