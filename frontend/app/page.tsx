@@ -7,14 +7,14 @@ export default function HomePage() {
   return (
     <main>
       <div className="mb-4">
-        <p className="text-sm text-gray-600">MSTR daily price chart:</p>
+        <p className="text-sm text-gray-700">MSTR daily price chart:</p>
       </div>
       <PriceChart />
       <div className="mt-6">
         <RecommendationCard />
       </div>
       <div className="mt-4 text-sm">
-        <Link className="text-primary underline" href="/explainer">See explainer →</Link>
+        <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary" href="/explainer">See explainer →</Link>
       </div>
     </main>
   );
