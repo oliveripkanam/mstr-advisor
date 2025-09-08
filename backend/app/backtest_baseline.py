@@ -117,7 +117,7 @@ def backtest(df: pd.DataFrame, cfg: BtConfig) -> Dict:
     # Rolling hit-rate (fraction of positive strategy returns in window)
     rolling_hit = strat_ret.rolling(window).apply(lambda s: float((s > 0).mean()), raw=False)
 
-    return summary, equity, rolling_sharpe, rolling_dd
+    return summary, equity, rolling_sharpe, rolling_dd, rolling_hit
 
 
 def main() -> None:
@@ -130,7 +130,7 @@ def main() -> None:
     df = compute_indicators(df)
 
     cfg = BtConfig()
-    summary, equity, rolling_sharpe, rolling_dd = backtest(df, cfg)
+    summary, equity, rolling_sharpe, rolling_dd, rolling_hit = backtest(df, cfg)
 
     # Monthly returns heatmap data
     df_month = df[["timestamp", "close"]].copy()
