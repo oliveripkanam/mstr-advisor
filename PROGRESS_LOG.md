@@ -112,3 +112,9 @@ Day 3 — Frontend MVP (Static)
   - Commit title: feat: scaffold Next.js + Tailwind frontend (static export)
   - Commit description: Initialize frontend with base layout and palette; prepare for data wiring.
 
+- Part 2: Price chart
+  - Added `frontend/components/PriceChart.tsx` using `lightweight-charts` and wired it to `/data/public/mstr_ohlcv.json`.
+  - Rendered the chart on the homepage (`app/page.tsx`).
+  - Commit title: feat: add MSTR price chart wired to public JSON
+  - Commit description: Install lightweight-charts and render a responsive candlestick chart.
+

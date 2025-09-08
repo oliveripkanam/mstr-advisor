@@ -33,13 +33,13 @@ Day 2 — Features and Baseline Rules
 - DONE Part 1: SMA/EMA/RSI/MACD/ATR/Bollinger for MSTR; cache intermediate frames
 - DONE Part 2: Cross‑asset: 20/60d correlations (BTC/SPY/QQQ), VIX bands, UUP trend, ^TNX delta
 - DONE Part 3: Baseline rule engine (trend filter, RSI guards, ATR sizing, macro overlays) → action
-- Part 4: Rationale (plain English) + confidence heuristic; write `latest_recommendation.json`
-- Part 5: “What changed” vs prior day; finalize JSON schemas; dry run on a full week
-- Part 6: Safety rails v1: stale‑data checks, high‑VIX caps, min confidence gating
-- Part 7: Pipeline refactor/cleanup; update docs; confirm daily job stability
+- DONE Part 4: Rationale (plain English) + confidence heuristic; write `latest_recommendation.json`
+- DONE Part 5: “What changed” vs prior day; finalize JSON schemas; dry run on a full week
+- DONE Part 6: Safety rails v1: stale‑data checks, high‑VIX caps, min confidence gating
+- DONE Part 7: Pipeline refactor/cleanup; update docs; confirm daily job stability
 
 Day 3 — Frontend MVP (Static)
-- Part 1: Next.js + Tailwind scaffold; base layout; color‑blind‑safe palette
+- DONE Part 1: Next.js + Tailwind scaffold; base layout; color‑blind‑safe palette
 - Part 2: PriceChart using Lightweight Charts reading `mstr_ohlcv.json`
 - Part 3: RecommendationCard (action, entry/stop/TP, confidence, rationale)
 - Part 4: Explainer view + “What changed”; responsive/mobile polish
