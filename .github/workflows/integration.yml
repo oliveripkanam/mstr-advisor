@@ -21,10 +21,11 @@ jobs:
             [ -f "$f" ] || continue
             python - <<'PY'
 import json,sys,os
-p=sys.argv[1]
-with open(p,'r',encoding='utf-8') as f:
-    json.load(f)
-print('OK', os.path.basename(p))
+import glob
+for p in glob.glob('data/public/*.json'):
+    with open(p,'r',encoding='utf-8') as f:
+        json.load(f)
+    print('OK', os.path.basename(p))
 PY
           done
 
