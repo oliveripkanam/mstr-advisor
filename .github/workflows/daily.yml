@@ -94,6 +94,11 @@ jobs:
         run: |
           python backend/app/what_changed_mstr.py
 
+      - name: Backtest baseline (summary + equity)
+        shell: bash
+        run: |
+          python backend/app/backtest_baseline.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |
