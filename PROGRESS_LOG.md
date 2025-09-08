@@ -104,3 +104,11 @@ Day 2 — Features and Baseline Rules
   - Commit description: Use status.json staleness and env MIN_CONFIDENCE to suppress low-trust calls.
 
 
+Day 3 — Frontend MVP (Static)
+-----------------------------------
+- Part 1: Next.js scaffold
+  - Added frontend app with Next.js 14 + Tailwind, static export enabled.
+  - Files: `frontend/package.json`, `frontend/next.config.js`, `frontend/tailwind.config.js`, `frontend/postcss.config.js`, `frontend/app/layout.tsx`, `frontend/app/page.tsx`, `frontend/app/globals.css`.
+  - Commit title: feat: scaffold Next.js + Tailwind frontend (static export)
+  - Commit description: Initialize frontend with base layout and palette; prepare for data wiring.
+

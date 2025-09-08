@@ -46,6 +46,11 @@ Troubleshooting
 - Weekends: equities don’t trade; staleness is suppressed on weekends.
 - API hiccups: ingestion retries with exponential backoff; rerun later if needed.
 
+Config
+------
+- `MAX_RETRIES` (env): retry attempts for ingestion (default 3)
+- `MIN_CONFIDENCE` (env): minimum confidence to avoid suppression (default 50)
+
 See `BUILD_PLAN.md` for the full schedule.
 
 
