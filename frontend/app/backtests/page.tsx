@@ -29,6 +29,7 @@ export default function BacktestsPage() {
   const summary = useJson<Summary>("data/public/backtest_baseline.json");
   const equity = useJson<Eq[]>("data/public/backtest_equity.json");
   const ref = useRef<HTMLDivElement>(null);
+  const ref2 = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current || !equity) return;
@@ -49,6 +50,26 @@ export default function BacktestsPage() {
     return () => { window.removeEventListener('resize', onResize); chart.remove(); };
   }, [equity]);
 
+  const rolling = useJson<{ rolling_sharpe_252: { timestamp: string; value: number|null }[]; drawdown: { timestamp: string; value: number }[] }>("data/public/backtest_rolling.json");
+  useEffect(() => {
+    if (!ref2.current || !rolling) return;
+    const chart = createChart(ref2.current, {
+      layout: { background: { type: ColorType.Solid, color: "#ffffff" }, textColor: "#111827" },
+      width: ref2.current.clientWidth,
+      height: 240,
+      timeScale: { rightOffset: 2, fixLeftEdge: true },
+      grid: { vertLines: { color: "#f3f4f6" }, horzLines: { color: "#f3f4f6" } },
+    });
+    const s1: ISeriesApi<'Line'> = chart.addLineSeries({ color: "#16a34a" });
+    s1.setData(rolling.rolling_sharpe_252.filter(p=>p.value!==null).map(p => ({ time: p.timestamp as unknown as any, value: p.value as number })));
+    const s2: ISeriesApi<'Line'> = chart.addLineSeries({ color: "#dc2626" });
+    s2.setData(rolling.drawdown.map(p => ({ time: p.timestamp as unknown as any, value: p.value })));
+    chart.timeScale().fitContent();
+    const onResize = () => { if (ref2.current) chart.applyOptions({ width: ref2.current.clientWidth }); };
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('resize', onResize); chart.remove(); };
+  }, [rolling]);
+
   return (
     <main className="space-y-4">
       <h2 className="text-xl font-semibold">Baseline Backtest</h2>
@@ -67,6 +88,10 @@ export default function BacktestsPage() {
       <div>
         <div className="mb-2 text-sm text-gray-700">Equity curve</div>
         <div ref={ref} className="w-full" />
+      </div>
+      <div>
+        <div className="mb-2 text-sm text-gray-700">Rolling Sharpe (12m) and Drawdown</div>
+        <div ref={ref2} className="w-full" />
       </div>
     </main>
   );

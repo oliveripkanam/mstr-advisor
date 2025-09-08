@@ -12,6 +12,7 @@ import pandas as pd
 INPUT_PATH = Path("data/public/mstr_ohlcv.json")
 OUT_SUMMARY = Path("data/public/backtest_baseline.json")
 OUT_EQUITY = Path("data/public/backtest_equity.json")
+OUT_ROLLING = Path("data/public/backtest_rolling.json")
 
 
 @dataclass
@@ -103,7 +104,12 @@ def backtest(df: pd.DataFrame, cfg: BtConfig) -> Dict:
         },
     }
 
-    return summary, equity
+    # Rolling metrics (12m ~ 252 trading days)
+    window = 252
+    rolling_sharpe = (strat_ret.rolling(window).mean() * 252.0) / (strat_ret.rolling(window).std() * np.sqrt(252.0) + 1e-9)
+    rolling_dd = (equity / equity.cummax() - 1.0)
+
+    return summary, equity, rolling_sharpe, rolling_dd
 
 
 def main() -> None:
@@ -116,7 +122,7 @@ def main() -> None:
     df = compute_indicators(df)
 
     cfg = BtConfig()
-    summary, equity = backtest(df, cfg)
+    summary, equity, rolling_sharpe, rolling_dd = backtest(df, cfg)
 
     OUT_SUMMARY.parent.mkdir(parents=True, exist_ok=True)
     with OUT_SUMMARY.open("w", encoding="utf-8") as f:
@@ -126,6 +132,17 @@ def main() -> None:
             {"timestamp": str(ts.date()), "equity": float(eq)}
             for ts, eq in zip(df["timestamp"], equity)
         ], f, ensure_ascii=False)
+    with OUT_ROLLING.open("w", encoding="utf-8") as f:
+        json.dump({
+            "rolling_sharpe_252": [
+                {"timestamp": str(ts.date()), "value": (None if np.isnan(val) else float(val))}
+                for ts, val in zip(df["timestamp"], rolling_sharpe)
+            ],
+            "drawdown": [
+                {"timestamp": str(ts.date()), "value": float(val)}
+                for ts, val in zip(df["timestamp"], rolling_dd)
+            ],
+        }, f, ensure_ascii=False)
     logging.info("Wrote %s and %s", OUT_SUMMARY, OUT_EQUITY)
 
 

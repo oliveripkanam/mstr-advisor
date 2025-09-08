@@ -148,3 +148,24 @@ Day 3 — Frontend MVP (Static)
   - Commit title: ci: add GitHub Pages deploy for frontend static site
   - Commit description: Build Next.js static export, stage artifacts, and deploy via GitHub Pages.
 
+Day 4 — Backtesting Basics
+-----------------------------------
+- Part 1: Baseline backtester (daily bars)
+  - Added `backend/app/backtest_baseline.py` to simulate a simple trend/RSI baseline on daily closes with slippage.
+  - Produces `data/public/backtest_baseline.json` (summary metrics) and `data/public/backtest_equity.json` (equity curve).
+  - Wired into the daily workflow so artifacts update automatically.
+  - Commit title: feat: add baseline backtester and publish summary/equity JSON
+  - Commit description: Compute CAGR, MDD, Sharpe, turnover and equity curve for baseline.
+ 
+- Part 2: Backtests page
+  - Added `frontend/app/backtests/page.tsx` to render summary metrics and an equity curve from backtest JSONs.
+  - Linked from homepage.
+  - Commit title: feat: add Backtests page (summary + equity curve)
+  - Commit description: Visualize baseline performance and equity curve using lightweight-charts.
+
+- Part 3: Rolling metrics
+  - Enhanced backtester to export rolling 12m Sharpe and drawdown to `data/public/backtest_rolling.json`.
+  - Updated Backtests page to render Rolling Sharpe and Drawdown below the equity curve.
+  - Commit title: feat: add rolling metrics and charts to Backtests page
+  - Commit description: Compute rolling Sharpe/drawdown and visualize for context.
+
