@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
@@ -12,6 +13,7 @@ import pandas as pd
 TECH_PATH = Path("data/public/mstr_technical.json")
 XASSET_PATH = Path("data/public/mstr_crossasset.json")
 OUT_PATH = Path("data/public/baseline_signal.json")
+STATUS_PATH = Path("data/public/status.json")
 
 
 @dataclass
@@ -132,7 +134,7 @@ def decide_action(inp: BaselineInputs) -> Dict:
 
     why = "; ".join(rationale_parts) if rationale_parts else "Neutral setup"
 
-    return {
+    result = {
         "timestamp": inp.timestamp,
         "action": action,
         "entry_zone": [round(entry_min, 2), round(entry_max, 2)],
@@ -150,6 +152,39 @@ def decide_action(inp: BaselineInputs) -> Dict:
             "uup_trend_up": inp.uup_trend_up,
         },
     }
+
+    # Safety rails
+    result["suppressed"] = False
+    safety_notes = []
+
+    # 1) Stale data gating (from status.json)
+    try:
+        if STATUS_PATH.exists():
+            with STATUS_PATH.open("r", encoding="utf-8") as f:
+                status = json.load(f)
+            if bool(status.get("stale", False)):
+                result["action"] = "Hold"
+                result["confidence"] = min(result["confidence"], 50)
+                result["suppressed"] = True
+                safety_notes.append("Stale data: recommendation suppressed")
+    except Exception:
+        # If status can't be read, don't crash the pipeline
+        pass
+
+    # 2) Minimum confidence gating
+    min_conf = int(os.getenv("MIN_CONFIDENCE", "50"))
+    if result["confidence"] < min_conf:
+        result["action"] = "Hold"
+        result["suppressed"] = True
+        safety_notes.append(f"Confidence below {min_conf}: recommendation suppressed")
+
+    if safety_notes:
+        if result["why"]:
+            result["why"] = f"{result['why']}; " + "; ".join(safety_notes)
+        else:
+            result["why"] = "; ".join(safety_notes)
+
+    return result
 
 
 def main() -> None:

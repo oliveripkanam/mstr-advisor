@@ -95,4 +95,12 @@ Day 2 — Features and Baseline Rules
   - Commit title: feat: add daily 'What changed' summary JSON
   - Commit description: Generate concise change log for last two days and publish what_changed.json.
 
+- Part 6: Safety rails v1
+  - Enhanced `baseline_rules.py` to apply gating:
+    - Stale data (from `status.json`) → downgrade to Hold and cap confidence
+    - Minimum confidence (env `MIN_CONFIDENCE`, default 50) → Hold and mark suppressed
+  - Output now includes `suppressed` boolean and appended notes in `why` when gating triggers.
+  - Commit title: feat: add safety rails to baseline recommendation (stale/confidence gating)
+  - Commit description: Use status.json staleness and env MIN_CONFIDENCE to suppress low-trust calls.
+
 
