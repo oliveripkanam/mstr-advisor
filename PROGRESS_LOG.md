@@ -260,3 +260,8 @@ Day 6 — ML v1 (Optional, Free)
   - Wired into daily workflow.
   - Commit title: feat: combine baseline with ML under safety rails
   - Commit description: Blend probabilities to strengthen or temper the baseline while keeping guardrails.
+
+- Part 4: Feature importances (lightweight)
+  - `train_ml_mstr.py` now writes `data/public/ml_feature_importances.json` (top features) for explainability.
+  - Commit title: feat: emit ML feature importances for explainability
+  - Commit description: Provide a quick view of top drivers without heavy SHAP.

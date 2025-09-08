@@ -35,7 +35,7 @@ def assemble_dataset() -> Tuple[pd.DataFrame, pd.Series]:
     return X, y
 
 
-def train_and_calibrate(X: pd.DataFrame, y: pd.Series) -> Tuple[CalibratedClassifierCV, Dict]:
+def train_and_calibrate(X: pd.DataFrame, y: pd.Series) -> Tuple[CalibratedClassifierCV, Dict, GradientBoostingClassifier, List[str]]:
     # simple time-series split for calibration; small model to keep CI fast
     tscv = TimeSeriesSplit(n_splits=3)
     base = GradientBoostingClassifier(random_state=42)
@@ -48,12 +48,16 @@ def train_and_calibrate(X: pd.DataFrame, y: pd.Series) -> Tuple[CalibratedClassi
         "splits": 3,
         "n_features": int(X.shape[1]),
     }
-    return calib, meta
+    # Train a copy of the base model on the same transformed features to extract importances
+    base_imp = GradientBoostingClassifier(random_state=42)
+    base_imp.fit(Xs, y)
+    feature_names = list(X.columns)
+    return calib, meta, base_imp, feature_names
 
 
 def main() -> None:
     X, y = assemble_dataset()
-    model, meta = train_and_calibrate(X, y)
+    model, meta, base_imp, feat_names = train_and_calibrate(X, y)
 
     # latest probs on last row
     last_X = X.iloc[[-1]]
@@ -66,6 +70,15 @@ def main() -> None:
         json.dump(meta, f, ensure_ascii=False)
     with OUT_PROBS.open("w", encoding="utf-8") as f:
         json.dump({"timestamp": pd.Timestamp.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"), "probs": prob_map}, f, ensure_ascii=False)
+    # Feature importances (top 12)
+    try:
+        imps = base_imp.feature_importances_.tolist()
+        pairs = sorted(zip(feat_names, imps), key=lambda t: t[1], reverse=True)[:12]
+        out_imp = Path("data/public/ml_feature_importances.json")
+        with out_imp.open("w", encoding="utf-8") as f:
+            json.dump([{"feature": n, "importance": float(v)} for n, v in pairs], f, ensure_ascii=False)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
