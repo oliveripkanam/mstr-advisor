@@ -104,23 +104,7 @@ jobs:
         run: |
           python backend/app/backtest_baseline.py
 
-      - name: Generate labels (5d)
-        shell: bash
-        run: |
-          python backend/app/labels_mstr.py
-
-      - name: Train ML (v1) and output latest probs
-        shell: bash
-        run: |
-          if [ -f backend/app/train_ml_mstr.py ]; then
-            pip install scikit-learn || true
-            python backend/app/train_ml_mstr.py
-          fi
-
-      - name: Combine baseline with ML under safety rails
-        shell: bash
-        run: |
-          python backend/app/combine_baseline_ml.py
+      # ML and labels run weekly; daily job focuses on baseline pipeline
 
       - name: Commit updated artifacts
         shell: bash

@@ -71,7 +71,7 @@ Day 6 — ML v1 (Optional, Free)
 - Part 3: Calibrate (isotonic/Platt); score latest; combine via expected utility and risk rails
 - Part 4: SHAP on latest day only (TreeSHAP) or feature importances if runtime tight
 - DONE Part 5: Frontend: probability/confidence visualization; ML toggle in config
-- Part 6: Runtime budget and scheduling: baseline daily, ML weekly (if needed)
+- DONE Part 6: Runtime budget and scheduling: baseline daily, ML weekly (if needed)
 - Part 7: QA/regression tests on frozen sample; finalize ML docs
 
 Day 7 — Regimes, Robustness, Reporting & Launch

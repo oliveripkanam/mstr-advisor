@@ -272,3 +272,9 @@ Day 6 — ML v1 (Optional, Free)
   - Enhanced `frontend/components/RecommendationCard.tsx` to optionally read combined recommendation, show a "Combined" pill, and display probability bars based on config.
   - Commit title: feat: add ML toggle and probability bars to RecommendationCard
   - Commit description: Config-driven combined-vs-baseline selection and visual ML probs for clarity.
+
+- Part 6: Runtime budget & scheduling
+  - Edited `/.github/workflows/daily.yml` to focus daily runs on baseline pipeline only.
+  - Added `/.github/workflows/ml-weekly.yml` to run labels + ML + combine weekly (Monday 22:15 UTC) with commit of ML artifacts.
+  - Commit title: ci: split daily vs weekly workflows (ML weekly)
+  - Commit description: Keep baseline daily; move labels/model/combine to a weekly schedule to respect free runtime budgets.
