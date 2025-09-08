@@ -224,3 +224,8 @@ Day 5 — Explainability (Rules First)
   - Explainer uses `aria-live` for assistive tech updates.
   - Commit title: chore: add frontend fallbacks and a11y live region
   - Commit description: Gracefully handle fetch errors and improve accessibility.
+
+- Part 6: Copy tone refinement
+  - Narrative now starts with “Today: Action (Confidence X%).” and then rationale.
+  - Commit title: chore: refine explainer narrative tone
+  - Commit description: Align copy with user-facing style for clarity and brevity.

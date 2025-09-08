@@ -83,14 +83,17 @@ def build_drivers(tech: pd.Series, xas: pd.Series, baseline: Dict) -> List[Dict]
 
 
 def build_narrative(baseline: Dict) -> str:
-    parts = []
-    if baseline.get("action"):
-        parts.append(f"Action: {baseline['action']}")
-    if baseline.get("confidence") is not None:
-        parts.append(f"Confidence {int(baseline['confidence'])}%")
-    if baseline.get("why"):
-        parts.append(baseline["why"])
-    text = ". ".join(parts)
+    action = baseline.get("action")
+    conf = baseline.get("confidence")
+    why = baseline.get("why") or ""
+    prefix = ""
+    if action is not None and conf is not None:
+        prefix = f"Today: {action} (Confidence {int(conf)}%). "
+    elif action is not None:
+        prefix = f"Today: {action}. "
+    elif conf is not None:
+        prefix = f"Confidence {int(conf)}%. "
+    text = (prefix + why).strip()
     # cap to ~160 chars for UI brevity
     return (text[:157] + "…") if len(text) > 160 else text
 
