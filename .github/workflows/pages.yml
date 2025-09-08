@@ -47,6 +47,7 @@ jobs:
 
       - name: Build static export
         run: |
+          echo "NEXT_PUBLIC_BASE_PATH=/mstr-advisor" >> $GITHUB_ENV
           cd frontend
           npm run build
 
