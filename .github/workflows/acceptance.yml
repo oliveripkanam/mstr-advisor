@@ -1,4 +1,4 @@
-name: Acceptance Backtests
+name: Acceptance
 
 on:
   workflow_dispatch:

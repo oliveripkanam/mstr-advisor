@@ -66,5 +66,6 @@ jobs:
             git push
           else
             echo "No ML changes to commit"
+          fi
 
 

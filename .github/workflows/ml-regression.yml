@@ -1,4 +1,4 @@
-name: ML Regression (Frozen Sample)
+name: ML Regression
 
 on:
   workflow_dispatch:
