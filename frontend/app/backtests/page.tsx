@@ -92,7 +92,7 @@ export default function BacktestsPage() {
           </div>
           <div className="mt-2 text-xs text-gray-500">Params hash: {/** @ts-ignore **/summary.params_hash}</div>
           <div className="mt-2 text-xs">
-            <Link className="text-primary underline" href="/docs/BACKTEST">Backtester docs →</Link>
+            <Link className="text-primary underline" href="/mstr-advisor/docs/BACKTEST.md">Backtester docs →</Link>
           </div>
         </div>
       )}

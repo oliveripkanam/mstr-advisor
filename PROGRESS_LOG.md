@@ -312,3 +312,10 @@ Day 7 — Regimes, Robustness, Reporting & Launch
   - Added `/.github/workflows/acceptance.yml` for on-demand acceptance backtests with a simple metric gate and optional tag.
   - Commit title: feat: add change-point detector and acceptance workflow
   - Commit description: Provide optional structural regime markers and a final go-live gate.
+
+Fixes and Finalization
+----------------------
+- Fixed `backend/app/crossasset_mstr.py` import typo (`numpy as np`).
+- Pages deploy now copies `configs/frontend.json` and `docs/BACKTEST.md`; Backtests links to `BACKTEST.md`.
+- Data Status page fetch path corrected to `data/public/status.json`.
+- Added `docs/ML.md` and `ml-regression.yml` (frozen-window ML sanity checks).

@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List
 
-import numpy as pd
+import numpy as np
 import pandas as pd
 
 MSTR_PATH = Path("data/public/mstr_ohlcv.json")

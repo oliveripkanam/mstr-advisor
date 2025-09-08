@@ -12,7 +12,7 @@ export default function StatusPage() {
   const [data, setData] = useState<Status | null>(null);
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
-    fetch("/data/public/status.json")
+    fetch("data/public/status.json")
       .then((r) => r.json())
       .then((d: Status) => setData(d))
       .catch(() => setErr("Unable to load status"));

@@ -44,6 +44,9 @@ jobs:
           mkdir -p frontend/public/configs
           cp -r data/public/*.json frontend/public/data/public/ || true
           cp configs/glossary.yaml frontend/public/configs/glossary.yaml || true
+          cp configs/frontend.json frontend/public/configs/frontend.json || true
+          mkdir -p frontend/public/docs
+          cp docs/BACKTEST.md frontend/public/docs/BACKTEST.md || true
 
       - name: Build static export
         run: |
