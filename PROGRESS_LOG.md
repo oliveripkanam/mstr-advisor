@@ -80,4 +80,11 @@ Day 2 — Features and Baseline Rules
   - Commit title: feat: add baseline rule engine and daily recommendation JSON
   - Commit description: Generate Buy/Hold/Reduce with ATR-based risk and macro overlays; write baseline_signal.json and update workflow.
 
+- Part 4: Publish latest recommendation
+  - Implemented `backend/app/publish_recommendation.py` to convert `baseline_signal.json` into a lighter `latest_recommendation.json` for the frontend.
+  - Fields: symbol, timestamp, action, entry_zone, stop, take_profit, confidence, why
+  - Wired into workflow after baseline generation.
+  - Commit title: feat: publish latest_recommendation.json for frontend consumption
+  - Commit description: Output minimal recommendation JSON derived from baseline signal and add workflow step.
+
 

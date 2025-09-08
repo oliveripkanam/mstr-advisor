@@ -84,6 +84,11 @@ jobs:
         run: |
           python backend/app/baseline_rules.py
 
+      - name: Publish latest recommendation JSON
+        shell: bash
+        run: |
+          python backend/app/publish_recommendation.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |
