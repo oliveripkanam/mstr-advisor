@@ -242,3 +242,9 @@ Day 6 — ML v1 (Optional, Free)
   - Wired into daily workflow for freshness.
   - Commit title: feat: generate 5d labels (Up/Flat/Down)
   - Commit description: Produce training labels aligned to close without look-ahead in features.
+
+- Part 2: Model scaffold + latest probabilities
+  - Added `backend/app/train_ml_mstr.py` to assemble features/labels, train a calibrated classifier, and emit `data/public/ml_latest_probs.json` and `ml_model_meta.json`.
+  - Wired into the daily workflow (lightweight runtime, free tier friendly).
+  - Commit title: feat: add ML v1 scaffold and emit latest probabilities
+  - Commit description: Train a small calibrated model and publish latest class probabilities.

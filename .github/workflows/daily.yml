@@ -109,6 +109,14 @@ jobs:
         run: |
           python backend/app/labels_mstr.py
 
+      - name: Train ML (v1) and output latest probs
+        shell: bash
+        run: |
+          if [ -f backend/app/train_ml_mstr.py ]; then
+            pip install scikit-learn || true
+            python backend/app/train_ml_mstr.py
+          fi
+
       - name: Commit updated artifacts
         shell: bash
         run: |
