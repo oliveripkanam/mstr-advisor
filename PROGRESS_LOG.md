@@ -180,6 +180,11 @@ Day 4 — Backtesting Basics
   - Commit title: feat: add monthly returns heatmap to Backtests
   - Commit description: Compute monthly returns and display a compact table for quick scanning.
 
+- Part 6: Backtest smoke workflow
+  - Added `.github/workflows/backtest-smoke.yml` to run the backtest on demand and upload artifacts.
+  - Commit title: ci: add backtest smoke workflow
+  - Commit description: On-demand baseline backtest for quick validation of changes.
+
 Documentation
 -------------
 - Added `docs/BACKTEST.md` describing inputs, logic, outputs, and determinism.
