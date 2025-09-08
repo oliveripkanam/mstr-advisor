@@ -14,6 +14,7 @@ INPUT_PATH = Path("data/public/mstr_ohlcv.json")
 OUT_SUMMARY = Path("data/public/backtest_baseline.json")
 OUT_EQUITY = Path("data/public/backtest_equity.json")
 OUT_ROLLING = Path("data/public/backtest_rolling.json")
+OUT_MONTHLY = Path("data/public/backtest_monthly.json")
 
 
 @dataclass
@@ -128,6 +129,22 @@ def main() -> None:
     cfg = BtConfig()
     summary, equity, rolling_sharpe, rolling_dd = backtest(df, cfg)
 
+    # Monthly returns heatmap data
+    df_month = df[["timestamp", "close"]].copy()
+    df_month["month"] = pd.to_datetime(df_month["timestamp"]).dt.to_period("M")
+    month_close = df_month.groupby("month")["close"].last()
+    month_ret = month_close.pct_change().dropna()
+    month_ret.index = month_ret.index.to_timestamp()
+    heat = {}
+    for ts, val in month_ret.items():
+        y = ts.year
+        m = ts.strftime("%b")
+        heat.setdefault(y, {})[m] = round(float(val), 4)
+    heat_rows = [
+        {"year": y, **heat[y]}
+        for y in sorted(heat.keys())
+    ]
+
     OUT_SUMMARY.parent.mkdir(parents=True, exist_ok=True)
     with OUT_SUMMARY.open("w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False)
@@ -147,7 +164,9 @@ def main() -> None:
                 for ts, val in zip(df["timestamp"], rolling_dd)
             ],
         }, f, ensure_ascii=False)
-    logging.info("Wrote %s and %s", OUT_SUMMARY, OUT_EQUITY)
+    with OUT_MONTHLY.open("w", encoding="utf-8") as f:
+        json.dump(heat_rows, f, ensure_ascii=False)
+    logging.info("Wrote %s, %s, %s", OUT_SUMMARY, OUT_EQUITY, OUT_MONTHLY)
 
 
 if __name__ == "__main__":

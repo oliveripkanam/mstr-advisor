@@ -174,3 +174,9 @@ Day 4 — Backtesting Basics
   - Commit title: chore: add params hash to backtest summary
   - Commit description: Include short hash of config in `backtest_baseline.json`.
 
+- Part 5: Monthly returns heatmap
+  - Enhanced backtester to export monthly returns as `data/public/backtest_monthly.json`.
+  - Backtests page renders a simple monthly heatmap table.
+  - Commit title: feat: add monthly returns heatmap to Backtests
+  - Commit description: Compute monthly returns and display a compact table for quick scanning.
+

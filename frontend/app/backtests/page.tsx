@@ -70,6 +70,8 @@ export default function BacktestsPage() {
     return () => { window.removeEventListener('resize', onResize); chart.remove(); };
   }, [rolling]);
 
+  const monthly = useJson<{ year: number; [k: string]: any }[]>("data/public/backtest_monthly.json");
+
   return (
     <main className="space-y-4">
       <h2 className="text-xl font-semibold">Baseline Backtest</h2>
@@ -92,6 +94,37 @@ export default function BacktestsPage() {
       <div>
         <div className="mb-2 text-sm text-gray-700">Rolling Sharpe (12m) and Drawdown</div>
         <div ref={ref2} className="w-full" />
+      </div>
+      <div>
+        <div className="mb-2 text-sm text-gray-700">Monthly returns (heatmap)</div>
+        {!monthly && <div className="text-sm text-gray-600">Loading monthly returns…</div>}
+        {monthly && (
+          <div className="overflow-x-auto">
+            <table className="text-xs">
+              <thead>
+                <tr>
+                  <th className="px-2 py-1 text-left">Year</th>
+                  {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map(m => (
+                    <th key={m} className="px-2 py-1 text-right">{m}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {monthly.map(row => (
+                  <tr key={row.year}>
+                    <td className="px-2 py-1">{row.year}</td>
+                    {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map(m => {
+                      const v = row[m];
+                      const color = typeof v === 'number' ? (v >= 0 ? 'text-green-700' : 'text-red-700') : 'text-gray-400';
+                      const disp = typeof v === 'number' ? `${(v*100).toFixed(1)}%` : '—';
+                      return <td key={m} className={`px-2 py-1 text-right ${color}`}>{disp}</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </main>
   );
