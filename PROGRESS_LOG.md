@@ -253,3 +253,10 @@ Day 6 — ML v1 (Optional, Free)
   - RecommendationCard now displays latest ML (5d) class probabilities (if available).
   - Commit title: feat: show ML probabilities on RecommendationCard
   - Commit description: Surface ML context without changing baseline recommendation.
+
+- Part 3: Combine baseline + ML (safety rails)
+  - Added `backend/app/combine_baseline_ml.py` to blend confidence and conservatively adjust action when ML is strong; respects suppression.
+  - Emits `data/public/latest_recommendation_combined.json`.
+  - Wired into daily workflow.
+  - Commit title: feat: combine baseline with ML under safety rails
+  - Commit description: Blend probabilities to strengthen or temper the baseline while keeping guardrails.
