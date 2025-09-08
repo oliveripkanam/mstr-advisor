@@ -29,7 +29,7 @@ export default function PriceChart() {
       grid: { vertLines: { color: '#f3f4f6' }, horzLines: { color: '#f3f4f6' } },
     });
     const series: ISeriesApi<'Candlestick'> = chart.addCandlestickSeries();
-    fetch('/data/public/mstr_ohlcv.json')
+    fetch('data/public/mstr_ohlcv.json')
       .then((r) => r.json())
       .then((bars: Bar[]) => {
         series.setData(toChartData(bars));

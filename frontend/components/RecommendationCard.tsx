@@ -17,7 +17,7 @@ export default function RecommendationCard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/data/public/latest_recommendation.json')
+    fetch('data/public/latest_recommendation.json')
       .then((r) => r.json())
       .then((d: Rec) => setRec(d))
       .catch(() => setError('Unable to load recommendation'));

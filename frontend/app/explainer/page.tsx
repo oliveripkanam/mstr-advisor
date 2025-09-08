@@ -22,8 +22,8 @@ export default function ExplainerPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/data/public/what_changed.json").then((r) => r.json()),
-      fetch("/data/public/baseline_signal.json").then((r) => r.json()),
+      fetch("data/public/what_changed.json").then((r) => r.json()),
+      fetch("data/public/baseline_signal.json").then((r) => r.json()),
     ])
       .then(([c, s]) => {
         setChanged(c);
