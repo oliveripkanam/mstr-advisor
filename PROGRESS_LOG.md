@@ -118,3 +118,33 @@ Day 3 — Frontend MVP (Static)
   - Commit title: feat: add MSTR price chart wired to public JSON
   - Commit description: Install lightweight-charts and render a responsive candlestick chart.
 
+- Part 3: Recommendation card
+  - Added `frontend/components/RecommendationCard.tsx` that reads `/data/public/latest_recommendation.json` and displays action, entry/stop/TP, confidence, and why.
+  - Wired into the homepage below the chart.
+  - Commit title: feat: add RecommendationCard and wire to latest_recommendation.json
+  - Commit description: Fetch minimal recommendation JSON and display in a styled card.
+
+- Part 4: Explainer view
+  - Added `frontend/app/explainer/page.tsx` that reads `/data/public/what_changed.json` and `/data/public/baseline_signal.json` and shows changes + rationale.
+  - Linked from homepage.
+  - Commit title: feat: add Explainer page and link from home
+  - Commit description: Render What Changed items and baseline rationale in a simple explainer view.
+
+- Part 5: Glossary tooltips
+  - Added `configs/glossary.yaml` with beginner-friendly definitions for terms (RSI, SMA/EMA, MACD, ATR, Bollinger, VIX, etc.).
+  - Added `frontend/components/GlossaryTooltip.tsx` to fetch and render tooltip titles from the YAML.
+  - Commit title: feat: add glossary YAML and tooltip component
+  - Commit description: Provide inline explanations for terms via a lightweight client tooltip.
+
+- Part 6: Mobile/a11y polish
+  - Improved contrast and focus styles; added responsive padding; accessible link focus ring.
+  - Tweaked Tailwind palette to darker primary/accent for better contrast.
+  - Commit title: chore: mobile responsiveness and accessibility polish
+  - Commit description: Adjust colors, spacing, and focus states for better readability and keyboard nav.
+
+- Part 7: Static export & Pages deploy
+  - Added `.github/workflows/pages.yml` to build `frontend/` (static export) and deploy `frontend/out` to GitHub Pages.
+  - Copies `data/public/*.json` and `configs/glossary.yaml` into `frontend/public/` during build for the static site.
+  - Commit title: ci: add GitHub Pages deploy for frontend static site
+  - Commit description: Build Next.js static export, stage artifacts, and deploy via GitHub Pages.
+

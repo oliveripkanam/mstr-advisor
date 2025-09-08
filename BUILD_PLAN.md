@@ -40,8 +40,8 @@ Day 2 — Features and Baseline Rules
 
 Day 3 — Frontend MVP (Static)
 - DONE Part 1: Next.js + Tailwind scaffold; base layout; color‑blind‑safe palette
-- Part 2: PriceChart using Lightweight Charts reading `mstr_ohlcv.json`
-- Part 3: RecommendationCard (action, entry/stop/TP, confidence, rationale)
+- DONE Part 2: PriceChart using Lightweight Charts reading `mstr_ohlcv.json`
+- DONE Part 3: RecommendationCard (action, entry/stop/TP, confidence, rationale)
 - Part 4: Explainer view + “What changed”; responsive/mobile polish
 - Part 5: Glossary tooltips wired to `configs/glossary.yaml`; basic accessibility
 - Part 6: Mobile responsiveness; keyboard navigation; contrast checks
