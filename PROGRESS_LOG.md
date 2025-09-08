@@ -204,3 +204,8 @@ Day 5 — Explainability (Rules First)
   - Commit title: feat: add baseline explainer (narrative + drivers)
   - Commit description: Produce explainability JSON for the frontend without external libraries.
 
+- Part 2: Explainer UI wiring
+  - Updated Explainer page to load `explain_latest.json` and show narrative + drivers with glossary tooltips.
+  - Commit title: feat: wire explain_latest.json into Explainer UI
+  - Commit description: Display baseline narrative and driver list with impact hints.
+
