@@ -219,3 +219,8 @@ Day 5 — Explainability (Rules First)
   - Commit title: chore: add payload size audit to status
   - Commit description: Track `data/public/*.json` sizes in `status.json` with budget check.
 
+- Part 5: Edge-case safeguards
+  - RecommendationCard caches last good `latest_recommendation.json` in localStorage for offline/404.
+  - Explainer uses `aria-live` for assistive tech updates.
+  - Commit title: chore: add frontend fallbacks and a11y live region
+  - Commit description: Gracefully handle fetch errors and improve accessibility.

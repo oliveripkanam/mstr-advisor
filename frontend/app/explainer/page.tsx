@@ -56,7 +56,7 @@ export default function ExplainerPage() {
           ))}
         </ul>
       </div>
-      <div className="rounded border p-4">
+      <div className="rounded border p-4" aria-live="polite">
         <div className="mb-1 text-sm text-gray-600">Today’s baseline</div>
         <div className="text-base">Action: <span className="font-medium">{signal.action}</span> · Confidence: {signal.confidence}%</div>
         {signal.why && <div className="mt-2 text-sm text-gray-700">Why: {signal.why}</div>}

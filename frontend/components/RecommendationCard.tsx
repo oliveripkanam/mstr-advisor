@@ -17,10 +17,20 @@ export default function RecommendationCard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const key = 'latest_recommendation_cache';
     fetch('data/public/latest_recommendation.json')
       .then((r) => r.json())
-      .then((d: Rec) => setRec(d))
-      .catch(() => setError('Unable to load recommendation'));
+      .then((d: Rec) => {
+        setRec(d);
+        try { localStorage.setItem(key, JSON.stringify(d)); } catch {}
+      })
+      .catch(() => {
+        try {
+          const cached = localStorage.getItem(key);
+          if (cached) { setRec(JSON.parse(cached)); return; }
+        } catch {}
+        setError('Unable to load recommendation');
+      });
   }, []);
 
   if (error) {
