@@ -89,6 +89,11 @@ jobs:
         run: |
           python backend/app/publish_recommendation.py
 
+      - name: Build explainability (narrative + drivers)
+        shell: bash
+        run: |
+          python backend/app/explain_baseline.py
+
       - name: Generate 'What changed' summary
         shell: bash
         run: |

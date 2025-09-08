@@ -196,3 +196,11 @@ Documentation
 - Commit title: docs: add BACKTEST.md (baseline backtester)
 - Commit description: Document baseline assumptions and artifacts.
 
+Day 5 — Explainability (Rules First)
+-----------------------------------
+- Part 1: Baseline explainer (narrative + drivers)
+  - Added `backend/app/explain_baseline.py` to generate `data/public/explain_latest.json` with a plain-English narrative and top drivers (trend, RSI, VIX band, USD trend, correlations, ATR).
+  - Wired into the daily workflow after publishing latest recommendation.
+  - Commit title: feat: add baseline explainer (narrative + drivers)
+  - Commit description: Produce explainability JSON for the frontend without external libraries.
+
