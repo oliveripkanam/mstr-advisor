@@ -94,6 +94,11 @@ Day 7 — Regimes, Robustness, Reporting & Launch
 6) Commit updated artifacts to `data/public/`
 7) GitHub Pages updates site automatically
 
+Optional free enhancement (freshness):
+- Add a midday status-only refresh (and optional re-run of features/baseline)
+- Recommended schedule: 17:30 UTC (midday check) and 22:05 UTC (EOD)
+- Keep to 1–2 runs/day; avoid hourly runs since Yahoo daily bars don’t change intraday
+
 ## Acceptance Criteria (Go‑Live)
 - One‑click daily run produces recommendation with entry/stop/TP, confidence, rationale, updated charts
 - Backtests show risk‑adjusted improvement vs benchmark out‑of‑sample
