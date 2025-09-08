@@ -169,3 +169,8 @@ Day 4 — Backtesting Basics
   - Commit title: feat: add rolling metrics and charts to Backtests page
   - Commit description: Compute rolling Sharpe/drawdown and visualize for context.
 
+- Part 4: Determinism marker
+  - Added `params_hash` (MD5) to backtest summary for reproducibility tracking.
+  - Commit title: chore: add params hash to backtest summary
+  - Commit description: Include short hash of config in `backtest_baseline.json`.
+

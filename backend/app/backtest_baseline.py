@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+import hashlib
 from pathlib import Path
 from typing import Dict, List
 
@@ -103,6 +104,9 @@ def backtest(df: pd.DataFrame, cfg: BtConfig) -> Dict:
             "execution": cfg.execution,
         },
     }
+    # Determinism marker: hash of parameters only (inputs are deterministic daily closes)
+    params_json = json.dumps(asdict(cfg), sort_keys=True)
+    summary["params_hash"] = hashlib.md5(params_json.encode("utf-8")).hexdigest()[:12]
 
     # Rolling metrics (12m ~ 252 trading days)
     window = 252
