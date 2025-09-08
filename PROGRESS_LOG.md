@@ -70,4 +70,14 @@ Day 2 — Features and Baseline Rules
   - Commit title: feat: add cross-asset correlations and simple regime flags
   - Commit description: Compute corr(20/60) with BTC/SPY/QQQ; add VIX band, UUP trend, TNX delta; output mstr_crossasset.json and update workflow.
 
+- Part 3: Baseline rule engine
+  - Implemented `backend/app/baseline_rules.py` to produce a daily recommendation:
+    - Rules: trend (close>50DMA>200DMA), RSI guards (>70 avoid buys; >80 reduce; <30 add if trend up), macro overlays (VIX band, UUP trend)
+    - Risk: ATR(14)-based entry zone, stop, take-profit; simple confidence heuristic
+  - Inputs: `mstr_technical.json` and `mstr_crossasset.json`
+  - Output: `data/public/baseline_signal.json` (action, entry_zone, stop, take_profit, confidence, why, inputs)
+  - Wired into daily workflow after cross-asset features.
+  - Commit title: feat: add baseline rule engine and daily recommendation JSON
+  - Commit description: Generate Buy/Hold/Reduce with ATR-based risk and macro overlays; write baseline_signal.json and update workflow.
+
 

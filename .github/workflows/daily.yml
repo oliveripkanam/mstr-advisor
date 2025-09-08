@@ -79,6 +79,11 @@ jobs:
         run: |
           python backend/app/crossasset_mstr.py
 
+      - name: Generate baseline recommendation
+        shell: bash
+        run: |
+          python backend/app/baseline_rules.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |
