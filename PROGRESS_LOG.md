@@ -87,4 +87,12 @@ Day 2 — Features and Baseline Rules
   - Commit title: feat: publish latest_recommendation.json for frontend consumption
   - Commit description: Output minimal recommendation JSON derived from baseline signal and add workflow step.
 
+- Part 5: "What changed" summary
+  - Implemented `backend/app/what_changed_mstr.py` to compare last two common dates across tech and cross-asset features.
+  - Detects: price vs 50DMA crossover, 50/200DMA cross, RSI band shifts, VIX regime change, USD trend flip, and large corr(20d) moves.
+  - Output: `data/public/what_changed.json` with items, deltas, and a short summary.
+  - Wired into daily workflow after publishing latest recommendation.
+  - Commit title: feat: add daily 'What changed' summary JSON
+  - Commit description: Generate concise change log for last two days and publish what_changed.json.
+
 

@@ -89,6 +89,11 @@ jobs:
         run: |
           python backend/app/publish_recommendation.py
 
+      - name: Generate 'What changed' summary
+        shell: bash
+        run: |
+          python backend/app/what_changed_mstr.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |

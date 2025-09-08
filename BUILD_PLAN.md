@@ -30,9 +30,9 @@ Day 1 — Repo, CI, Data Ingest MVP
 - DONE Part 7: Documentation pass (README, docs/INGEST.md); fix issues from smoke test
 
 Day 2 — Features and Baseline Rules
-- Part 1: SMA/EMA/RSI/MACD/ATR/Bollinger for MSTR; cache intermediate frames
-- Part 2: Cross‑asset: 20/60d correlations (BTC/SPY/QQQ), VIX bands, UUP trend, ^TNX delta
-- Part 3: Baseline rule engine (trend filter, RSI guards, ATR sizing, macro overlays) → action
+- DONE Part 1: SMA/EMA/RSI/MACD/ATR/Bollinger for MSTR; cache intermediate frames
+- DONE Part 2: Cross‑asset: 20/60d correlations (BTC/SPY/QQQ), VIX bands, UUP trend, ^TNX delta
+- DONE Part 3: Baseline rule engine (trend filter, RSI guards, ATR sizing, macro overlays) → action
 - Part 4: Rationale (plain English) + confidence heuristic; write `latest_recommendation.json`
 - Part 5: “What changed” vs prior day; finalize JSON schemas; dry run on a full week
 - Part 6: Safety rails v1: stale‑data checks, high‑VIX caps, min confidence gating
