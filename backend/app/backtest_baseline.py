@@ -114,6 +114,9 @@ def backtest(df: pd.DataFrame, cfg: BtConfig) -> Dict:
     rolling_sharpe = (strat_ret.rolling(window).mean() * 252.0) / (strat_ret.rolling(window).std() * np.sqrt(252.0) + 1e-9)
     rolling_dd = (equity / equity.cummax() - 1.0)
 
+    # Rolling hit-rate (fraction of positive strategy returns in window)
+    rolling_hit = strat_ret.rolling(window).apply(lambda s: float((s > 0).mean()), raw=False)
+
     return summary, equity, rolling_sharpe, rolling_dd
 
 
@@ -162,6 +165,10 @@ def main() -> None:
             "drawdown": [
                 {"timestamp": str(ts.date()), "value": float(val)}
                 for ts, val in zip(df["timestamp"], rolling_dd)
+            ],
+            "hit_rate_252": [
+                {"timestamp": str(ts.date()), "value": (None if np.isnan(val) else float(val))}
+                for ts, val in zip(df["timestamp"], rolling_hit)
             ],
         }, f, ensure_ascii=False)
     with OUT_MONTHLY.open("w", encoding="utf-8") as f:

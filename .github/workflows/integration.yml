@@ -1,0 +1,40 @@
+name: Integration Checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify JSON artifacts validity
+        shell: bash
+        run: |
+          set -e
+          for f in data/public/*.json; do
+            [ -f "$f" ] || continue
+            python - <<'PY'
+import json,sys,os
+p=sys.argv[1]
+with open(p,'r',encoding='utf-8') as f:
+    json.load(f)
+print('OK', os.path.basename(p))
+PY
+          done
+
+      - name: Lightweight type checks (frontend build dry-run)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: |
+          cd frontend
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npm run build --if-present
+
+

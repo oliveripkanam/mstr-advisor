@@ -52,7 +52,7 @@ export default function BacktestsPage() {
     return () => { window.removeEventListener('resize', onResize); chart.remove(); };
   }, [equity]);
 
-  const rolling = useJson<{ rolling_sharpe_252: { timestamp: string; value: number|null }[]; drawdown: { timestamp: string; value: number }[] }>("data/public/backtest_rolling.json");
+  const rolling = useJson<{ rolling_sharpe_252: { timestamp: string; value: number|null }[]; drawdown: { timestamp: string; value: number }[]; hit_rate_252?: { timestamp: string; value: number|null }[] }>("data/public/backtest_rolling.json");
   useEffect(() => {
     if (!ref2.current || !rolling) return;
     const chart = createChart(ref2.current, {
@@ -66,6 +66,10 @@ export default function BacktestsPage() {
     s1.setData(rolling.rolling_sharpe_252.filter(p=>p.value!==null).map(p => ({ time: p.timestamp as unknown as any, value: p.value as number })));
     const s2: ISeriesApi<'Line'> = chart.addLineSeries({ color: "#dc2626" });
     s2.setData(rolling.drawdown.map(p => ({ time: p.timestamp as unknown as any, value: p.value })));
+    if (rolling.hit_rate_252) {
+      const s3: ISeriesApi<'Line'> = chart.addLineSeries({ color: "#1f2937" });
+      s3.setData(rolling.hit_rate_252.filter(p=>p.value!==null).map(p => ({ time: p.timestamp as unknown as any, value: p.value as number })));
+    }
     chart.timeScale().fitContent();
     const onResize = () => { if (ref2.current) chart.applyOptions({ width: ref2.current.clientWidth }); };
     window.addEventListener('resize', onResize);

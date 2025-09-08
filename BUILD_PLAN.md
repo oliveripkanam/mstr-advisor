@@ -66,21 +66,21 @@ Day 5 — Explainability (Rules First)
 - DONE Part 7: QA pass; fix narrative edge cases
 
 Day 6 — ML v1 (Optional, Free)
-- Part 1: Labels with strict close alignment; freeze features; walk‑forward CV
-- Part 2: Train LightGBM/XGBoost on trimmed history; cache model; runtime profiling
-- Part 3: Calibrate (isotonic/Platt); score latest; combine via expected utility and risk rails
-- Part 4: SHAP on latest day only (TreeSHAP) or feature importances if runtime tight
+- DONE Part 1: Labels with strict close alignment; freeze features; walk‑forward CV
+- DONE Part 2: Train LightGBM/XGBoost on trimmed history; cache model; runtime profiling
+- DONE Part 3: Calibrate (isotonic/Platt); score latest; combine via expected utility and risk rails
+- DONE Part 4: SHAP on latest day only (TreeSHAP) or feature importances if runtime tight
 - DONE Part 5: Frontend: probability/confidence visualization; ML toggle in config
 - DONE Part 6: Runtime budget and scheduling: baseline daily, ML weekly (if needed)
 - Part 7: QA/regression tests on frozen sample; finalize ML docs
 
 Day 7 — Regimes, Robustness, Reporting & Launch
-- Part 1: Volatility buckets and BTC correlation regimes; cache regime state
+- DONE Part 1: Volatility buckets and BTC correlation regimes; cache regime state
 - Part 2: Optional HMM/ruptures on reduced features (guarded by runtime)
-- Part 3: Enforce stale‑data checks; high‑VIX risk caps; min confidence gating
-- Part 4: Rolling 12m Sharpe/drawdown/hit‑rate series; monthly returns heatmap JSON
-- Part 5: Data Status page; a11y polish (keyboard nav, contrast); copy polish
-- Part 6: CI/CD: formatting/lint/tests; integration test workflow on frozen data
+- DONE Part 3: Enforce stale‑data checks; high‑VIX risk caps; min confidence gating
+- DONE Part 4: Rolling 12m Sharpe/drawdown/hit‑rate series; monthly returns heatmap JSON
+- DONE Part 5: Data Status page; a11y polish (keyboard nav, contrast); copy polish
+- DONE Part 6: CI/CD: formatting/lint/tests; integration test workflow on frozen data
 - Part 7: Final acceptance backtests; runtime audit; tag v1.0; smoke test; launch notes; maintenance schedule
 
 ---

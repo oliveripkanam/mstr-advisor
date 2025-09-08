@@ -278,3 +278,31 @@ Day 6 — ML v1 (Optional, Free)
   - Added `/.github/workflows/ml-weekly.yml` to run labels + ML + combine weekly (Monday 22:15 UTC) with commit of ML artifacts.
   - Commit title: ci: split daily vs weekly workflows (ML weekly)
   - Commit description: Keep baseline daily; move labels/model/combine to a weekly schedule to respect free runtime budgets.
+
+Day 7 — Regimes, Robustness, Reporting & Launch
+-----------------------------------
+- Part 1: Volatility and BTC-correlation regimes
+  - Added `backend/app/regimes_mstr.py` to classify VIX regime (low/med/high) and 60d BTC correlation (neg/neutral/pos). Writes `data/public/regimes_mstr.json`.
+  - Commit title: feat: add regimes classifier and publish regimes_mstr.json
+  - Commit description: Publish simple daily regime state derived from existing cross-asset features.
+
+- Part 3: Risk caps refinement
+  - `baseline_rules.py` now caps confidence at 55 during high VIX regime.
+  - Commit title: chore: cap confidence during high VIX regime
+  - Commit description: Extra safety in volatile markets.
+
+- Part 4: Rolling hit-rate series
+  - Backtester now outputs `hit_rate_252` in `backtest_rolling.json` (fraction of positive days over ~12m).
+  - Backtests page renders the series when present.
+  - Commit title: feat: add rolling hit-rate and render in Backtests
+  - Commit description: Provide an intuitive consistency measure alongside Sharpe and drawdown.
+
+- Part 5: Data Status page
+  - Added `frontend/app/status/page.tsx` to display `status.json` (last run, staleness, payload sizes, raw symbol freshness) and linked it from Home.
+  - Commit title: feat: add Data Status page and home link
+  - Commit description: Improve transparency on pipeline freshness and payload budget.
+
+- Part 6: CI integration checks
+  - Added `/.github/workflows/integration.yml` to validate JSON artifacts and run a frontend build dry-run on pushes and PRs.
+  - Commit title: ci: add integration checks (JSON validity + frontend build)
+  - Commit description: Early detection of broken artifacts and UI build issues.

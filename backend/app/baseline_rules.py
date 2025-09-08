@@ -131,6 +131,9 @@ def decide_action(inp: BaselineInputs) -> Dict:
     if inp.rsi14 < 35 and trend_up:
         confidence += 5
     confidence = int(max(0, min(100, confidence)))
+    # Extra cap under high VIX regime
+    if inp.vix_band == "high":
+        confidence = min(confidence, 55)
 
     why = "; ".join(rationale_parts) if rationale_parts else "Neutral setup"
 

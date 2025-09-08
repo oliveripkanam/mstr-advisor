@@ -15,7 +15,8 @@ export default function HomePage() {
       </div>
       <div className="mt-4 text-sm">
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/explainer">See explainer →</Link>
-        <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary" href="/backtests">Backtests →</Link>
+        <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/backtests">Backtests →</Link>
+        <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary" href="/status">Data Status →</Link>
       </div>
     </main>
   );
