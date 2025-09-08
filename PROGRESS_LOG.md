@@ -229,3 +229,8 @@ Day 5 — Explainability (Rules First)
   - Narrative now starts with “Today: Action (Confidence X%).” and then rationale.
   - Commit title: chore: refine explainer narrative tone
   - Commit description: Align copy with user-facing style for clarity and brevity.
+
+- Part 7: Suppression note
+  - If a recommendation is suppressed (stale/low confidence), the narrative appends a short note.
+  - Commit title: chore: add suppression note to explainer narrative
+  - Commit description: Make gating state explicit in the explainability text.

@@ -93,7 +93,8 @@ def build_narrative(baseline: Dict) -> str:
         prefix = f"Today: {action}. "
     elif conf is not None:
         prefix = f"Confidence {int(conf)}%. "
-    text = (prefix + why).strip()
+    note = " Recommendation suppressed." if baseline.get("suppressed") else ""
+    text = (prefix + why + note).strip()
     # cap to ~160 chars for UI brevity
     return (text[:157] + "…") if len(text) > 160 else text
 
