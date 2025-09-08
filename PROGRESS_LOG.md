@@ -180,3 +180,9 @@ Day 4 — Backtesting Basics
   - Commit title: feat: add monthly returns heatmap to Backtests
   - Commit description: Compute monthly returns and display a compact table for quick scanning.
 
+Documentation
+-------------
+- Added `docs/BACKTEST.md` describing inputs, logic, outputs, and determinism.
+- Commit title: docs: add BACKTEST.md (baseline backtester)
+- Commit description: Document baseline assumptions and artifacts.
+
