@@ -265,3 +265,10 @@ Day 6 — ML v1 (Optional, Free)
   - `train_ml_mstr.py` now writes `data/public/ml_feature_importances.json` (top features) for explainability.
   - Commit title: feat: emit ML feature importances for explainability
   - Commit description: Provide a quick view of top drivers without heavy SHAP.
+
+- Part 5: Frontend ML toggle and visualization
+  - Added `configs/frontend.json` to toggle using `latest_recommendation_combined.json` and probability bars.
+  - Created `frontend/components/ProbabilityBars.tsx` to render Up/Flat/Down bars.
+  - Enhanced `frontend/components/RecommendationCard.tsx` to optionally read combined recommendation, show a "Combined" pill, and display probability bars based on config.
+  - Commit title: feat: add ML toggle and probability bars to RecommendationCard
+  - Commit description: Config-driven combined-vs-baseline selection and visual ML probs for clarity.

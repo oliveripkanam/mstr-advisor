@@ -42,35 +42,35 @@ Day 3 — Frontend MVP (Static)
 - DONE Part 1: Next.js + Tailwind scaffold; base layout; color‑blind‑safe palette
 - DONE Part 2: PriceChart using Lightweight Charts reading `mstr_ohlcv.json`
 - DONE Part 3: RecommendationCard (action, entry/stop/TP, confidence, rationale)
-- Part 4: Explainer view + “What changed”; responsive/mobile polish
-- Part 5: Glossary tooltips wired to `configs/glossary.yaml`; basic accessibility
-- Part 6: Mobile responsiveness; keyboard navigation; contrast checks
-- Part 7: Static export build; GitHub Pages config; perf checks
+- DONE Part 4: Explainer view + “What changed”; responsive/mobile polish
+- DONE Part 5: Glossary tooltips wired to `configs/glossary.yaml`; basic accessibility
+- DONE Part 6: Mobile responsiveness; keyboard navigation; contrast checks
+- DONE Part 7: Static export build; GitHub Pages config; perf checks
 
 Day 4 — Backtesting Basics
-- Part 1: Event-driven backtester (daily bars; close vs next‑open toggle; slippage/fees)
-- Part 2: Run baseline 2018–present; persist metrics JSON (CAGR, MDD, Sharpe, turnover)
-- Part 3: Generate equity/drawdown/rolling Sharpe series JSON
-- Part 4: Frontend Backtests page; summary cards and charts
-- Part 5: Determinism check on frozen sample; parameter hashes recorded
-- Part 6: Backtest docs; example report JSON and charts wired
-- Part 7: Bugfixes; refactor for clarity; re‑run baseline
+- DONE Part 1: Event-driven backtester (daily bars; close vs next‑open toggle; slippage/fees)
+- DONE Part 2: Run baseline 2018–present; persist metrics JSON (CAGR, MDD, Sharpe, turnover)
+- DONE Part 3: Generate equity/drawdown/rolling Sharpe series JSON
+- DONE Part 4: Frontend Backtests page; summary cards and charts
+- DONE Part 5: Determinism check on frozen sample; parameter hashes recorded
+- DONE Part 6: Backtest docs; example report JSON and charts wired
+- DONE Part 7: Bugfixes; refactor for clarity; re‑run baseline
 
 Day 5 — Explainability (Rules First)
-- Part 1: Rationale templates; thresholds for signal mentions; glossary links
-- Part 2: Rank features per day; map to drivers; cap verbosity
-- Part 3: “Why” page polish; consistent tone and lengths
-- Part 4: Payload size audit; keep daily JSON < ~1–2 MB
-- Part 5: Edge cases: stale data, missing symbols; graceful degradation
-- Part 6: Copy and tone polish; glossary expansion where needed
-- Part 7: QA pass; fix narrative edge cases
+- DONE Part 1: Rationale templates; thresholds for signal mentions; glossary links
+- DONE Part 2: Rank features per day; map to drivers; cap verbosity
+- DONE Part 3: “Why” page polish; consistent tone and lengths
+- DONE Part 4: Payload size audit; keep daily JSON < ~1–2 MB
+- DONE Part 5: Edge cases: stale data, missing symbols; graceful degradation
+- DONE Part 6: Copy and tone polish; glossary expansion where needed
+- DONE Part 7: QA pass; fix narrative edge cases
 
 Day 6 — ML v1 (Optional, Free)
 - Part 1: Labels with strict close alignment; freeze features; walk‑forward CV
 - Part 2: Train LightGBM/XGBoost on trimmed history; cache model; runtime profiling
 - Part 3: Calibrate (isotonic/Platt); score latest; combine via expected utility and risk rails
 - Part 4: SHAP on latest day only (TreeSHAP) or feature importances if runtime tight
-- Part 5: Frontend: probability/confidence visualization; ML toggle in config
+- DONE Part 5: Frontend: probability/confidence visualization; ML toggle in config
 - Part 6: Runtime budget and scheduling: baseline daily, ML weekly (if needed)
 - Part 7: QA/regression tests on frozen sample; finalize ML docs
 

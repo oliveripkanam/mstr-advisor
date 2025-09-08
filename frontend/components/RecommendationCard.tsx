@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import ProbabilityBars from './ProbabilityBars';
 
 type Rec = {
   symbol: string;
@@ -13,15 +14,30 @@ type Rec = {
 };
 
 type MLProbs = { timestamp: string; probs: Record<string, number> };
+type FrontendConfig = {
+  useCombinedRecommendation?: boolean;
+  showProbabilityBars?: boolean;
+};
 
 export default function RecommendationCard() {
   const [rec, setRec] = useState<Rec | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ml, setMl] = useState<MLProbs | null>(null);
+  const [cfg, setCfg] = useState<FrontendConfig>({ useCombinedRecommendation: true, showProbabilityBars: true });
+
+  useEffect(() => {
+    fetch('configs/frontend.json')
+      .then((r) => r.json())
+      .then((c: FrontendConfig) => setCfg((prev) => ({ ...prev, ...c })))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const key = 'latest_recommendation_cache';
-    fetch('data/public/latest_recommendation.json')
+    const path = cfg.useCombinedRecommendation
+      ? 'data/public/latest_recommendation_combined.json'
+      : 'data/public/latest_recommendation.json';
+    fetch(path)
       .then((r) => r.json())
       .then((d: Rec) => {
         setRec(d);
@@ -34,7 +50,7 @@ export default function RecommendationCard() {
         } catch {}
         setError('Unable to load recommendation');
       });
-  }, []);
+  }, [cfg.useCombinedRecommendation]);
 
   useEffect(() => {
     fetch('data/public/ml_latest_probs.json')
@@ -56,6 +72,9 @@ export default function RecommendationCard() {
       <div className="mb-2 flex items-baseline gap-2">
         <h2 className="text-xl font-semibold">Today’s Recommendation</h2>
         <span className="text-xs text-gray-500">{rec.timestamp}</span>
+        {cfg.useCombinedRecommendation && (
+          <span className="ml-2 rounded bg-blue-100 px-2 py-0.5 text-[10px] text-blue-800">Combined</span>
+        )}
       </div>
       <div className="mb-2">
         <span className="text-sm text-gray-700">Action: </span>
@@ -69,10 +88,11 @@ export default function RecommendationCard() {
         </div>
         <div>
           <div>Confidence: {rec.confidence}%</div>
-          {ml && (
-            <div className="mt-1 text-xs text-gray-600">
-              ML (5d): {Object.entries(ml.probs).map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' · ')}
-            </div>
+          {ml && !cfg.showProbabilityBars && (
+            <div className="mt-1 text-xs text-gray-600">ML (5d): {Object.entries(ml.probs).map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' · ')}</div>
+          )}
+          {ml && cfg.showProbabilityBars && (
+            <ProbabilityBars probs={ml.probs} />
           )}
         </div>
       </div>
