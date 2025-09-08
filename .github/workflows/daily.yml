@@ -74,6 +74,11 @@ jobs:
         run: |
           python backend/app/features_mstr.py
 
+      - name: Compute cross-asset features and regimes
+        shell: bash
+        run: |
+          python backend/app/crossasset_mstr.py
+
       - name: Commit updated artifacts
         shell: bash
         run: |
