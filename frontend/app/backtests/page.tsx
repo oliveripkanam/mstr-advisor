@@ -11,6 +11,7 @@ type Summary = {
   max_drawdown: number;
   sharpe: number;
   turnover: number;
+  params_hash?: string;
 };
 
 type Eq = { timestamp: string; equity: number };
