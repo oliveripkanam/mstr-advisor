@@ -12,9 +12,12 @@ type Rec = {
   why?: string;
 };
 
+type MLProbs = { timestamp: string; probs: Record<string, number> };
+
 export default function RecommendationCard() {
   const [rec, setRec] = useState<Rec | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ml, setMl] = useState<MLProbs | null>(null);
 
   useEffect(() => {
     const key = 'latest_recommendation_cache';
@@ -31,6 +34,13 @@ export default function RecommendationCard() {
         } catch {}
         setError('Unable to load recommendation');
       });
+  }, []);
+
+  useEffect(() => {
+    fetch('data/public/ml_latest_probs.json')
+      .then((r) => r.json())
+      .then((d: MLProbs) => setMl(d))
+      .catch(() => setMl(null));
   }, []);
 
   if (error) {
@@ -59,6 +69,11 @@ export default function RecommendationCard() {
         </div>
         <div>
           <div>Confidence: {rec.confidence}%</div>
+          {ml && (
+            <div className="mt-1 text-xs text-gray-600">
+              ML (5d): {Object.entries(ml.probs).map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' · ')}
+            </div>
+          )}
         </div>
       </div>
       {rec.why && (

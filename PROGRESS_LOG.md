@@ -248,3 +248,8 @@ Day 6 — ML v1 (Optional, Free)
   - Wired into the daily workflow (lightweight runtime, free tier friendly).
   - Commit title: feat: add ML v1 scaffold and emit latest probabilities
   - Commit description: Train a small calibrated model and publish latest class probabilities.
+
+- Part 2.1: Frontend probabilities badge
+  - RecommendationCard now displays latest ML (5d) class probabilities (if available).
+  - Commit title: feat: show ML probabilities on RecommendationCard
+  - Commit description: Surface ML context without changing baseline recommendation.
