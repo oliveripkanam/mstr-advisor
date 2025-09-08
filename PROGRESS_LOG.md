@@ -214,3 +214,8 @@ Day 5 — Explainability (Rules First)
   - Commit title: chore: polish explainer narrative and drivers
   - Commit description: Keep copy concise and de-duplicate drivers for readability.
 
+- Part 4: Payload audit
+  - Status builder now reports per-file sizes and total JSON payload with a budget flag.
+  - Commit title: chore: add payload size audit to status
+  - Commit description: Track `data/public/*.json` sizes in `status.json` with budget check.
+

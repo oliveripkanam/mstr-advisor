@@ -82,6 +82,22 @@ def build_status() -> Dict:
         status["stale"] = True
     status["public"]["mstr_ohlcv"] = pub
 
+    # Payload sizes (KB) and budget check
+    public_dir = PUBLIC_DIR
+    sizes_kb = {}
+    total_kb = 0.0
+    for p in public_dir.glob("*.json"):
+        try:
+            sz = p.stat().st_size / 1024.0
+            sizes_kb[p.name] = round(sz, 1)
+            total_kb += sz
+        except Exception:
+            continue
+    status["public"]["sizes_kb"] = sizes_kb
+    status["public"]["total_public_kb"] = round(total_kb, 1)
+    # budget ~ 2000KB
+    status["public"]["payload_ok"] = total_kb <= 2000.0
+
     return status
 
 
