@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import Sparkline from "../../components/Sparkline";
 
 type Term = {
   key: string;
@@ -75,6 +76,11 @@ export default function LearnPage() {
           if (Number.isFinite(price)) metrics["price"] = price;
           if (Number.isFinite(rsi)) metrics["rsi"] = rsi;
           if (Number.isFinite(atr)) metrics["atr"] = atr;
+          // Series for sparklines
+          const rsiSeries = tech
+            .map((row: any) => Number(row?.rsi14))
+            .filter((v: number) => Number.isFinite(v));
+          if (rsiSeries.length) metrics["rsi_series"] = JSON.stringify(rsiSeries);
         }
       } catch {}
       try {
@@ -103,6 +109,7 @@ export default function LearnPage() {
             const v = Number(arr[arr.length-1].value);
             s["hit_rate"] = `Hit‑rate(12m) = ${(v*100).toFixed(0)}%`;
             metrics["hit_rate"] = v;
+            metrics["hit_rate_series"] = JSON.stringify(arr.map((p:any)=>Number(p.value)));
           }
         }
         if (rolling && rolling.rolling_sharpe_252 && rolling.rolling_sharpe_252.length) {
@@ -111,6 +118,7 @@ export default function LearnPage() {
             const v = Number(arr[arr.length-1].value);
             s["sharpe"] = `Rolling Sharpe(12m) = ${v.toFixed(2)}`;
             metrics["sharpe_roll"] = v;
+            metrics["sharpe_series"] = JSON.stringify(arr.map((p:any)=>Number(p.value)));
           }
         }
         if (rolling && rolling.drawdown && rolling.drawdown.length) {
@@ -119,6 +127,7 @@ export default function LearnPage() {
             const v = Number(arr[arr.length-1].value);
             s["drawdown"] = `Drawdown = ${(v*100).toFixed(1)}%`;
             metrics["dd"] = v;
+            metrics["dd_series"] = JSON.stringify(arr.map((p:any)=>Number(p.value)));
           }
         }
         if (summary && typeof summary.sharpe !== 'undefined') {
@@ -157,7 +166,7 @@ export default function LearnPage() {
             <button
               key={t.key}
               onClick={() => setActive(t.key)}
-              className={`rounded border px-3 py-1 text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary ${active===t.key? 'bg-gray-100' : ''}`}
+              className={`rounded border px-3 py-1 text-sm transition-transform hover:scale-[1.02] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 ${active===t.key? 'bg-gray-100 shadow-inner' : ''}`}
               aria-pressed={active===t.key}
             >{t.name}</button>
           ))}
@@ -255,11 +264,29 @@ export default function LearnPage() {
             })();
             return (
               <div className="mt-3 rounded border border-blue-200 bg-blue-50 p-3">
-                <div className="text-sm font-medium">Today</div>
-                <ul className="mt-1 list-disc pl-5 text-sm text-gray-800">
-                  {lines.map((ln,i)=>(<li key={i}>{ln}</li>))}
-                </ul>
-                {g && <div className="mt-2 text-sm text-gray-900">{g}</div>}
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium">Today</div>
+                    <ul className="mt-1 list-disc pl-5 text-sm text-gray-800">
+                      {lines.map((ln,i)=>(<li key={i}>{ln}</li>))}
+                    </ul>
+                    {g && <div className="mt-2 text-sm text-gray-900">{g}</div>}
+                  </div>
+                  <div className="shrink-0">
+                    {activeTerm.key === 'rsi' && metrics['rsi_series'] && (
+                      <Sparkline data={JSON.parse(String(metrics['rsi_series']))} stroke="#7c3aed" fill="#ede9fe" />
+                    )}
+                    {activeTerm.key === 'sharpe' && metrics['sharpe_series'] && (
+                      <Sparkline data={JSON.parse(String(metrics['sharpe_series']))} />
+                    )}
+                    {activeTerm.key === 'drawdown' && metrics['dd_series'] && (
+                      <Sparkline data={JSON.parse(String(metrics['dd_series']))} stroke="#dc2626" fill="#fee2e2" />
+                    )}
+                    {activeTerm.key === 'hit_rate' && metrics['hit_rate_series'] && (
+                      <Sparkline data={JSON.parse(String(metrics['hit_rate_series']))} stroke="#1f2937" fill="#e5e7eb" />
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })()}
