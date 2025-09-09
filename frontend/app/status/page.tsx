@@ -28,6 +28,7 @@ export default function StatusPage() {
   const usedPctRaw = (used / budget) * 100;
   const usedPct = Math.max(0, Math.min(100, usedPctRaw));
   const ok = Boolean(data.public?.payload_ok);
+  const maxFile = Math.max(0, ...Object.values(sizes).map((v) => v || 0));
   return (
     <main className="space-y-4">
       <h2 className="text-xl font-semibold">Data Status</h2>
@@ -56,12 +57,13 @@ export default function StatusPage() {
             <div aria-label="Payload summary">Budget: {budget.toFixed(0)} KB · Used: {used.toFixed(1)} KB ({usedPct.toFixed(0)}%) · OK: {String(ok)}</div>
             <div className="mt-2 space-y-1">
               {Object.entries(sizes).map(([name, kb]) => {
-                const pct = Math.min(100, Math.max(0, ((kb||0) / budget) * 100));
+                const pctOfMax = maxFile > 0 ? Math.min(100, Math.max(0, ((kb||0) / maxFile) * 100)) : 0;
+                const pctOfBudget = Math.min(100, Math.max(0, ((kb||0) / budget) * 100));
                 return (
                   <div key={name}>
-                    <div className="flex justify-between"><span>{name}</span><span>{(kb||0).toFixed(1)} KB</span></div>
-                    <div className="mt-0.5 h-1.5 w-full rounded bg-gray-200" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Number.isFinite(pct)? Math.round(pct): 0} aria-label={`${name} size percent of total`}>
-                      <div className={`h-1.5 rounded ${pct>15? 'bg-blue-600' : 'bg-blue-400'} transition-[width] duration-500 ease-out`} style={{ width: `${pct}%` }} />
+                    <div className="flex justify-between"><span>{name}</span><span>{(kb||0).toFixed(1)} KB · {pctOfBudget.toFixed(1)}% of budget</span></div>
+                    <div className="mt-0.5 h-1.5 w-full rounded bg-gray-200" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Number.isFinite(pctOfMax)? Math.round(pctOfMax): 0} aria-label={`${name} size percent of largest file`}>
+                      <div className={`h-1.5 rounded ${pctOfBudget>15? 'bg-blue-600' : 'bg-blue-400'} transition-[width] duration-500 ease-out`} style={{ width: `${pctOfMax}%` }} />
                     </div>
                   </div>
                 );

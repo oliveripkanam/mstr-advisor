@@ -127,7 +127,7 @@ export default function ExplainerPage() {
         <ul className="mt-3 space-y-1 text-sm">
           {explain.drivers.map((d, i) => (
             <li key={i} className="flex items-start justify-between gap-2">
-              <span className="text-gray-800"><GlossaryTooltip term={d.name} />: {d.detail} <a className="ml-1 text-blue-700 underline" href="/learn">learn</a></span>
+              <span className="text-gray-800"><GlossaryTooltip term={d.name} />: {d.detail}</span>
               <span className={`text-xs ${d.impact === '+' ? 'text-green-700' : d.impact === '-' ? 'text-red-700' : 'text-gray-500'}`}>{d.impact}</span>
             </li>
           ))}
