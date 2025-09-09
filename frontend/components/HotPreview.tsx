@@ -2,7 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 
 type HotData = {
-	asof_utc?: string;
+	asof_utc?: string; // optional UTC timestamp
+	timestamp?: string; // fallback key used by backend
 	symbol?: string;
 	last_price?: number;
 	prev_close?: number;
@@ -52,16 +53,26 @@ export default function HotPreview() {
 		};
 	}, [visible]);
 
-	if (!data || !data.asof_utc) return null;
+	if (!data) return null;
 
-	const pct = typeof data.change_pct === "number" ? (data.change_pct * 100).toFixed(2) : "--";
-	const dir = (data.change_pct ?? 0) > 0 ? "text-green-700" : (data.change_pct ?? 0) < 0 ? "text-red-700" : "text-gray-700";
+	const ts = data.asof_utc || data.timestamp;
+	if (!ts) return null;
+
+	let pctNum: number | null = null;
+	if (typeof data.change_pct === "number") {
+		// Accept either fraction (-0.0178) or percent (-1.78)
+		pctNum = Math.abs(data.change_pct) <= 1.5 ? data.change_pct * 100 : data.change_pct;
+	} else if (typeof data.last_price === "number" && typeof data.prev_close === "number") {
+		pctNum = ((data.last_price - data.prev_close) / data.prev_close) * 100;
+	}
+	const pct = pctNum !== null ? pctNum.toFixed(2) : "--";
+	const dir = (pctNum ?? 0) > 0 ? "text-green-700" : (pctNum ?? 0) < 0 ? "text-red-700" : "text-gray-700";
 
 	return (
 		<div className="mb-3 rounded border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-gray-800" role="status" aria-live="polite">
 			<span className="font-medium">Live preview</span>
 			<span className="mx-2">•</span>
-			<span>{new Date(data.asof_utc).toUTCString()}</span>
+			<span>{new Date(ts).toUTCString()}</span>
 			<span className="mx-2">•</span>
 			<span>
 				{data.symbol} {typeof data.last_price === "number" ? data.last_price.toFixed(2) : "--"}
