@@ -25,11 +25,21 @@ export default function LearnPage() {
 
   // Load current values from published JSONs and compute simple states
   useEffect(() => {
+    const fetchFirst = async (paths: string[]) => {
+      for (const p of paths) {
+        try {
+          const res = await fetch(p);
+          if (res.ok) return await res.json();
+        } catch {}
+      }
+      return null;
+    };
+
     Promise.all([
-      fetch("/mstr-advisor/data/public/mstr_technical.json").then(r=>r.json()).catch(()=>null),
-      fetch("/mstr-advisor/data/public/mstr_crossasset.json").then(r=>r.json()).catch(()=>null),
-      fetch("/mstr-advisor/data/public/backtest_rolling.json").then(r=>r.json()).catch(()=>null),
-      fetch("/mstr-advisor/data/public/backtest_baseline.json").then(r=>r.json()).catch(()=>null)
+      fetchFirst(["/mstr-advisor/data/public/mstr_technical.json","data/public/mstr_technical.json"]),
+      fetchFirst(["/mstr-advisor/data/public/mstr_crossasset.json","data/public/mstr_crossasset.json"]),
+      fetchFirst(["/mstr-advisor/data/public/backtest_rolling.json","data/public/backtest_rolling.json"]),
+      fetchFirst(["/mstr-advisor/data/public/backtest_baseline.json","data/public/backtest_baseline.json"]) 
     ]).then(([tech, xas, rolling, summary]) => {
       const s: Record<string,string> = {};
       const lastValid = (arr: any[], key: string) => {
