@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createChart, ColorType, ISeriesApi } from "lightweight-charts";
 
-type Bar = { timestamp: string; open: number; high: number; low: number; close: number };
+type Bar = { timestamp: string; open: number; high: number; low: number; close: number; volume: number };
 
 function toChartData(bars: Bar[]) {
   // Convert YYYY-MM-DD to epoch seconds for lightweight-charts
@@ -34,11 +34,26 @@ export default function PriceChart() {
     const series: ISeriesApi<'Candlestick'> = chart.addCandlestickSeries({
       upColor: '#10b981', downColor: '#ef4444', borderUpColor: '#10b981', borderDownColor: '#ef4444', wickUpColor: '#10b981', wickDownColor: '#ef4444'
     });
+    // Allocate bottom area for volume
+    series.priceScale().applyOptions({ scaleMargins: { top: 0.05, bottom: 0.2 } });
+    const volSeries = chart.addHistogramSeries({
+      color: '#9ca3af',
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'right',
+      priceLineVisible: false,
+    });
+    volSeries.priceScale().applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
     fetch('data/public/mstr_ohlcv.json')
       .then((r) => r.json())
       .then((bars: Bar[]) => {
         const data = toChartData(bars);
         series.setData(data);
+        const volData = bars.map((b) => ({
+          time: b.timestamp as unknown as any,
+          value: b.volume || 0,
+          color: (b.close >= b.open) ? '#10b981' : '#ef4444',
+        }));
+        volSeries.setData(volData as any);
         // Apply range
         const clampRange = () => {
           const n = data.length;
