@@ -319,3 +319,11 @@ Fixes and Finalization
 - Pages deploy now copies `configs/frontend.json` and `docs/BACKTEST.md`; Backtests links to `BACKTEST.md`.
 - Data Status page fetch path corrected to `data/public/status.json`.
 - Added `docs/ML.md` and `ml-regression.yml` (frozen-window ML sanity checks).
+
+Learn & Explain
+---------------
+- Added `frontend/app/learn/page.tsx` with interactive terminology chips and side panels.
+- Added `configs/terminology.json` with plain‑English definitions and impacts.
+- Linked `Learn` from Home; added `docs/LEARN_GUIDE.md` describing site flow and terms.
+- Commit title: feat: add interactive Learn page and terminology content
+- Commit description: Explain the full pipeline and terms in beginner‑friendly UI and docs.

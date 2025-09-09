@@ -1,0 +1,133 @@
+{
+  "terms": [
+    {
+      "key": "trend",
+      "name": "Trend",
+      "definition": "Overall direction of price over time. We approximate using moving averages.",
+      "how_to_read": {
+        "up": "Price above 50DMA and 50DMA above 200DMA: uptrend",
+        "down": "Price below 50DMA: down/weak trend"
+      },
+      "impact": [
+        "Uptrend: bias Buy or Hold on pullbacks",
+        "Below 50DMA: bias Reduce/avoid fresh buys"
+      ]
+    },
+    {
+      "key": "dma",
+      "name": "50/200DMA",
+      "definition": "50- and 200-day simple moving averages (average of past closes).",
+      "how_to_read": {
+        "price_above_50": "Supportive; pullbacks often bought",
+        "golden_cross": "50DMA > 200DMA is supportive",
+        "price_below_50": "Caution; weakness"
+      },
+      "impact": [
+        "Price > 50DMA > 200DMA: constructive",
+        "Price < 50DMA: caution / trims"
+      ]
+    },
+    {
+      "key": "rsi",
+      "name": "RSI (14)",
+      "definition": "Momentum oscillator from 0–100.",
+      "how_to_read": {
+        "low": "<30 often oversold",
+        "high": ">70 often overbought"
+      },
+      "impact": [
+        ">80: reduce risk / avoid new buys",
+        "<30 in uptrend: buy-the-dip friendly"
+      ]
+    },
+    {
+      "key": "vix",
+      "name": "VIX",
+      "definition": "S&P 500 implied volatility (fear index).",
+      "how_to_read": {
+        "low": "<18 calm",
+        "med": "18–25 normal",
+        "high": ">25 stressed"
+      },
+      "impact": [
+        "High VIX: cap confidence and widen risk",
+        "Low VIX: normal risk"
+      ]
+    },
+    {
+      "key": "uup",
+      "name": "USD (UUP)",
+      "definition": "US Dollar index proxy (UUP).",
+      "how_to_read": {
+        "uptrend": "20DMA above 60DMA",
+        "downtrend": "20DMA below 60DMA"
+      },
+      "impact": [
+        "USD uptrend: headwind for risk assets → reduce risk a bit",
+        "USD weak: tailwind"
+      ]
+    },
+    {
+      "key": "corr",
+      "name": "Correlation",
+      "definition": "How two assets move together (−1 to +1).",
+      "how_to_read": {
+        "positive": "> 0.4 tends to move together",
+        "negative": "< −0.2 tends to move opposite"
+      },
+      "impact": [
+        "High BTC correlation: extra sensitivity to crypto moves",
+        "Negative SPY correlation: idiosyncratic"
+      ]
+    },
+    {
+      "key": "atr",
+      "name": "ATR (14)",
+      "definition": "Average True Range (recent daily range).",
+      "how_to_read": {
+        "higher": "more volatile → wider stops",
+        "lower": "tighter stops"
+      },
+      "impact": [
+        "We use ATR to size entry zone / stop / take-profit"
+      ]
+    },
+    {
+      "key": "sharpe",
+      "name": "Sharpe",
+      "definition": "Risk‑adjusted return of a strategy.",
+      "how_to_read": {
+        "higher": ">1 good; <0 bad"
+      },
+      "impact": [
+        "Helps compare performance vs volatility"
+      ]
+    },
+    {
+      "key": "drawdown",
+      "name": "Drawdown",
+      "definition": "Peak‑to‑trough decline of equity curve.",
+      "how_to_read": {
+        "deeper": "more painful losses",
+        "shallower": "smoother ride"
+      },
+      "impact": [
+        "We show historical max DD and rolling DD"
+      ]
+    },
+    {
+      "key": "hit_rate",
+      "name": "Hit‑rate (12m)",
+      "definition": "Fraction of positive days over the last ~252 sessions.",
+      "how_to_read": {
+        "higher": "more consistency",
+        "lower": "choppier"
+      },
+      "impact": [
+        "Used for context alongside Sharpe"
+      ]
+    }
+  ]
+}
+
+
