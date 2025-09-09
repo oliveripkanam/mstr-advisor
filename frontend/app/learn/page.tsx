@@ -14,6 +14,7 @@ export default function LearnPage() {
   const [active, setActive] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [today, setToday] = useState<Record<string, string>>({});
+  const [metrics, setMetrics] = useState<Record<string, number | string>>({});
 
   useEffect(() => {
     fetch("/mstr-advisor/configs/terminology.json")
@@ -43,37 +44,66 @@ export default function LearnPage() {
             const uptrend = price> sma50 && sma50> sma200;
             s["trend"] = uptrend ? "Uptrend (price>50>200)" : (price < sma50 ? "Below 50DMA" : "Mixed");
             s["dma"] = `Price ${price>=sma50?"≥":"<"} 50DMA ${sma50>=sma200?"and 50≥200":"and 50<200"}`;
+            metrics["trend_up"] = uptrend ? 1 : 0;
+            metrics["below_50"] = price < sma50 ? 1 : 0;
           }
           if (Number.isFinite(rsi)) s["rsi"] = `RSI 14 = ${rsi.toFixed(1)}`;
           if (Number.isFinite(atr)) s["atr"] = `ATR(14) = ${atr.toFixed(2)}`;
+          if (Number.isFinite(price)) metrics["price"] = price;
+          if (Number.isFinite(rsi)) metrics["rsi"] = rsi;
+          if (Number.isFinite(atr)) metrics["atr"] = atr;
         }
       } catch {}
       try {
         if (xas && xas.length) {
           const x = xas[xas.length-1];
           if (x.vix_band) s["vix"] = `VIX regime: ${String(x.vix_band)}`;
-          if (typeof x.uup_trend_up !== 'undefined') s["uup"] = Number(x.uup_trend_up)===1? "USD uptrend" : "USD not in uptrend";
-          if (typeof x.corr_BTCUSD_20 !== 'undefined') s["corr"] = `BTC 20d corr = ${Number(x.corr_BTCUSD_20).toFixed(2)}`;
+          if (typeof x.uup_trend_up !== 'undefined') {
+            const up = Number(x.uup_trend_up)===1;
+            s["uup"] = up ? "USD uptrend" : "USD not in uptrend";
+            metrics["uup_up"] = up ? 1 : 0;
+          }
+          if (typeof x.corr_BTCUSD_20 !== 'undefined') {
+            const c = Number(x.corr_BTCUSD_20);
+            s["corr"] = `BTC 20d corr = ${c.toFixed(2)}`;
+            metrics["corr_btc20"] = c;
+          }
+          if (x.vix_band) metrics["vix_band"] = String(x.vix_band);
         }
       } catch {}
       try {
         if (rolling && rolling.hit_rate_252 && rolling.hit_rate_252.length) {
           const arr = rolling.hit_rate_252.filter((p:any)=>p && p.value!==null);
-          if (arr.length) s["hit_rate"] = `Hit‑rate(12m) = ${(Number(arr[arr.length-1].value)*100).toFixed(0)}%`;
+          if (arr.length) {
+            const v = Number(arr[arr.length-1].value);
+            s["hit_rate"] = `Hit‑rate(12m) = ${(v*100).toFixed(0)}%`;
+            metrics["hit_rate"] = v;
+          }
         }
         if (rolling && rolling.rolling_sharpe_252 && rolling.rolling_sharpe_252.length) {
           const arr = rolling.rolling_sharpe_252.filter((p:any)=>p && p.value!==null);
-          if (arr.length) s["sharpe"] = `Rolling Sharpe(12m) = ${Number(arr[arr.length-1].value).toFixed(2)}`;
+          if (arr.length) {
+            const v = Number(arr[arr.length-1].value);
+            s["sharpe"] = `Rolling Sharpe(12m) = ${v.toFixed(2)}`;
+            metrics["sharpe_roll"] = v;
+          }
         }
         if (rolling && rolling.drawdown && rolling.drawdown.length) {
           const arr = rolling.drawdown;
-          if (arr.length) s["drawdown"] = `Drawdown = ${(Number(arr[arr.length-1].value)*100).toFixed(1)}%`;
+          if (arr.length) {
+            const v = Number(arr[arr.length-1].value);
+            s["drawdown"] = `Drawdown = ${(v*100).toFixed(1)}%`;
+            metrics["dd"] = v;
+          }
         }
         if (summary && typeof summary.sharpe !== 'undefined') {
-          s["sharpe_total"] = `Sharpe (full sample) = ${Number(summary.sharpe).toFixed(2)}`;
+          const v = Number(summary.sharpe);
+          s["sharpe_total"] = `Sharpe (full sample) = ${v.toFixed(2)}`;
+          metrics["sharpe_total"] = v;
         }
       } catch {}
       setToday(s);
+      setMetrics(prev => ({...prev, ...metrics}));
     }).catch(()=>{});
   }, []);
 
@@ -140,13 +170,67 @@ export default function LearnPage() {
             };
             const keys = keyMap[activeTerm.key] || [];
             const lines = keys.map(k => today[k]).filter(Boolean);
-            if (!lines.length) return null;
+            if (!lines.length) return (
+              <div className="mt-3 rounded border border-yellow-200 bg-yellow-50 p-3 text-sm text-gray-800">No live value available for today.</div>
+            );
+
+            // Guidance sentence based on simple thresholds
+            const g = (() => {
+              const tu = Number(metrics["trend_up"]) === 1;
+              const below50 = Number(metrics["below_50"]) === 1;
+              const rsi = Number(metrics["rsi"]);
+              const vix = String(metrics["vix_band"] || "");
+              const uupUp = Number(metrics["uup_up"]) === 1;
+              const corr = Number(metrics["corr_btc20"]);
+              const sharpe = Number(metrics["sharpe_roll"] || metrics["sharpe_total"]);
+              const dd = Number(metrics["dd"]);
+              switch (activeTerm.key) {
+                case "trend":
+                case "dma":
+                  if (tu) return "Uptrend supports Buy/Hold on pullbacks.";
+                  if (below50) return "Below 50DMA suggests caution or trims.";
+                  return "Mixed trend; neutral bias.";
+                case "rsi":
+                  if (rsi >= 80) return "Very hot momentum — trim/reduce risk.";
+                  if (rsi >= 70) return "Overbought — avoid new buys.";
+                  if (rsi <= 30 && tu) return "Oversold pullback within uptrend — buy-the-dip friendly with risk controls.";
+                  return "Neutral momentum.";
+                case "vix":
+                  if (vix === "high") return "High volatility — cap confidence and widen stops.";
+                  if (vix === "low") return "Calm conditions — normal sizing.";
+                  return "Normal volatility.";
+                case "uup":
+                  return uupUp ? "Strong USD — mild headwind; slightly reduce risk." : "USD neutral — no adjustment.";
+                case "corr":
+                  if (corr >= 0.6) return "Moves closely with BTC — expect crypto sensitivity.";
+                  if (corr <= -0.2) return "Negatively correlated — more idiosyncratic.";
+                  return "Moderate correlation.";
+                case "atr":
+                  return "ATR reflects daily range — larger ATR implies wider stops.";
+                case "sharpe":
+                  if (sharpe >= 1) return "Good risk-adjusted performance recently.";
+                  if (sharpe < 0) return "Negative risk-adjusted performance — caution.";
+                  return "Mixed risk-adjusted performance.";
+                case "drawdown":
+                  if (dd <= -0.2) return "Deep drawdown — significant risk realized.";
+                  if (dd <= -0.1) return "Moderate drawdown.";
+                  return "Shallow drawdown.";
+                case "hit_rate":
+                  const hr = Number(metrics["hit_rate"]);
+                  if (hr >= 0.55) return "Consistent recent wins (hit‑rate >55%).";
+                  if (hr <= 0.45) return "Choppy period (hit‑rate <45%).";
+                  return "Near coin‑flip consistency.";
+                default:
+                  return "";
+              }
+            })();
             return (
-              <div className="mt-3">
+              <div className="mt-3 rounded border border-blue-200 bg-blue-50 p-3">
                 <div className="text-sm font-medium">Today</div>
                 <ul className="mt-1 list-disc pl-5 text-sm text-gray-800">
                   {lines.map((ln,i)=>(<li key={i}>{ln}</li>))}
                 </ul>
+                {g && <div className="mt-2 text-sm text-gray-900">{g}</div>}
               </div>
             );
           })()}
