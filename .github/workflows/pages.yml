@@ -45,6 +45,7 @@ jobs:
           cp -r data/public/*.json frontend/public/data/public/ || true
           cp configs/glossary.yaml frontend/public/configs/glossary.yaml || true
           cp configs/frontend.json frontend/public/configs/frontend.json || true
+          cp configs/terminology.json frontend/public/configs/terminology.json || true
           mkdir -p frontend/public/docs
           cp docs/BACKTEST.md frontend/public/docs/BACKTEST.md || true
 

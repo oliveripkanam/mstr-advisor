@@ -15,7 +15,7 @@ export default function LearnPage() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/configs/terminology.json")
+    fetch("/mstr-advisor/configs/terminology.json")
       .then((r) => r.json())
       .then((d) => setTerms(d.terms || []))
       .catch(() => setErr("Unable to load terminology"));
