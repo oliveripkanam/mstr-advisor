@@ -92,13 +92,7 @@ export default function BacktestsPage() {
           </div>
           <div className="mt-2 text-xs text-gray-500">Params hash: {/** @ts-ignore **/summary.params_hash}</div>
           <div className="mt-2 text-xs">
-            {(() => {
-              const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
-              const href = `${base}/docs/BACKTEST.md`;
-              return (
-                <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline">Backtester docs →</a>
-              );
-            })()}
+            <a href="../docs/BACKTEST.md" target="_blank" rel="noopener noreferrer" className="text-primary underline">Backtester docs →</a>
           </div>
         </div>
       )}
