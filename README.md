@@ -1,5 +1,6 @@
-MSTR Advisor (Free-First)
+MSTR Advisor
 =========================
+<img width="752" height="659" alt="demoscreenshot" src="https://github.com/user-attachments/assets/f2db8812-c189-4138-bf0b-7501df17196f" />
 
 Daily, automated, beginner-friendly advisory for MSTR using free data and static hosting.
 
