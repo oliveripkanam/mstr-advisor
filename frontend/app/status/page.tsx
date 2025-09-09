@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 type Status = {
   last_run_utc: string;
   stale: boolean;
-  public?: { sizes_kb?: Record<string, number>; total_public_kb?: number; payload_ok?: boolean };
+  public?: { sizes_kb?: Record<string, number>; total_public_kb?: number; payload_ok?: boolean; payload_budget_kb?: number };
   symbols?: Record<string, { exists: boolean; rows?: number; latest?: string | null }>;
 };
 
