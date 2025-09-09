@@ -22,6 +22,10 @@ export default function StatusPage() {
   if (!data) return <div className="p-4 text-gray-500">Loading…</div>;
 
   const sizes = data.public?.sizes_kb || {};
+  const total = Math.max(1, data.public?.total_public_kb || 0);
+  const used = Object.values(sizes).reduce((a, b) => a + (b || 0), 0);
+  const usedPct = Math.min(100, Math.max(0, (used / total) * 100));
+  const ok = Boolean(data.public?.payload_ok);
   return (
     <main className="space-y-4">
       <h2 className="text-xl font-semibold">Data Status</h2>
@@ -29,12 +33,40 @@ export default function StatusPage() {
       <div className={`text-sm ${data.stale ? 'text-red-700' : 'text-green-700'}`}>Stale: {String(data.stale)}</div>
       <div className="rounded border p-4">
         <div className="text-sm font-medium mb-2">Public payload</div>
-        <div className="text-xs text-gray-700">Total: {(data.public?.total_public_kb || 0).toFixed(1)} KB · OK: {String(data.public?.payload_ok)}</div>
-        <ul className="mt-2 text-xs">
-          {Object.entries(sizes).map(([name, kb]) => (
-            <li key={name} className="flex justify-between"><span>{name}</span><span>{kb} KB</span></li>
-          ))}
-        </ul>
+        <div className="flex items-center gap-4">
+          <div className="relative h-24 w-24">
+            <svg viewBox="0 0 100 100" className="h-24 w-24">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#e5e7eb" strokeWidth="12" />
+              <circle
+                cx="50" cy="50" r="42" fill="none"
+                stroke={ok ? "#16a34a" : "#dc2626"}
+                strokeWidth="12"
+                strokeDasharray={`${Math.round(2 * Math.PI * 42 * (usedPct/100))} ${Math.round(2 * Math.PI * 42)}`}
+                strokeLinecap="round"
+                transform="rotate(-90 50 50)"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-xs font-semibold">{usedPct.toFixed(0)}%</div>
+            </div>
+          </div>
+          <div className="text-xs text-gray-700">
+            <div>Total: {(total).toFixed(1)} KB · Used: {used.toFixed(1)} KB · OK: {String(ok)}</div>
+            <div className="mt-2 space-y-1">
+              {Object.entries(sizes).map(([name, kb]) => {
+                const pct = Math.min(100, Math.max(0, ((kb||0) / total) * 100));
+                return (
+                  <div key={name}>
+                    <div className="flex justify-between"><span>{name}</span><span>{(kb||0).toFixed(1)} KB</span></div>
+                    <div className="mt-0.5 h-1.5 w-full rounded bg-gray-200">
+                      <div className={`h-1.5 rounded ${pct>15? 'bg-blue-600' : 'bg-blue-400'}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
       {data.symbols && (
         <div className="rounded border p-4">
