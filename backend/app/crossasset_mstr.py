@@ -86,7 +86,9 @@ def main() -> None:
     out["timestamp"] = out["timestamp"].astype(str)
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    records: List[Dict] = out.to_dict(orient="records")
+    # Replace NaN with None to produce valid JSON (avoid NaN tokens)
+    out_clean = out.replace({np.nan: None})
+    records: List[Dict] = out_clean.to_dict(orient="records")
     with OUTPUT_PATH.open("w", encoding="utf-8") as f:
         json.dump(records, f, ensure_ascii=False)
     logging.info("Wrote %s with %d rows", OUTPUT_PATH, len(out))
