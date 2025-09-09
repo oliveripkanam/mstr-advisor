@@ -78,21 +78,54 @@ export default function BacktestsPage() {
 
   const monthly = useJson<{ year: number; [k: string]: any }[]>("data/public/backtest_monthly.json");
 
+  function formatPct(v: number) {
+    return `${(v * 100).toFixed(2)}%`;
+  }
+
+  function tile(label: string, value: string, accent?: "up" | "down" | "neutral") {
+    const chipColor = accent === 'up' ? 'bg-green-100 text-green-700' : accent === 'down' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700';
+    return (
+      <div className="rounded border border-gray-200 p-3">
+        <div className="text-xs text-gray-500">{label}</div>
+        <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
+          <span>{value}</span>
+          <span className={`rounded px-1.5 py-0.5 text-[10px] ${chipColor}`}>{accent === 'up' ? '↑' : accent === 'down' ? '↓' : '—'}</span>
+        </div>
+      </div>
+    );
+  }
+
+  function colorForReturn(v: number) {
+    // Clamp around +/-15% for monthly hue intensity
+    const a = Math.min(1, Math.abs(v) / 0.15);
+    if (v >= 0) {
+      const light = 98 - Math.round(a * 40); // 98% -> 58%
+      return `hsl(142, 60%, ${light}%)`; // green-ish
+    } else {
+      const light = 98 - Math.round(a * 40);
+      return `hsl(0, 70%, ${light}%)`; // red-ish
+    }
+  }
+
   return (
     <main className="space-y-4">
       <h2 className="text-xl font-semibold">Baseline Backtest</h2>
       {!summary && <div className="text-sm text-gray-600">Loading metrics…</div>}
       {summary && (
-        <div className="rounded border p-4 text-sm">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div><div className="text-gray-600">CAGR</div><div>{(summary.CAGR*100).toFixed(2)}%</div></div>
-            <div><div className="text-gray-600">Max DD</div><div>{(summary.max_drawdown*100).toFixed(2)}%</div></div>
-            <div><div className="text-gray-600">Sharpe</div><div>{summary.sharpe.toFixed(2)}</div></div>
-            <div><div className="text-gray-600">Volatility</div><div>{(summary.volatility*100).toFixed(2)}%</div></div>
+        <div className="rounded border border-gray-200 bg-white p-4">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            {tile("CAGR", formatPct(summary.CAGR), summary.CAGR >= 0 ? 'up' : 'down')}
+            {tile("Total Return", formatPct(summary.total_return), summary.total_return >= 0 ? 'up' : 'down')}
+            {tile("Max Drawdown", formatPct(summary.max_drawdown), 'down')}
+            {tile("Sharpe (12m)", summary.sharpe.toFixed(2), summary.sharpe >= 1 ? 'up' : summary.sharpe < 0.5 ? 'down' : 'neutral')}
+            {tile("Volatility", formatPct(summary.volatility), 'neutral')}
+            {tile("Turnover", summary.turnover.toFixed(2), 'neutral')}
           </div>
-          <div className="mt-2 text-xs text-gray-500">Params hash: {/** @ts-ignore **/summary.params_hash}</div>
-          <div className="mt-2 text-xs">
-            <a href="/mstr-advisor/docs/BACKTEST.md" target="_blank" rel="noopener noreferrer" className="text-primary underline">Backtester docs →</a>
+          <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+            <div>Params hash: {/** @ts-ignore **/summary.params_hash}</div>
+            <div>
+              <a href="/mstr-advisor/docs/BACKTEST.md" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Backtester docs →</a>
+            </div>
           </div>
         </div>
       )}
@@ -125,14 +158,18 @@ export default function BacktestsPage() {
                     <td className="px-2 py-1">{row.year}</td>
                     {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map(m => {
                       const v = row[m];
-                      const color = typeof v === 'number' ? (v >= 0 ? 'text-green-700' : 'text-red-700') : 'text-gray-400';
                       const disp = typeof v === 'number' ? `${(v*100).toFixed(1)}%` : '—';
-                      return <td key={m} className={`px-2 py-1 text-right ${color}`}>{disp}</td>;
+                      const style = typeof v === 'number' ? { backgroundColor: colorForReturn(v) } as React.CSSProperties : undefined;
+                      const textCls = typeof v === 'number' ? (Math.abs(v) > 0.08 ? 'text-white' : 'text-gray-800') : 'text-gray-400';
+                      return (
+                        <td key={m} className={`px-2 py-1 text-right font-mono ${textCls}`} style={style}>{disp}</td>
+                      );
                     })}
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div className="mt-2 text-[10px] text-gray-500">Cell color intensity scales with monthly return (±15% clamp).</div>
           </div>
         )}
       </div>
