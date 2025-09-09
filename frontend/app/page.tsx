@@ -48,7 +48,7 @@ export default function HomePage() {
 }
 
 function KpiBar() {
-  const [vals, setVals] = React.useState<{ price?: number; changePct?: number; rsi?: number; gap50?: number; vix?: string; livePrice?: boolean; liveDay?: boolean } | null>(null);
+  const [vals, setVals] = React.useState<{ price?: number; changePct?: number; rsi?: number; gap50?: number; vix?: string; livePrice?: boolean; liveDay?: boolean; sma50?: number } | null>(null);
   React.useEffect(() => {
     const REPO = 'oliveripkanam/mstr-advisor';
     const BRANCH = 'hotdata';
@@ -79,9 +79,27 @@ function KpiBar() {
         const gap50 = (price && sma50)? ((price - sma50)/sma50)*100 : undefined;
         const x = Array.isArray(xas) && xas.length? xas[xas.length-1] : null;
         const vix = x && x.vix_band ? String(x.vix_band) : undefined;
-        setVals({ price, changePct, rsi, gap50, vix, livePrice, liveDay });
+        setVals({ price, changePct, rsi, gap50, vix, livePrice, liveDay, sma50 });
       } catch { setVals(null); }
     }).catch(()=>{});
+    const interval = setInterval(async () => {
+      try {
+        const url = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${PATH}?t=${Date.now()}`;
+        const r = await fetch(url, { cache: 'no-store' });
+        if (!r.ok) return;
+        const hot = await r.json();
+        if (!hot || typeof hot.last_price !== 'number') return;
+        setVals((prev) => {
+          if (!prev) return prev;
+          const price = Number(hot.last_price);
+          const prevClose = typeof hot.prev_close === 'number' ? Number(hot.prev_close) : undefined;
+          const changePct = (prevClose !== undefined) ? ((price - prevClose) / prevClose) * 100 : prev.changePct;
+          const gap50 = (prev.sma50 && typeof prev.sma50 === 'number') ? ((price - prev.sma50) / prev.sma50) * 100 : prev.gap50;
+          return { ...prev, price, changePct, gap50, livePrice: true, liveDay: prevClose !== undefined ? true : prev.liveDay };
+        });
+      } catch {}
+    }, 90000);
+    return () => { try { clearInterval(interval); } catch {} };
   }, []);
   if (!vals) return null;
   const chip = (label: string, value: string, tone: 'neutral'|'good'|'bad'='neutral') => (
