@@ -86,7 +86,12 @@ export default function PriceChart() {
           <button key={r} className={`rounded px-2 py-1 text-xs border ${range===r? 'bg-gray-800 border-gray-800 text-white' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`} onClick={()=>setRange(r)}>{r}</button>
         ))}
       </div>
-      <div ref={ref} className="w-full rounded border border-gray-200" />
+      <div className="relative w-full rounded border border-gray-200">
+        <div ref={ref} className="w-full h-[420px]" />
+        <div aria-hidden="true" className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500">Volume (shares)</div>
+        <div aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500">Price (USD)</div>
+        <div aria-hidden="true" className="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-gray-500">Date</div>
+      </div>
     </div>
   );
 }
