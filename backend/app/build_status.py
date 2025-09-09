@@ -96,7 +96,9 @@ def build_status() -> Dict:
     status["public"]["sizes_kb"] = sizes_kb
     status["public"]["total_public_kb"] = round(total_kb, 1)
     # budget ~ 2000KB
-    status["public"]["payload_ok"] = total_kb <= 2000.0
+    payload_budget_kb = 2000.0
+    status["public"]["payload_budget_kb"] = payload_budget_kb
+    status["public"]["payload_ok"] = total_kb <= payload_budget_kb
 
     return status
 

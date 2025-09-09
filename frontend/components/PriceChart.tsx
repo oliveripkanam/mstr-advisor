@@ -26,7 +26,7 @@ export default function PriceChart() {
       width: ref.current.clientWidth,
       height: 420,
       rightPriceScale: { visible: true, borderColor: '#e5e7eb' },
-      leftPriceScale: { visible: false },
+      leftPriceScale: { visible: true, borderColor: '#e5e7eb' },
       timeScale: { rightOffset: 2, fixLeftEdge: true, borderColor: '#e5e7eb' },
       grid: { vertLines: { color: '#f3f4f6' }, horzLines: { color: '#f3f4f6' } },
       crosshair: { horzLine: { color: '#9ca3af' }, vertLine: { color: '#9ca3af' } },
@@ -39,7 +39,7 @@ export default function PriceChart() {
     const volSeries = chart.addHistogramSeries({
       color: '#9ca3af',
       priceFormat: { type: 'volume' },
-      priceScaleId: 'right',
+      priceScaleId: 'left',
       priceLineVisible: false,
     });
     volSeries.priceScale().applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });

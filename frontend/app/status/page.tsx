@@ -22,9 +22,11 @@ export default function StatusPage() {
   if (!data) return <div role="status" aria-live="polite" className="p-4 text-gray-500">Loading…</div>;
 
   const sizes = data.public?.sizes_kb || {};
-  const total = Math.max(1, data.public?.total_public_kb || 0);
+  const budget = data.public?.payload_budget_kb || 2000;
+  const total = Math.max(0, data.public?.total_public_kb || 0);
   const used = Object.values(sizes).reduce((a, b) => a + (b || 0), 0);
-  const usedPct = Math.min(100, Math.max(0, (used / total) * 100));
+  const usedPctRaw = (used / budget) * 100;
+  const usedPct = Math.max(0, Math.min(100, usedPctRaw));
   const ok = Boolean(data.public?.payload_ok);
   return (
     <main className="space-y-4">
@@ -39,7 +41,7 @@ export default function StatusPage() {
               <circle cx="50" cy="50" r="42" fill="none" stroke="#e5e7eb" strokeWidth="12" />
               <circle
                 cx="50" cy="50" r="42" fill="none"
-                stroke={ok ? "#16a34a" : "#dc2626"}
+                stroke={usedPctRaw <= 100 ? "#16a34a" : "#dc2626"}
                 strokeWidth="12"
                 strokeDasharray={`${Math.round(2 * Math.PI * 42 * (usedPct/100))} ${Math.round(2 * Math.PI * 42)}`}
                 strokeLinecap="round"
@@ -51,10 +53,10 @@ export default function StatusPage() {
             </div>
           </div>
           <div className="text-xs text-gray-700" aria-live="polite">
-            <div aria-label="Payload summary">Total: {(total).toFixed(1)} KB · Used: {used.toFixed(1)} KB · OK: {String(ok)}</div>
+            <div aria-label="Payload summary">Budget: {budget.toFixed(0)} KB · Used: {used.toFixed(1)} KB ({usedPct.toFixed(0)}%) · OK: {String(ok)}</div>
             <div className="mt-2 space-y-1">
               {Object.entries(sizes).map(([name, kb]) => {
-                const pct = Math.min(100, Math.max(0, ((kb||0) / total) * 100));
+                const pct = Math.min(100, Math.max(0, ((kb||0) / budget) * 100));
                 return (
                   <div key={name}>
                     <div className="flex justify-between"><span>{name}</span><span>{(kb||0).toFixed(1)} KB</span></div>
@@ -67,6 +69,9 @@ export default function StatusPage() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="text-xs text-gray-600">
+        This section audits the JSON payload the frontend downloads. The ring shows what percent of the budget we’re using. Each bar is a file’s contribution. If OK is false, consider trimming heavy files like `mstr_technical.json`.
       </div>
       {data.symbols && (
         <div className="rounded border p-4">
