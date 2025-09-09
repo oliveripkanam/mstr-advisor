@@ -32,6 +32,14 @@ export default function LearnPage() {
       fetch("/mstr-advisor/data/public/backtest_baseline.json").then(r=>r.json()).catch(()=>null)
     ]).then(([tech, xas, rolling, summary]) => {
       const s: Record<string,string> = {};
+      const lastValid = (arr: any[], key: string) => {
+        if (!Array.isArray(arr)) return null;
+        for (let i=arr.length-1; i>=0; i--) {
+          const v = arr[i]?.[key];
+          if (v !== undefined && v !== null && !(typeof v === 'number' && isNaN(v))) return arr[i];
+        }
+        return null;
+      };
       try {
         if (tech && tech.length) {
           const t = tech[tech.length-1];
@@ -56,7 +64,7 @@ export default function LearnPage() {
       } catch {}
       try {
         if (xas && xas.length) {
-          const x = xas[xas.length-1];
+          const x = lastValid(xas, 'vix_band') || lastValid(xas, 'uup_trend_up') || lastValid(xas, 'corr_BTCUSD_20') || xas[xas.length-1];
           if (x.vix_band) s["vix"] = `VIX regime: ${String(x.vix_band)}`;
           if (typeof x.uup_trend_up !== 'undefined') {
             const up = Number(x.uup_trend_up)===1;
