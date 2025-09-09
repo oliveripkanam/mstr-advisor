@@ -22,14 +22,14 @@ export default function PriceChart() {
   useEffect(() => {
     if (!ref.current) return;
     const chart = createChart(ref.current, {
-      layout: { background: { type: ColorType.Solid, color: '#0b1220' }, textColor: '#cbd5e1' },
+      layout: { background: { type: ColorType.Solid, color: '#ffffff' }, textColor: '#111827' },
       width: ref.current.clientWidth,
       height: 420,
-      rightPriceScale: { visible: true, borderColor: '#1e293b' },
+      rightPriceScale: { visible: true, borderColor: '#e5e7eb' },
       leftPriceScale: { visible: false },
-      timeScale: { rightOffset: 2, fixLeftEdge: true, borderColor: '#1e293b' },
-      grid: { vertLines: { color: '#1e293b' }, horzLines: { color: '#1e293b' } },
-      crosshair: { horzLine: { color: '#475569' }, vertLine: { color: '#475569' } },
+      timeScale: { rightOffset: 2, fixLeftEdge: true, borderColor: '#e5e7eb' },
+      grid: { vertLines: { color: '#f3f4f6' }, horzLines: { color: '#f3f4f6' } },
+      crosshair: { horzLine: { color: '#9ca3af' }, vertLine: { color: '#9ca3af' } },
     });
     const series: ISeriesApi<'Candlestick'> = chart.addCandlestickSeries({
       upColor: '#10b981', downColor: '#ef4444', borderUpColor: '#10b981', borderDownColor: '#ef4444', wickUpColor: '#10b981', wickDownColor: '#ef4444'
@@ -68,10 +68,10 @@ export default function PriceChart() {
     <div>
       <div className="mb-2 flex items-center gap-2">
         {(['1M','3M','1Y','ALL'] as const).map(r => (
-          <button key={r} className={`rounded px-2 py-1 text-xs border ${range===r? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'}`} onClick={()=>setRange(r)}>{r}</button>
+          <button key={r} className={`rounded px-2 py-1 text-xs border ${range===r? 'bg-gray-800 border-gray-800 text-white' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`} onClick={()=>setRange(r)}>{r}</button>
         ))}
       </div>
-      <div ref={ref} className="w-full rounded border border-slate-800" />
+      <div ref={ref} className="w-full rounded border border-gray-200" />
     </div>
   );
 }
