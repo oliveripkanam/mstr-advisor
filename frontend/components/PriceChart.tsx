@@ -17,7 +17,12 @@ function toChartData(bars: Bar[]) {
 
 export default function PriceChart() {
   const ref = useRef<HTMLDivElement>(null);
-  const [range, setRange] = useState<"1M"|"3M"|"1Y"|"ALL">("ALL");
+  const [range, setRange] = useState<"1M"|"3M"|"1Y"|"ALL">(() => {
+    if (typeof window === 'undefined') return 'ALL';
+    const q = new URLSearchParams(window.location.search).get('range');
+    return (q === '1M' || q === '3M' || q === '1Y' || q === 'ALL') ? (q as any) : 'ALL';
+  });
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -67,8 +72,9 @@ export default function PriceChart() {
           chart.timeScale().setVisibleRange({ from, to });
         };
         clampRange();
+        setLoading(false);
       })
-      .catch(() => {});
+      .catch(() => { setLoading(false); });
     const onResize = () => {
       if (ref.current) chart.applyOptions({ width: ref.current.clientWidth });
     };
@@ -83,11 +89,25 @@ export default function PriceChart() {
     <div>
       <div className="mb-2 flex items-center gap-2">
         {(['1M','3M','1Y','ALL'] as const).map(r => (
-          <button key={r} className={`rounded px-2 py-1 text-xs border ${range===r? 'bg-gray-800 border-gray-800 text-white' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`} onClick={()=>setRange(r)}>{r}</button>
+          <button key={r} className={`rounded px-2 py-1 text-xs border ${range===r? 'bg-gray-800 border-gray-800 text-white' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'}`} onClick={()=>{ setRange(r); try { const url = new URL(window.location.href); url.searchParams.set('range', r); window.history.replaceState({}, '', url); } catch {} }}>{r}</button>
         ))}
+        <button
+          className="ml-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+          onClick={() => {
+            try {
+              const url = new URL(window.location.href);
+              url.searchParams.set('range', range);
+              navigator.clipboard.writeText(url.toString());
+            } catch {}
+          }}
+          aria-label="Copy link with current range"
+        >Copy link</button>
       </div>
       <div className="relative w-full rounded border border-gray-200">
         <div ref={ref} className="w-full h-[420px]" />
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/60 text-sm text-gray-600">Loading chart…</div>
+        )}
         <div aria-hidden="true" className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500">Volume (shares)</div>
         <div aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500">Price (USD)</div>
         <div aria-hidden="true" className="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-gray-500">Date</div>

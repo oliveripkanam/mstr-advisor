@@ -28,7 +28,19 @@ export default function RecommendationCard() {
   useEffect(() => {
     fetch('configs/frontend.json')
       .then((r) => r.json())
-      .then((c: FrontendConfig) => setCfg((prev) => ({ ...prev, ...c })))
+      .then((c: FrontendConfig) => {
+        // URL override for combined toggle
+        try {
+          const q = new URLSearchParams(window.location.search);
+          const override = q.get('combined');
+          let useCombined = c?.useCombinedRecommendation;
+          if (override === '1') useCombined = true;
+          if (override === '0') useCombined = false;
+          setCfg((prev) => ({ ...prev, ...c, useCombinedRecommendation: useCombined }));
+        } catch {
+          setCfg((prev) => ({ ...prev, ...c }));
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -75,6 +87,19 @@ export default function RecommendationCard() {
         {cfg.useCombinedRecommendation && (
           <span className="ml-2 rounded bg-blue-100 px-2 py-0.5 text-[10px] text-blue-700">Combined</span>
         )}
+        <span className="ml-auto" />
+        <label className="ml-auto flex items-center gap-2 text-xs text-gray-600">
+          <input
+            type="checkbox"
+            checked={!!cfg.useCombinedRecommendation}
+            onChange={(e) => {
+              const v = e.target.checked;
+              setCfg((prev) => ({ ...prev, useCombinedRecommendation: v }));
+              try { const url = new URL(window.location.href); url.searchParams.set('combined', v ? '1' : '0'); window.history.replaceState({}, '', url); } catch {}
+            }}
+          />
+          Use combined
+        </label>
       </div>
       <div className="mb-3">
         <span className="text-sm text-gray-700">Action: </span>
