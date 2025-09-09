@@ -60,25 +60,28 @@ export default function RecommendationCard() {
   }, []);
 
   if (error) {
-    return <div className="rounded border p-4 text-red-600">{error}</div>;
+    return <div className="rounded border border-slate-800 bg-slate-900 p-4 text-red-400">{error}</div>;
   }
 
   if (!rec) {
-    return <div className="rounded border p-4 text-gray-500">Loading recommendation…</div>;
+    return <div className="rounded border border-slate-800 bg-slate-900 p-4 text-slate-400">Loading recommendation…</div>;
   }
 
   return (
-    <div className="rounded border p-4 bg-white">
+    <div className="rounded border border-slate-800 bg-slate-900 p-4">
       <div className="mb-2 flex items-baseline gap-2">
         <h2 className="text-xl font-semibold">Today’s Recommendation</h2>
-        <span className="text-xs text-gray-500">{rec.timestamp}</span>
+        <span className="text-xs text-slate-400">{rec.timestamp}</span>
         {cfg.useCombinedRecommendation && (
-          <span className="ml-2 rounded bg-blue-100 px-2 py-0.5 text-[10px] text-blue-800">Combined</span>
+          <span className="ml-2 rounded bg-blue-600/20 px-2 py-0.5 text-[10px] text-blue-300">Combined</span>
         )}
       </div>
-      <div className="mb-2">
-        <span className="text-sm text-gray-700">Action: </span>
+      <div className="mb-3">
+        <span className="text-sm text-slate-300">Action: </span>
         <span className="text-base font-medium">{rec.action}</span>
+      </div>
+      <div className="mb-2 h-2 w-full overflow-hidden rounded bg-slate-800">
+        <div className="h-2 bg-blue-500" style={{ width: `${rec.confidence}%` }} />
       </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
@@ -89,7 +92,7 @@ export default function RecommendationCard() {
         <div>
           <div>Confidence: {rec.confidence}%</div>
           {ml && !cfg.showProbabilityBars && (
-            <div className="mt-1 text-xs text-gray-600">ML (5d): {Object.entries(ml.probs).map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' · ')}</div>
+            <div className="mt-1 text-xs text-slate-400">ML (5d): {Object.entries(ml.probs).map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' · ')}</div>
           )}
           {ml && cfg.showProbabilityBars && (
             <ProbabilityBars probs={ml.probs} />
@@ -97,7 +100,7 @@ export default function RecommendationCard() {
         </div>
       </div>
       {rec.why && (
-        <div className="mt-3 text-sm text-gray-600">
+        <div className="mt-3 text-sm text-slate-300">
           <div className="font-medium">Why:</div>
           <div>{rec.why}</div>
         </div>
