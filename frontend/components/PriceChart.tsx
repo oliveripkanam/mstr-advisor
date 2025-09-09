@@ -73,6 +73,32 @@ export default function PriceChart() {
         };
         clampRange();
         setLoading(false);
+
+        // Live price line from hot.json (raw on hotdata branch)
+        const REPO = 'oliveripkanam/mstr-advisor';
+        const BRANCH = 'hotdata';
+        const PATH = 'data/public/hot.json';
+        const base = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${PATH}`;
+        let liveLine: any | null = null;
+        let timer: any;
+        const fetchHot = async () => {
+          try {
+            const res = await fetch(`${base}?t=${Date.now()}`, { cache: 'no-store' });
+            if (!res.ok) return;
+            const j = await res.json();
+            const price = typeof j?.last_price === 'number' ? j.last_price : null;
+            if (price === null) return;
+            if (!liveLine) {
+              liveLine = (series as any).createPriceLine({ price, color: '#2563eb', lineWidth: 2, title: 'Live' });
+            } else {
+              liveLine.applyOptions({ price });
+            }
+          } catch {}
+        };
+        fetchHot();
+        timer = setInterval(fetchHot, 90_000);
+        // cleanup timer when effect cleans up
+        (window as any).__hotTimer = timer;
       })
       .catch(() => { setLoading(false); });
     const onResize = () => {
@@ -81,6 +107,7 @@ export default function PriceChart() {
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
+      try { if ((window as any).__hotTimer) clearInterval((window as any).__hotTimer); } catch {}
       chart.remove();
     };
   }, [range]);
