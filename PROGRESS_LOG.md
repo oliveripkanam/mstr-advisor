@@ -319,6 +319,9 @@ Fixes and Finalization
 - Pages deploy now copies `configs/frontend.json` and `docs/BACKTEST.md`; Backtests links to `BACKTEST.md`.
 - Data Status page fetch path corrected to `data/public/status.json`.
 - Added `docs/ML.md` and `ml-regression.yml` (frozen-window ML sanity checks).
+ - Status page visuals: added payload ring chart and per-file size meters.
+   - Commit title: feat(ui): Status page payload ring chart and file size meters
+   - Commit description: Visualize total payload usage and per-artifact sizes with a ring chart and color-coded meters.
 
 Learn & Explain
 ---------------

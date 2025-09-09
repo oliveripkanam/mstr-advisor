@@ -1,9 +1,9 @@
-# Visuals Overhaul (Dark‑Only)
+# Visuals Overhaul (Light Theme)
 
 This document tracks the UI/UX modernization work. Target: sleek, high‑contrast dark theme with TradingView‑class polish.
 
 ## Foundation
-- Dark only (no toggle). High-contrast tokens and accessible focus states.
+- Light only (no toggle). High-contrast tokens and accessible focus states.
 - Libraries: shadcn/ui + Radix Primitives, Tailwind (+ animate), Framer Motion, Lucide icons, chroma-js.
 - Charts: Lightweight Charts (price/equity), Visx (sparklines/KPIs), ECharts (heatmap).
 
@@ -36,7 +36,7 @@ This document tracks the UI/UX modernization work. Target: sleek, high‑contras
 6) Learn [ ]
 - Chip motion; improved Today callouts; term sparklines
 
-7) Status [ ]
+7) Status [x]
 - Payload ring and file meters; stale badge styling
 
 8) Micro-interactions & a11y/perf [ ]
