@@ -53,15 +53,15 @@ export default function StatusPage() {
               <div className="text-xs font-semibold">{usedPct.toFixed(0)}%</div>
             </div>
           </div>
-          <div className="text-xs text-gray-700" aria-live="polite">
+          <div className="flex-1 min-w-0 text-xs text-gray-700" aria-live="polite">
             <div aria-label="Payload summary">Budget: {budget.toFixed(0)} KB · Used: {used.toFixed(1)} KB ({usedPct.toFixed(0)}%) · OK: {String(ok)}</div>
             <div className="mt-2 space-y-1">
               {Object.entries(sizes).map(([name, kb]) => {
                 const pctOfMax = maxFile > 0 ? Math.min(100, Math.max(0, ((kb||0) / maxFile) * 100)) : 0;
                 const pctOfBudget = Math.min(100, Math.max(0, ((kb||0) / budget) * 100));
                 return (
-                  <div key={name}>
-                    <div className="flex justify-between"><span>{name}</span><span>{(kb||0).toFixed(1)} KB · {pctOfBudget.toFixed(1)}% of budget</span></div>
+                  <div key={name} className="w-full">
+                    <div className="flex justify-between"><span className="truncate pr-2">{name}</span><span className="shrink-0">{(kb||0).toFixed(1)} KB · {pctOfBudget.toFixed(1)}% of budget</span></div>
                     <div className="mt-0.5 h-1.5 w-full rounded bg-gray-200" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Number.isFinite(pctOfMax)? Math.round(pctOfMax): 0} aria-label={`${name} size percent of largest file`}>
                       <div className={`h-1.5 rounded ${pctOfBudget>15? 'bg-blue-600' : 'bg-blue-400'} transition-[width] duration-500 ease-out`} style={{ width: `${pctOfMax}%` }} />
                     </div>
