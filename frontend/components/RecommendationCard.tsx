@@ -60,11 +60,11 @@ export default function RecommendationCard() {
   }, []);
 
   if (error) {
-    return <div className="rounded border border-gray-200 bg-white p-4 text-red-600">{error}</div>;
+    return <div role="alert" aria-live="assertive" className="rounded border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>;
   }
 
   if (!rec) {
-    return <div className="rounded border border-gray-200 bg-white p-4 text-gray-500">Loading recommendation…</div>;
+    return <div role="status" aria-live="polite" className="rounded border border-gray-200 bg-white p-4 text-gray-500">Loading recommendation…</div>;
   }
 
   return (
@@ -80,8 +80,14 @@ export default function RecommendationCard() {
         <span className="text-sm text-gray-700">Action: </span>
         <span className="text-base font-medium">{rec.action}</span>
       </div>
-      <div className="mb-2 h-2 w-full overflow-hidden rounded bg-gray-200">
-        <div className="h-2 bg-blue-600" style={{ width: `${rec.confidence}%` }} />
+      <div className="mb-2">
+        <div className="mb-1 flex items-center justify-between text-xs text-gray-600">
+          <span>Confidence</span>
+          <span aria-live="polite">{rec.confidence}%</span>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded bg-gray-200" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={rec.confidence} aria-label="Recommendation confidence">
+          <div className="h-2 bg-blue-600 transition-[width] duration-500 ease-out" style={{ width: `${rec.confidence}%` }} />
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
@@ -95,7 +101,9 @@ export default function RecommendationCard() {
             <div className="mt-1 text-xs text-gray-600">ML (5d): {Object.entries(ml.probs).map(([k,v]) => `${k}: ${(v*100).toFixed(0)}%`).join(' · ')}</div>
           )}
           {ml && cfg.showProbabilityBars && (
-            <ProbabilityBars probs={ml.probs} />
+            <div aria-label="ML class probabilities" className="mt-1">
+              <ProbabilityBars probs={ml.probs} />
+            </div>
           )}
         </div>
       </div>

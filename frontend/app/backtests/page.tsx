@@ -110,7 +110,7 @@ export default function BacktestsPage() {
   return (
     <main className="space-y-4">
       <h2 className="text-xl font-semibold">Baseline Backtest</h2>
-      {!summary && <div className="text-sm text-gray-600">Loading metrics…</div>}
+      {!summary && <div role="status" aria-live="polite" className="text-sm text-gray-600">Loading metrics…</div>}
       {summary && (
         <div className="rounded border border-gray-200 bg-white p-4">
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -122,7 +122,7 @@ export default function BacktestsPage() {
             {tile("Turnover", summary.turnover.toFixed(2), 'neutral')}
           </div>
           <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-            <div>Params hash: {/** @ts-ignore **/summary.params_hash}</div>
+            <div>Params hash: <span className="font-mono" aria-label="Parameters hash">{/** @ts-ignore **/summary.params_hash}</span></div>
             <div>
               <a href="/mstr-advisor/docs/BACKTEST.md" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Backtester docs →</a>
             </div>

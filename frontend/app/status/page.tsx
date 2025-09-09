@@ -18,8 +18,8 @@ export default function StatusPage() {
       .catch(() => setErr("Unable to load status"));
   }, []);
 
-  if (err) return <div className="p-4 text-red-600">{err}</div>;
-  if (!data) return <div className="p-4 text-gray-500">Loading…</div>;
+  if (err) return <div role="alert" aria-live="assertive" className="p-4 rounded border border-red-200 bg-red-50 text-red-700">{err}</div>;
+  if (!data) return <div role="status" aria-live="polite" className="p-4 text-gray-500">Loading…</div>;
 
   const sizes = data.public?.sizes_kb || {};
   const total = Math.max(1, data.public?.total_public_kb || 0);
@@ -46,20 +46,20 @@ export default function StatusPage() {
                 transform="rotate(-90 50 50)"
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center" aria-hidden>
               <div className="text-xs font-semibold">{usedPct.toFixed(0)}%</div>
             </div>
           </div>
-          <div className="text-xs text-gray-700">
-            <div>Total: {(total).toFixed(1)} KB · Used: {used.toFixed(1)} KB · OK: {String(ok)}</div>
+          <div className="text-xs text-gray-700" aria-live="polite">
+            <div aria-label="Payload summary">Total: {(total).toFixed(1)} KB · Used: {used.toFixed(1)} KB · OK: {String(ok)}</div>
             <div className="mt-2 space-y-1">
               {Object.entries(sizes).map(([name, kb]) => {
                 const pct = Math.min(100, Math.max(0, ((kb||0) / total) * 100));
                 return (
                   <div key={name}>
                     <div className="flex justify-between"><span>{name}</span><span>{(kb||0).toFixed(1)} KB</span></div>
-                    <div className="mt-0.5 h-1.5 w-full rounded bg-gray-200">
-                      <div className={`h-1.5 rounded ${pct>15? 'bg-blue-600' : 'bg-blue-400'}`} style={{ width: `${pct}%` }} />
+                    <div className="mt-0.5 h-1.5 w-full rounded bg-gray-200" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Number.isFinite(pct)? Math.round(pct): 0} aria-label={`${name} size percent of total`}>
+                      <div className={`h-1.5 rounded ${pct>15? 'bg-blue-600' : 'bg-blue-400'} transition-[width] duration-500 ease-out`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
