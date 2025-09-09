@@ -21,6 +21,7 @@ Daily artifacts
 ---------------
 - `data/public/mstr_ohlcv.json` → array of { timestamp, open, high, low, close, volume }
 - `data/public/status.json` → summary of last run, per-symbol counts/latest dates, and staleness
+- `data/public/hot.json` (near‑live) → intraday `{ timestamp/asof_utc, symbol, last_price, prev_close, change_pct, market_open }` published to the `hotdata` branch by a separate schedule.
 
 How it runs
 -----------
@@ -30,6 +31,12 @@ How it runs
   3) Build status → `backend/app/build_status.py`
   4) Commit artifacts back to the repo
 - Manual check: Smoke Status workflow runs only the status builder and prints JSON
+
+Near‑live hot feed
+------------------
+- `.github/workflows/hot-data.yml` runs every 10 minutes on weekdays, on branch `hotdata` only.
+- Generates and commits `data/public/hot.json` if values change.
+- Frontend reads `hot.json` client‑side from `raw.githubusercontent.com` and polls ~90s.
 
 Local quickstart
 ----------------
@@ -45,6 +52,7 @@ Troubleshooting
 ---------------
 - Weekends: equities don’t trade; staleness is suppressed on weekends.
 - API hiccups: ingestion retries with exponential backoff; rerun later if needed.
+- Missing blue “Live preview” banner: ensure `hot-data` workflow is enabled and `hotdata` branch exists. Hard refresh the site after a deploy.
 
 Config
 ------

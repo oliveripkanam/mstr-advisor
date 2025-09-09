@@ -330,3 +330,39 @@ Learn & Explain
 - Linked `Learn` from Home; added `docs/LEARN_GUIDE.md` describing site flow and terms.
 - Commit title: feat: add interactive Learn page and terminology content
 - Commit description: Explain the full pipeline and terms in beginner‑friendly UI and docs.
+
+Day 8 — Near‑Live Updates (Free Tier)
+-------------------------------------
+- Part 1: Hot data generator
+  - Added `backend/app/hot_data.py` to emit `data/public/hot.json` with fields: `{ timestamp/asof_utc, symbol, last_price, prev_close, change_pct, market_open }`.
+  - Designed to be lightweight and idempotent; replaces NaN with null for valid JSON.
+  - Commit title: feat(hotdata): add intraday hot feed generator writing hot.json
+
+- Part 2: Hot data workflow (decoupled from site builds)
+  - Added `.github/workflows/hot-data.yml` running every 10 minutes on weekdays (and manual `workflow_dispatch`).
+  - Checks out the `hotdata` branch, runs `hot_data.py`, commits only when values change, and pushes.
+  - Uses concurrency group `hot-data`; commit message tagged `[skip ci]` to avoid triggering other workflows.
+  - Commit title: ci: schedule near‑live hot data updates on hotdata branch
+
+- Part 3: Frontend live wiring
+  - New `frontend/components/HotPreview.tsx`: blue banner that shows the latest intraday price and percent, polling every 90s and pausing when the tab is hidden. Handles both `asof_utc` and `timestamp`, and computes percent from either `change_pct` or `(last_price, prev_close)`.
+  - Home KPIs (`frontend/app/page.tsx` → `KpiBar`): prefers live `hot.json` for Price and Day change and labels them “(Live)”; recomputes vs‑50DMA using SMA50 from technicals; polls every 90s.
+  - Chart (`frontend/components/PriceChart.tsx`): overlays a blue “Live” price line sourced from `hot.json`, refreshed every 90s. Range controls, volume pane, crosshair retained.
+  - Commit titles:
+    - feat(hotdata): wire KPI bar to hot.json and overlay live price line on chart
+    - feat(hotdata): KPI bar polls hot.json; chart live line added
+    - fix(hotdata): restore Live preview banner; robust timestamp/pct parsing in HotPreview
+
+- Part 4: Pages deploy and integration
+  - Frontend changes land on `main` and are deployed by `pages.yml` as usual. The live UI then reads `hot.json` directly from `raw.githubusercontent.com` without a site rebuild.
+  - Integration workflow continues to validate JSON and build preview; no changes required.
+
+- Part 5: Housekeeping and fixes
+  - Ensured cross‑asset JSON wrote valid `null` instead of `NaN`.
+  - Ensured Backtests doc link uses the correct Pages path; copied docs/configs in deploy workflow to avoid 404s.
+  - Added payload budget meters and ring chart on Status page.
+
+Notes on schedules & costs
+--------------------------
+- Daily EOD pipeline and weekly ML pipeline remain unchanged.
+- Near‑live updates are free‑tier friendly: tiny JSON polled client‑side (~90s cadence) and a lightweight scheduled job committing to a separate branch.
