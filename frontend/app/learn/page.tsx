@@ -30,7 +30,10 @@ export default function LearnPage() {
         try {
           const res = await fetch(p);
           if (res.ok) return await res.json();
-        } catch {}
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn("/learn fetch failed", p, e);
+        }
       }
       return null;
     };
@@ -50,6 +53,8 @@ export default function LearnPage() {
         }
         return null;
       };
+      // eslint-disable-next-line no-console
+      console.debug("/learn sources", { tech_len: tech?.length, xas_len: xas?.length, hasRolling: !!rolling, hasSummary: !!summary });
       try {
         if (tech && tech.length) {
           const t = tech[tech.length-1];
@@ -75,6 +80,8 @@ export default function LearnPage() {
       try {
         if (xas && xas.length) {
           const x = lastValid(xas, 'vix_band') || lastValid(xas, 'uup_trend_up') || lastValid(xas, 'corr_BTCUSD_20') || xas[xas.length-1];
+          // eslint-disable-next-line no-console
+          console.debug("/learn xas picked", x);
           if (x.vix_band) s["vix"] = `VIX regime: ${String(x.vix_band)}`;
           if (typeof x.uup_trend_up !== 'undefined') {
             const up = Number(x.uup_trend_up)===1;
@@ -120,6 +127,10 @@ export default function LearnPage() {
           metrics["sharpe_total"] = v;
         }
       } catch {}
+      if (!s.vix || !s.uup || !s.corr) {
+        // eslint-disable-next-line no-console
+        console.debug("/learn missing today", { vix: s.vix, uup: s.uup, corr: s.corr });
+      }
       setToday(s);
       setMetrics(prev => ({...prev, ...metrics}));
     }).catch(()=>{});
