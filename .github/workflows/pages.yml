@@ -6,7 +6,7 @@ on:
     branches: [ main ]
     paths:
       - 'frontend/**'
-      - 'data/public/**'
+      - 'docs/**'
       - 'configs/glossary.yaml'
       - '.github/workflows/pages.yml'
 

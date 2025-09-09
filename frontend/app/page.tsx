@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import HotPreview from '../components/HotPreview';
 const PriceChart = dynamic(() => import('../components/PriceChart'), { ssr: false });
 import RecommendationCard from '../components/RecommendationCard';
 
@@ -29,6 +30,7 @@ export default function HomePage() {
         <p className="text-sm text-gray-700">MSTR daily price chart:</p>
         <LastUpdatedBadge />
       </div>
+      <HotPreview />
       {/* KPI bar */}
       <KpiBar />
       <PriceChart />
