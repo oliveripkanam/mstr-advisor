@@ -296,8 +296,17 @@ Day 9
    - Added a rebase step before pushing updated ML artifacts to avoid non‑fast‑forward push failures.
 
  - Part 8: Real‑world Events UI
-   - Added `frontend/app/news/page.tsx` that lists the latest ~20 items from `news.json` (prefers `hotdata`), with title links, source, timestamp, and sentiment badge.
-   - Added a “News →” link to the homepage navigation.
-   - Documented that the sentiment is keyword‑based and conservative; Neutral is common when headlines lack strong cues. This overlay nudges risk only and is not used to train ML.
+  - Added `frontend/app/news/page.tsx` that lists the latest ~20 items from `news.json` (prefers `hotdata`), with title links, source, timestamp, and sentiment badge.
+  - Added a “News →” link to the homepage navigation.
+  - Documented that the sentiment is keyword‑based and conservative; Neutral is common when headlines lack strong cues. This overlay nudges risk only and is not used to train ML.
+
+- Part 9: Prediction forward‑only + UI clarity
+  - Predictor now keeps a forward‑only history starting from the next trading day; we update rows with actuals and compute errors once available.
+  - `/predict` shows a “Latest check” box (Date, Actual, Predicted, $ Error, % Error) and adds a % error column to the table.
+  - Hardened sparklines to sanitize inputs and handle single‑point series to avoid NaN SVG path errors.
+
+- Part 10: Info & Methodology updates
+  - Added an expandable “Prediction model (next‑day close)” section: inputs, target, validation, forward‑only history, usage.
+  - Added a “How to interpret” section (confidence bounds, conservative news overlay, hot feed behavior).
 
 
