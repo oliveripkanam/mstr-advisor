@@ -298,5 +298,6 @@ Day 9
  - Part 8: Real‑world Events UI
    - Added `frontend/app/news/page.tsx` that lists the latest ~20 items from `news.json` (prefers `hotdata`), with title links, source, timestamp, and sentiment badge.
    - Added a “News →” link to the homepage navigation.
+   - Documented that the sentiment is keyword‑based and conservative; Neutral is common when headlines lack strong cues. This overlay nudges risk only and is not used to train ML.
 
 

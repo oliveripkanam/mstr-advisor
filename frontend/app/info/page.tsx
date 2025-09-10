@@ -296,7 +296,7 @@ export default function InfoPage() {
         </details>
         <details className="text-sm mt-2">
           <summary className="cursor-pointer">How do real‑world events affect the call?</summary>
-          <div className="mt-1 text-gray-700">We scan public RSS feeds (news + Bitcoin) and compute a light bias/intensity score. High negative bias reduces risk and can temper a Buy; high positive bias can temper a Reduce. This overlay is modest and never overrides safety rails.</div>
+          <div className="mt-1 text-gray-700">We scan public RSS feeds (news + Bitcoin) and compute a light bias/intensity score. The sentiment is a conservative keyword heuristic (e.g., <em>upgrade, beats, rally</em> → positive; <em>downgrade, misses, selloff</em> → negative). Headlines that lack clear cues are marked Neutral. This only nudges risk (bounded) and does not train the ML model.</div>
           <ul className="mt-2 list-disc pl-5 text-gray-700">
             <li><span className="font-medium">CPI high</span>: sticks inflation → tighter policy risk → generally risk‑off tilt.</li>
             <li><span className="font-medium">Rate cuts</span>: easier financial conditions → risk‑on tilt (but watch inflation).</li>

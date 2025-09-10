@@ -42,6 +42,10 @@ Near‑live
 ---------
 - The frontend reads near‑live JSONs from `raw.githubusercontent.com` (hotdata branch) and polls ~90s.
 
+News sentiment
+--------------
+- Real‑world events come from RSS feeds. A conservative keyword heuristic assigns sentiment (Positive/Negative/Neutral). Many headlines are Neutral if they lack strong cues. This signal only nudges risk and does not influence model training. See the Info page for details.
+
 Local quickstart
 ----------------
 ```
