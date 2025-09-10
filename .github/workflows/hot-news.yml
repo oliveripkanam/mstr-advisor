@@ -31,6 +31,15 @@ jobs:
         run: |
           python backend/app/news_monitor.py
 
+      - name: Stage generated files to temp and clean worktree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/news"
+          cp -f data/public/news*.json "$RUNNER_TEMP/news/" || true
+          # Clean local changes so we can switch branches safely
+          git reset --hard HEAD
+
       - name: Switch to latest hotdata branch
         shell: bash
         run: |
@@ -41,6 +50,13 @@ jobs:
           else
             git checkout -B hotdata
           fi
+
+      - name: Restore generated files into hotdata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/public
+          cp -f "$RUNNER_TEMP/news/"news*.json data/public/ || true
 
       - name: Commit changes (if any)
         shell: bash
