@@ -309,4 +309,8 @@ Day 9
   - Added an expandable “Prediction model (next‑day close)” section: inputs, target, validation, forward‑only history, usage.
   - Added a “How to interpret” section (confidence bounds, conservative news overlay, hot feed behavior).
 
+ - Part 11: Documentation reshuffle
+   - Removed the separate Algorithm Deep‑Dive doc to reduce duplication.
+   - Renamed the essay to “How I Implemented the Model” and linked it from Info and README.
+   - Ensured Pages workflow copies the essay for public access.
 

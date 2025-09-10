@@ -1,12 +1,3 @@
-How I Implemented the Model (Plain‑English Essay)
-=================================================
-
-[This content mirrors `docs/ALGORITHM_ESSAY.md` and is the canonical user‑facing essay.]
-
-Who this is for
----------------
-You do not need a finance background. This document explains every moving part of the advisor in clear, practical terms: what the signals mean, how we compute them, how they influence the daily recommendation, and why we chose this approach.
-
 How the system works at a glance
 --------------------------------
 1) Every day after the market closes, we download the new daily bar for MSTR and a few context assets.
