@@ -50,13 +50,13 @@ export default function PredictPage() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <div className="text-gray-700">Next predicted close</div>
-            <div className="text-xl font-semibold">${data.predict_next_close.toFixed(2)}</div>
+            <div className="text-xl font-semibold">${typeof data.predict_next_close === 'number' ? data.predict_next_close.toFixed(2) : '--'}</div>
             <div className="text-xs text-gray-500">As of {data.asof}</div>
           </div>
           <div className="text-right">
             <div className="text-gray-700">Accuracy (±1%)</div>
             <div className="text-xl font-semibold">{accuracyPct !== null ? `${accuracyPct}%` : '—'}</div>
-            <div className="text-xs text-gray-500">MAE: ${data.metrics.mae.toFixed(2)} · MAPE: {data.metrics.mape.toFixed(2)}%</div>
+            <div className="text-xs text-gray-500">MAE: ${typeof data.metrics?.mae === 'number' ? data.metrics.mae.toFixed(2) : '--'} · MAPE: {typeof data.metrics?.mape === 'number' ? data.metrics.mape.toFixed(2) : '--'}%</div>
           </div>
         </div>
       </div>
@@ -93,9 +93,9 @@ export default function PredictPage() {
               {data.history.slice(-120).reverse().map((r, i) => (
                 <tr key={i} className="border-t">
                   <td className="py-1">{r.date}</td>
-                  <td className="py-1">${r.actual.toFixed(2)}</td>
-                  <td className="py-1">${r.pred.toFixed(2)}</td>
-                  <td className="py-1">${r.abs_err.toFixed(2)}</td>
+                  <td className="py-1">${typeof r.actual === 'number' ? r.actual.toFixed(2) : '--'}</td>
+                  <td className="py-1">${typeof r.pred === 'number' ? r.pred.toFixed(2) : '--'}</td>
+                  <td className="py-1">${typeof r.abs_err === 'number' ? r.abs_err.toFixed(2) : '--'}</td>
                 </tr>
               ))}
             </tbody>

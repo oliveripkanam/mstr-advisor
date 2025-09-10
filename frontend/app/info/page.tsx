@@ -82,10 +82,12 @@ export default function InfoPage() {
             s["uup"] = up ? "USD uptrend" : "USD not in uptrend";
             metrics["uup_up"] = up ? 1 : 0;
           }
-          if (typeof x.corr_BTCUSD_20 !== 'undefined') {
+          if (typeof x.corr_BTCUSD_20 !== 'undefined' && x.corr_BTCUSD_20 !== null) {
             const c = Number(x.corr_BTCUSD_20);
-            s["corr"] = `BTC 20d corr = ${c.toFixed(2)}`;
-            metrics["corr_btc20"] = c;
+            if (Number.isFinite(c)) {
+              s["corr"] = `BTC 20d corr = ${c.toFixed(2)}`;
+              metrics["corr_btc20"] = c;
+            }
           }
           if (x.vix_band) metrics["vix_band"] = String(x.vix_band);
         }

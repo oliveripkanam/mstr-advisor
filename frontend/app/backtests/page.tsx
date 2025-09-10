@@ -117,9 +117,9 @@ export default function BacktestsPage() {
             {tile("CAGR", formatPct(summary.CAGR), summary.CAGR >= 0 ? 'up' : 'down')}
             {tile("Total Return", formatPct(summary.total_return), summary.total_return >= 0 ? 'up' : 'down')}
             {tile("Max Drawdown", formatPct(summary.max_drawdown), 'down')}
-            {tile("Sharpe (12m)", summary.sharpe.toFixed(2), summary.sharpe >= 1 ? 'up' : summary.sharpe < 0.5 ? 'down' : 'neutral')}
+            {tile("Sharpe (12m)", (typeof summary.sharpe === 'number' ? summary.sharpe.toFixed(2) : '—'), summary.sharpe >= 1 ? 'up' : summary.sharpe < 0.5 ? 'down' : 'neutral')}
             {tile("Volatility", formatPct(summary.volatility), 'neutral')}
-            {tile("Turnover", summary.turnover.toFixed(2), 'neutral')}
+            {tile("Turnover", (typeof summary.turnover === 'number' ? summary.turnover.toFixed(2) : '—'), 'neutral')}
           </div>
           <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
             <div>Params hash: <span className="font-mono" aria-label="Parameters hash">{/** @ts-ignore **/summary.params_hash}</span></div>
