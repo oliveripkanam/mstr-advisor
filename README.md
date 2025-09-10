@@ -18,6 +18,7 @@ Where things live
 - Workflows: `.github/workflows/*.yml`
 - Code: `backend/app/*.py`
 - Docs: `docs/ALGORITHM.md` (Algorithm deep‑dive), `docs/BACKTEST.md`
+  - Plain‑English essay: `docs/ALGORITHM_ESSAY.md`
 
 Key artifacts
 -------------
