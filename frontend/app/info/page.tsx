@@ -174,6 +174,9 @@ export default function InfoPage() {
               <li><span className="font-medium">Hot feed</span>: near-live price preview updates ~90s from a lightweight branch; site remains static.</li>
             </ul>
           </details>
+          <div className="mt-3 text-sm">
+            <a href="/mstr-advisor/docs/ALGORITHM.md" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Read the full Algorithm Deep‑Dive →</a>
+          </div>
         </div>
       </section>
 

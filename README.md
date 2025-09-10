@@ -17,6 +17,7 @@ Where things live
 - Public frontend data: `data/public/*.json`
 - Workflows: `.github/workflows/*.yml`
 - Code: `backend/app/*.py`
+- Docs: `docs/ALGORITHM.md` (Algorithm deep‑dive), `docs/BACKTEST.md`
 
 Key artifacts
 -------------
@@ -45,6 +46,10 @@ Near‑live
 News sentiment
 --------------
 - Real‑world events come from RSS feeds. A conservative keyword heuristic assigns sentiment (Positive/Negative/Neutral). Many headlines are Neutral if they lack strong cues. This signal only nudges risk and does not influence model training. See the Info page for details.
+
+Prediction model
+----------------
+- A small Gradient Boosting Regressor predicts the next trading day close from daily technicals (MA/EMA, RSI, MACD, ATR, volume). We use walk‑forward splits, then train on all data for today’s forecast. The prediction log is forward‑only (starts today, actuals fill in later). This is informational and does not directly set Buy/Hold/Reduce.
 
 Local quickstart
 ----------------

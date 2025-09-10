@@ -48,6 +48,7 @@ jobs:
           cp configs/terminology.json frontend/public/configs/terminology.json || true
           mkdir -p frontend/public/docs
           cp docs/BACKTEST.md frontend/public/docs/BACKTEST.md || true
+          cp docs/ALGORITHM.md frontend/public/docs/ALGORITHM.md || true
 
       - name: Build static export
         run: |
