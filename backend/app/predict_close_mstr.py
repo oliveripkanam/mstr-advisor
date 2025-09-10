@@ -4,12 +4,13 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import TimeSeriesSplit
+from pandas.tseries.offsets import BDay
 
 
 TECH_PATH = Path("data/public/mstr_ohlcv.json")
@@ -82,21 +83,70 @@ def main() -> None:
     latest_features = X.iloc[[-1]]
     pred_next = float(model.predict(latest_features)[0])
 
-    # Build history for evaluation
-    dates = df.loc[y.index, "timestamp"].dt.strftime("%Y-%m-%d").tolist()
-    actuals = y.values.astype(float).tolist()
-    fitted = model.predict(X).astype(float).tolist()
-    errors = [abs(a - p) for a, p in zip(actuals, fitted)]
-    mae = float(np.mean(errors))
-    mape = float(np.mean([abs((a - p) / max(1e-6, a)) for a, p in zip(actuals, fitted)]) * 100)
+    # Append-only prediction log
+    # Determine next trading date (approximate using business day)
+    last_bar_date: pd.Timestamp = pd.Timestamp(df["timestamp"].iloc[-1]).normalize()
+    next_trading_date: pd.Timestamp = (last_bar_date + BDay(1)).normalize()
+    next_date_str = next_trading_date.strftime("%Y-%m-%d")
+
+    # Load existing history if present
+    existing_history: List[dict] = []
+    if OUT_PATH.exists():
+        try:
+            prev = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+            existing_history = list(prev.get("history", []))
+        except Exception:
+            existing_history = []
+
+    # Update any rows where actual is now known
+    close_by_date = {
+        pd.Timestamp(ts).strftime("%Y-%m-%d"): float(c)
+        for ts, c in zip(df["timestamp"].tolist(), df["close"].astype(float).tolist())
+    }
+    for row in existing_history:
+        d = row.get("date")
+        if d in close_by_date and (row.get("actual") is None or isinstance(row.get("actual"), str)):
+            row["actual"] = round(close_by_date[d], 2)
+            if isinstance(row.get("pred"), (int, float)):
+                row["abs_err"] = round(abs(row["actual"] - row["pred"]), 2)
+
+    # Upsert today's prediction for next date
+    def find_row(date_str: str) -> Optional[dict]:
+        for r in existing_history:
+            if r.get("date") == date_str:
+                return r
+        return None
+
+    r = find_row(next_date_str)
+    if r is None:
+        existing_history.append({
+            "date": next_date_str,
+            "actual": None,
+            "pred": round(pred_next, 2),
+            "abs_err": None,
+        })
+    else:
+        r["pred"] = round(pred_next, 2)
+        if isinstance(r.get("actual"), (int, float)):
+            r["abs_err"] = round(abs(r["actual"] - r["pred"]), 2)
+
+    # Compute metrics on rows with actuals
+    with_actual = [row for row in existing_history if isinstance(row.get("actual"), (int, float)) and isinstance(row.get("pred"), (int, float))]
+    if with_actual:
+        errors = [abs(r["actual"] - r["pred"]) for r in with_actual]
+        maes = float(np.mean(errors))
+        mapes = float(np.mean([abs((r["actual"] - r["pred"]) / max(1e-6, r["actual"])) for r in with_actual]) * 100)
+    else:
+        maes = 0.0
+        mapes = 0.0
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with OUT_PATH.open("w", encoding="utf-8") as f:
         json.dump({
             "asof": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "predict_next_close": round(pred_next, 2),
-            "history": [{"date": d, "actual": round(a, 2), "pred": round(p, 2), "abs_err": round(e, 2)} for d, a, p, e in zip(dates, actuals, fitted, errors)],
-            "metrics": {"mae": round(mae, 2), "mape": round(mape, 2), "cv": hist},
+            "history": existing_history,
+            "metrics": {"mae": round(maes, 2), "mape": round(mapes, 2), "cv": hist},
         }, f, ensure_ascii=False)
 
 
