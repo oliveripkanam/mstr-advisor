@@ -153,6 +153,27 @@ export default function InfoPage() {
             <li>Apply rules and a small ML model to form Buy/Hold/Reduce with confidence.</li>
             <li>Publish JSONs and render this static site. No brokerage links, no fees.</li>
           </ol>
+          <details className="mt-3">
+            <summary className="cursor-pointer font-medium">Prediction model (next-day close)</summary>
+            <div className="mt-2 space-y-2">
+              <p>We fit a small Gradient Boosting Regressor on daily technical features (moving averages, RSI, MACD, ATR, volume) to predict the next day’s close. We use time-series cross-validation to avoid look-ahead and then train on the full sample for the latest prediction.</p>
+              <ul className="list-disc pl-5">
+                <li><span className="font-medium">Input</span>: price/volume + technicals (no intraday data, no sentiment).</li>
+                <li><span className="font-medium">Target</span>: next trading day close.</li>
+                <li><span className="font-medium">Validation</span>: rolling splits (walk-forward).</li>
+                <li><span className="font-medium">History</span>: forward-only log starting today; actuals fill in when available, errors computed then.</li>
+                <li><span className="font-medium">Usage</span>: informational; it does not directly set Buy/Hold/Reduce.</li>
+              </ul>
+            </div>
+          </details>
+          <details className="mt-2">
+            <summary className="cursor-pointer font-medium">How to interpret</summary>
+            <ul className="mt-2 list-disc pl-5">
+              <li><span className="font-medium">Confidence</span>: bounded by volatility regime; reflects rule strength blended with ML probability.</li>
+              <li><span className="font-medium">News overlay</span>: conservative keyword heuristic nudges risk; never overrides safety rails.</li>
+              <li><span className="font-medium">Hot feed</span>: near-live price preview updates ~90s from a lightweight branch; site remains static.</li>
+            </ul>
+          </details>
         </div>
       </section>
 
