@@ -110,6 +110,9 @@ def main() -> None:
             if isinstance(row.get("pred"), (int, float)):
                 row["abs_err"] = round(abs(row["actual"] - row["pred"]), 2)
 
+    # Start history from today onward: drop any backfilled rows before the next prediction date
+    existing_history = [r for r in existing_history if isinstance(r.get("date"), str) and r["date"] >= next_date_str]
+
     # Upsert today's prediction for next date
     def find_row(date_str: str) -> Optional[dict]:
         for r in existing_history:

@@ -41,7 +41,11 @@ export default function PredictPage() {
 
   const closes = data.history.map((r) => r.actual);
   const preds = data.history.map((r) => r.pred);
-  const errs = data.history.map((r) => r.abs_err);
+  const errs = data.history.map((r) => r.abs_err).filter((v) => typeof v === 'number');
+  const latest = data.history.length ? data.history[data.history.length - 1] : null;
+  const latestPctErr = latest && typeof latest.actual === 'number' && typeof latest.pred === 'number'
+    ? Math.abs((latest.pred - latest.actual) / Math.max(1e-6, latest.actual)) * 100
+    : null;
 
   return (
     <main className="space-y-4">
@@ -78,6 +82,17 @@ export default function PredictPage() {
       </div>
 
       <div className="rounded border p-4">
+        <div className="text-sm font-medium mb-2">Latest check</div>
+        <div className="text-sm text-gray-700 flex flex-wrap gap-4">
+          <div>Date: <span className="font-mono">{latest?.date ?? '—'}</span></div>
+          <div>Actual: <span className="font-mono">{typeof latest?.actual === 'number' ? `$${latest!.actual.toFixed(2)}` : '—'}</span></div>
+          <div>Predicted: <span className="font-mono">{typeof latest?.pred === 'number' ? `$${latest!.pred.toFixed(2)}` : '—'}</span></div>
+          <div>Error: <span className="font-mono">{typeof latest?.abs_err === 'number' ? `$${latest!.abs_err.toFixed(2)}` : '—'}</span></div>
+          <div>% Error: <span className="font-mono">{latestPctErr !== null ? `${latestPctErr.toFixed(2)}%` : '—'}</span></div>
+        </div>
+      </div>
+
+      <div className="rounded border p-4">
         <div className="mb-2 text-sm font-medium">History</div>
         <div className="max-h-80 overflow-auto">
           <table className="w-full text-sm">
@@ -87,6 +102,7 @@ export default function PredictPage() {
                 <th className="py-1">Actual</th>
                 <th className="py-1">Predicted</th>
                 <th className="py-1">Abs err</th>
+                <th className="py-1">% err</th>
               </tr>
             </thead>
             <tbody>
@@ -96,6 +112,7 @@ export default function PredictPage() {
                   <td className="py-1">${typeof r.actual === 'number' ? r.actual.toFixed(2) : '--'}</td>
                   <td className="py-1">${typeof r.pred === 'number' ? r.pred.toFixed(2) : '--'}</td>
                   <td className="py-1">${typeof r.abs_err === 'number' ? r.abs_err.toFixed(2) : '--'}</td>
+                  <td className="py-1">{(typeof r.actual === 'number' && typeof r.pred === 'number') ? `${(Math.abs((r.pred - r.actual) / Math.max(1e-6, r.actual)) * 100).toFixed(2)}%` : '—'}</td>
                 </tr>
               ))}
             </tbody>
