@@ -22,11 +22,17 @@ def load_df() -> pd.DataFrame:
     tech = pd.read_json(FEAT_PATH)
     for df in (ohlcv, tech):
         df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    # Avoid duplicate 'close' columns after merge
+    if "close" in tech.columns:
+        tech = tech.drop(columns=["close"])
     df = pd.merge_asof(
         ohlcv.sort_values("timestamp"),
         tech.sort_values("timestamp"),
         on="timestamp",
     )
+    # Ensure canonical column names
+    if "close" not in df.columns and "close_x" in df.columns:
+        df = df.rename(columns={"close_x": "close"})
     df = df.dropna(subset=["close"]).copy()
     df["t"] = np.arange(len(df))
     return df
