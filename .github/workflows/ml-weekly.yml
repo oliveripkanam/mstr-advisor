@@ -61,11 +61,13 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "ci: weekly ML artifacts (labels, probs, combined) [skip ci]"
-            git push
-          else
+          if git diff --cached --quiet; then
             echo "No ML changes to commit"
+            exit 0
           fi
+          git commit -m "ci: weekly ML artifacts (labels, probs, combined) [skip ci]"
+          # Rebase to avoid non-fast-forward push failures
+          git pull --rebase origin main || true
+          git push origin HEAD:main
 
 
