@@ -79,6 +79,11 @@ jobs:
         run: |
           python backend/app/crossasset_mstr.py
 
+      - name: Collect real-world news score
+        shell: bash
+        run: |
+          python backend/app/news_monitor.py || true
+
       - name: Generate baseline recommendation
         shell: bash
         run: |
@@ -109,6 +114,11 @@ jobs:
         run: |
           python backend/app/regimes_mstr.py
           python backend/app/change_points.py || true
+
+      - name: Predict next close
+        shell: bash
+        run: |
+          python backend/app/predict_close_mstr.py || true
 
       # ML and labels run weekly; daily job focuses on baseline pipeline
 

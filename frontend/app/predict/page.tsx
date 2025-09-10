@@ -10,10 +10,22 @@ export default function PredictPage() {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("data/public/close_predictions.json")
-      .then((r) => r.json())
-      .then((d: PredFile) => setData(d))
-      .catch(() => setErr("Unable to load predictions"));
+    const REPO = 'oliveripkanam/mstr-advisor';
+    const raw = `https://raw.githubusercontent.com/${REPO}/main/data/public/close_predictions.json?t=${Date.now()}`;
+    const paths = [
+      'data/public/close_predictions.json',
+      '/mstr-advisor/data/public/close_predictions.json',
+      raw,
+    ];
+    (async () => {
+      for (const p of paths) {
+        try {
+          const res = await fetch(p, { cache: 'no-store' });
+          if (res.ok) { setData(await res.json()); setErr(null); return; }
+        } catch {}
+      }
+      setErr('Unable to load predictions');
+    })();
   }, []);
 
   const accuracyPct = useMemo(() => {
