@@ -27,17 +27,20 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Switch to hotdata branch
+      - name: Run news monitor (on main)
+        run: |
+          python backend/app/news_monitor.py
+
+      - name: Switch to latest hotdata branch
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin
-          # Create/reset local hotdata branch from current HEAD (main code present in working tree)
-          git checkout -B hotdata
-
-      - name: Run news monitor
-        run: |
-          python backend/app/news_monitor.py
+          git fetch origin hotdata || true
+          if git rev-parse --verify origin/hotdata >/dev/null 2>&1; then
+            git checkout -B hotdata origin/hotdata
+          else
+            git checkout -B hotdata
+          fi
 
       - name: Commit changes (if any)
         shell: bash
@@ -51,6 +54,8 @@ jobs:
             exit 0
           fi
           git commit -m "news: update news.json and news_score.json [skip ci]"
+          # Rebase in case remote moved since fetch
+          git pull --rebase origin hotdata || true
           git push origin hotdata
 
 
