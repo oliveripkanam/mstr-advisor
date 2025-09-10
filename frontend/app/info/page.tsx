@@ -175,9 +175,7 @@ export default function InfoPage() {
             </ul>
           </details>
           <div className="mt-3 text-sm">
-            <a href="/mstr-advisor/docs/ALGORITHM.md" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Read the full Algorithm Deep‑Dive →</a>
-            <span className="mx-2 text-gray-400">|</span>
-            <a href="/mstr-advisor/docs/ALGORITHM_ESSAY.md" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">Algorithm Essay (Plain‑English) →</a>
+            <a href="/mstr-advisor/docs/HOW_I_IMPLEMENTED_THE_MODEL.md" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">How I implemented the model →</a>
           </div>
         </div>
       </section>

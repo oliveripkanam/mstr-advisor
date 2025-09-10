@@ -1,5 +1,5 @@
-Algorithm Essay (Plain‑English Deep Dive)
-=========================================
+How I Implemented the Model (Plain‑English Essay)
+=================================================
 
 Who this is for
 ---------------

@@ -17,8 +17,8 @@ Where things live
 - Public frontend data: `data/public/*.json`
 - Workflows: `.github/workflows/*.yml`
 - Code: `backend/app/*.py`
-- Docs: `docs/ALGORITHM.md` (Algorithm deep‑dive), `docs/BACKTEST.md`
-  - Plain‑English essay: `docs/ALGORITHM_ESSAY.md`
+- Docs: `docs/BACKTEST.md`
+  - How‑we‑built‑it essay: `docs/HOW_I_IMPLEMENTED_THE_MODEL.md`
 
 Key artifacts
 -------------
