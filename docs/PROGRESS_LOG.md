@@ -278,4 +278,6 @@ Day 9
 -------------------------------------
 - Part 1: Retired Explainer (redirected `/explainer`→`/info`), removed link on Home, and added a collapsible details drawer (narrative, drivers, what changed) inside `frontend/components/RecommendationCard.tsx`.
 
+ - Part 2: Improved details drawer: added a short explainer sentence to “What changed” and fixed Entry display to show a single value when the entry range collapses.
+
 

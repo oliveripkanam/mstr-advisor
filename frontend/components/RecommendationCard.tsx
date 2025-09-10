@@ -94,6 +94,18 @@ export default function RecommendationCard() {
     return <div role="status" aria-live="polite" className="rounded border border-gray-200 bg-white p-4 text-gray-500">Loading recommendation…</div>;
   }
 
+  // Entry zone formatting: if effectively equal, show single value
+  const entryLow = rec.entry_zone?.[0];
+  const entryHigh = rec.entry_zone?.[1];
+  let entryText = '';
+  try {
+    if (typeof entryLow === 'number' && typeof entryHigh === 'number') {
+      const lowStr = entryLow.toFixed(2);
+      const highStr = entryHigh.toFixed(2);
+      entryText = lowStr === highStr ? lowStr : `${lowStr} – ${highStr}`;
+    }
+  } catch { entryText = ''; }
+
   return (
     <div className="rounded border border-gray-200 bg-white p-4">
       <div className="mb-2 flex items-baseline gap-2">
@@ -131,7 +143,7 @@ export default function RecommendationCard() {
       </div>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <div>Entry: {rec.entry_zone?.[0]?.toFixed(2)} – {rec.entry_zone?.[1]?.toFixed(2)}</div>
+          <div>Entry: {entryText || '—'}</div>
           <div>Stop: {rec.stop?.toFixed(2)}</div>
           <div>Take Profit: {rec.take_profit?.toFixed(2)}</div>
         </div>
@@ -180,13 +192,18 @@ export default function RecommendationCard() {
             </div>
             <div className="rounded border border-gray-200 bg-white p-3 text-sm">
               <div className="mb-1 text-xs text-gray-600">What changed</div>
+              <div className="mb-2 text-xs text-gray-500">Day‑over‑day highlights across trend, RSI, VIX, USD trend, and correlations.</div>
               {Array.isArray(changed?.items) && changed!.items!.length > 0 ? (
                 <ul className="list-disc pl-5">
                   {changed!.items!.slice(0,6).map((it, idx) => (
                     <li key={idx}>{it}</li>
                   ))}
                 </ul>
-              ) : '—'}
+              ) : (
+                <ul className="list-disc pl-5">
+                  <li>No material changes detected</li>
+                </ul>
+              )}
             </div>
           </div>
         )}
