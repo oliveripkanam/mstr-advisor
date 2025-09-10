@@ -13,31 +13,34 @@ What it does
 
 Where things live
 -----------------
-- Raw daily data: `data/raw/*.json` (one file per symbol)
-- Public frontend data: `data/public/` (e.g., `mstr_ohlcv.json`, `status.json`)
+- Raw daily data: `data/raw/*.json`
+- Public frontend data: `data/public/*.json`
 - Workflows: `.github/workflows/*.yml`
 - Code: `backend/app/*.py`
 
-Daily artifacts
----------------
-- `data/public/mstr_ohlcv.json` → array of { timestamp, open, high, low, close, volume }
-- `data/public/status.json` → summary of last run, per-symbol counts/latest dates, and staleness
-- `data/public/hot.json` (near‑live) → intraday `{ timestamp/asof_utc, symbol, last_price, prev_close, change_pct, market_open }` published to the `hotdata` branch by a separate schedule.
+Key artifacts
+-------------
+- `mstr_ohlcv.json`: { timestamp, open, high, low, close, volume }
+- `mstr_technical.json`: SMA/EMA/RSI/MACD/ATR/Bollinger
+- `mstr_crossasset.json`: correlations, VIX band, USD trend, TNX delta
+- `baseline_signal.json` and `latest_recommendation.json`
+- `explain_latest.json`, `what_changed.json`
+- `backtest_*.json` (summary, equity, rolling, monthly)
+- `regimes_mstr.json`, `change_points_mstr.json`
+- `ml_latest_probs.json`, `ml_feature_importances.json`, `latest_recommendation_combined.json`
+- `close_predictions.json` (append‑only next‑day close predictions)
+- `news.json`, `news_score.json` (real‑world events and a simple sentiment signal)
 
 How it runs
 -----------
-- GitHub Actions → Daily EOD Pipeline (scheduled 22:05 UTC) executes:
-  1) Ingest raw data → `backend/app/ingest_prices.py`
-  2) Normalize MSTR → `backend/app/normalize_mstr.py`
-  3) Build status → `backend/app/build_status.py`
-  4) Commit artifacts back to the repo
-- Manual check: Smoke Status workflow runs only the status builder and prints JSON
+- Daily EOD (22:05 UTC): full baseline pipeline and artifacts.
+- Weekly ML (Mon 22:15 UTC): labels + ML + combined recommendation.
+- Hot Data (every 10m on weekdays → `hotdata` branch): `hot.json`.
+- Hot News (every 30m during US market hours → `hotdata`): `news.json`, `news_score.json`.
 
-Near‑live hot feed
-------------------
-- `.github/workflows/hot-data.yml` runs every 10 minutes on weekdays, on branch `hotdata` only.
-- Generates and commits `data/public/hot.json` if values change.
-- Frontend reads `hot.json` client‑side from `raw.githubusercontent.com` and polls ~90s.
+Near‑live
+---------
+- The frontend reads near‑live JSONs from `raw.githubusercontent.com` (hotdata branch) and polls ~90s.
 
 Local quickstart
 ----------------
@@ -59,7 +62,5 @@ Config
 ------
 - `MAX_RETRIES` (env): retry attempts for ingestion (default 3)
 - `MIN_CONFIDENCE` (env): minimum confidence to avoid suppression (default 50)
-
-See `BUILD_PLAN.md` for the full schedule.
 
 

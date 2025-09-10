@@ -284,4 +284,19 @@ Day 9
 
  - Part 4: Close prediction — added `backend/app/predict_close_mstr.py` to produce `close_predictions.json`, and created `/predict` page that shows next predicted close, MAE/MAPE, accuracy (±1%), sparkline charts, and history table; added nav link.
 
+ - Part 5: Predict reliability and schema
+   - Fixed merge of technicals with OHLCV (`close` duplication) and regenerated `close_predictions.json`.
+   - Converted predictions to an append‑only log: we write one row for the next trading day with `pred`, then fill `actual` and `abs_err` later when known.
+   - Frontend `/predict` now fetches from multiple paths including `raw.githubusercontent.com` fallback.
+
+ - Part 6: Hot News workflow robustness
+   - Reworked `.github/workflows/hot-news.yml` to run the monitor on `main`, stash artifacts to temp, hard‑reset, check out up‑to‑date `hotdata`, restore JSONs, rebase and push — fixing non‑fast‑forward and dirty worktree errors.
+
+ - Part 7: Weekly ML workflow robustness
+   - Added a rebase step before pushing updated ML artifacts to avoid non‑fast‑forward push failures.
+
+ - Part 8: Real‑world Events UI
+   - Added `frontend/app/news/page.tsx` that lists the latest ~20 items from `news.json` (prefers `hotdata`), with title links, source, timestamp, and sentiment badge.
+   - Added a “News →” link to the homepage navigation.
+
 
