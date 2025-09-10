@@ -41,6 +41,7 @@ export default function HomePage() {
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/backtests">Backtests →</Link>
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/status">Data Status →</Link>
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/predict">Predict →</Link>
+        <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/news">News →</Link>
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary" href="/info">Info & Methodology →</Link>
       </div>
     </main>
