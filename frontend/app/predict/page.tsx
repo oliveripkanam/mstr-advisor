@@ -39,8 +39,8 @@ export default function PredictPage() {
   if (err) return <div className="p-4 text-red-600">{err}</div>;
   if (!data) return <div className="p-4 text-gray-500">Loading…</div>;
 
-  const closes = data.history.map((r) => r.actual);
-  const preds = data.history.map((r) => r.pred);
+  const closes = data.history.map((r) => r.actual).filter((v) => typeof v === 'number');
+  const preds = data.history.map((r) => r.pred).filter((v) => typeof v === 'number');
   const errs = data.history.map((r) => r.abs_err).filter((v) => typeof v === 'number');
   const latest = data.history.length ? data.history[data.history.length - 1] : null;
   const latestPctErr = latest && typeof latest.actual === 'number' && typeof latest.pred === 'number'
