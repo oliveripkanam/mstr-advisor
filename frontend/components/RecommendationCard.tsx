@@ -24,6 +24,9 @@ export default function RecommendationCard() {
   const [error, setError] = useState<string | null>(null);
   const [ml, setMl] = useState<MLProbs | null>(null);
   const [cfg, setCfg] = useState<FrontendConfig>({ useCombinedRecommendation: true, showProbabilityBars: true });
+  const [detailsOpen, setDetailsOpen] = useState<boolean>(false);
+  const [explain, setExplain] = useState<{ narrative?: string; drivers?: { name: string; detail: string; impact: string }[] } | null>(null);
+  const [changed, setChanged] = useState<{ timestamp?: string; items?: string[] } | null>(null);
 
   useEffect(() => {
     fetch('configs/frontend.json')
@@ -70,6 +73,18 @@ export default function RecommendationCard() {
       .then((d: MLProbs) => setMl(d))
       .catch(() => setMl(null));
   }, []);
+
+  // Lazy-load explainer bits for the details drawer
+  useEffect(() => {
+    if (!detailsOpen) return;
+    Promise.all([
+      fetch('data/public/explain_latest.json').then(r=>r.json()).catch(()=>null),
+      fetch('data/public/what_changed.json').then(r=>r.json()).catch(()=>null),
+    ]).then(([e, c]) => {
+      setExplain(e);
+      setChanged(c);
+    }).catch(()=>{});
+  }, [detailsOpen]);
 
   if (error) {
     return <div role="alert" aria-live="assertive" className="rounded border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>;
@@ -138,6 +153,44 @@ export default function RecommendationCard() {
           <div>{rec.why}</div>
         </div>
       )}
+
+      <div className="mt-4">
+        <button
+          className="text-sm text-blue-700 underline"
+          onClick={() => setDetailsOpen((o) => !o)}
+          aria-expanded={detailsOpen}
+        >
+          {detailsOpen ? 'Hide details' : 'Show details'}
+        </button>
+        {detailsOpen && (
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div className="rounded border border-gray-200 bg-white p-3 text-sm">
+              <div className="mb-1 text-xs text-gray-600">Narrative</div>
+              <div>{explain?.narrative || '—'}</div>
+              {Array.isArray(explain?.drivers) && explain!.drivers!.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {explain!.drivers!.slice(0,5).map((d, i) => (
+                    <li key={i} className="flex items-start justify-between gap-2">
+                      <span className="text-gray-800">{d.name}: {d.detail}</span>
+                      <span className={`text-xs ${d.impact==='+'? 'text-green-700' : d.impact==='-'? 'text-red-700' : 'text-gray-500'}`}>{d.impact}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="rounded border border-gray-200 bg-white p-3 text-sm">
+              <div className="mb-1 text-xs text-gray-600">What changed</div>
+              {Array.isArray(changed?.items) && changed!.items!.length > 0 ? (
+                <ul className="list-disc pl-5">
+                  {changed!.items!.slice(0,6).map((it, idx) => (
+                    <li key={idx}>{it}</li>
+                  ))}
+                </ul>
+              ) : '—'}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
