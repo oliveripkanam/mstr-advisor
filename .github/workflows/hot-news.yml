@@ -1,0 +1,46 @@
+name: Hot News Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 13-21 * * 1-5'  # every 30 minutes during US market hours (approx)
+
+jobs:
+  news:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout hotdata branch
+        uses: actions/checkout@v4
+        with:
+          ref: hotdata
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run news monitor
+        run: |
+          python backend/app/news_monitor.py
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data/public/news*.json || true
+          if ! git diff --cached --quiet; then
+            git commit -m "news: update news.json and news_score.json [skip ci]"
+            git push
+          else
+            echo "No news changes"
+          fi
+
+

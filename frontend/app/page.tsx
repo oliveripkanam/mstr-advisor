@@ -40,6 +40,7 @@ export default function HomePage() {
       <div className="mt-4 text-sm">
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/backtests">Backtests →</Link>
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/status">Data Status →</Link>
+        <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary mr-4" href="/predict">Predict →</Link>
         <Link className="text-primary underline focus:outline-none focus:ring-2 focus:ring-primary" href="/info">Info & Methodology →</Link>
       </div>
     </main>

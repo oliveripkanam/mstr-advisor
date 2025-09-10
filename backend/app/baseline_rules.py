@@ -14,6 +14,7 @@ TECH_PATH = Path("data/public/mstr_technical.json")
 XASSET_PATH = Path("data/public/mstr_crossasset.json")
 OUT_PATH = Path("data/public/baseline_signal.json")
 STATUS_PATH = Path("data/public/status.json")
+NEWS_SCORE_PATH = Path("data/public/news_score.json")
 
 
 @dataclass
@@ -100,6 +101,23 @@ def decide_action(inp: BaselineInputs) -> Dict:
     if inp.uup_trend_up == 1:
         risk_multiplier *= 0.85
         rationale_parts.append("Strong USD (UUP uptrend): reduce risk")
+
+    # Real-world news overlay (bias/intensity)
+    try:
+        if NEWS_SCORE_PATH.exists():
+            with NEWS_SCORE_PATH.open("r", encoding="utf-8") as f:
+                ns = json.load(f)
+            bias = float(ns.get("bias", 0.0))  # -1 to +1
+            intensity = float(ns.get("intensity", 0.0))  # 0 to 1
+            # Adjust confidence and risk multiplier lightly
+            risk_multiplier *= max(0.8, min(1.2, 1.0 + (bias * 0.1 * intensity)))
+            # If bias is negative and intensity high, tilt away from Buy
+            if bias < -0.25 and intensity >= 0.5 and action == "Buy":
+                action = "Hold"
+            if bias > 0.25 and intensity >= 0.5 and action == "Reduce":
+                action = "Hold"
+    except Exception:
+        pass
 
     # Risk sizing (ATR)
     atr = max(inp.atr14, 1e-6)

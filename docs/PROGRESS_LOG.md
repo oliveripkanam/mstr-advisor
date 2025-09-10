@@ -280,4 +280,8 @@ Day 9
 
  - Part 2: Improved details drawer: added a short explainer sentence to “What changed” and fixed Entry display to show a single value when the entry range collapses.
 
+ - Part 3: Real‑world monitoring scaffold — added `backend/app/news_monitor.py` (RSS → `news.json` and `news_score.json`) and a `hot-news.yml` workflow updating on a schedule; integrated `news_score` bias/intensity into `baseline_rules.py` to nudge risk and action.
+
+ - Part 4: Close prediction — added `backend/app/predict_close_mstr.py` to produce `close_predictions.json`, and created `/predict` page that shows next predicted close, MAE/MAPE, accuracy (±1%), sparkline charts, and history table; added nav link.
+
 

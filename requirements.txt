@@ -2,5 +2,6 @@ pandas>=2.1
 yfinance>=0.2.40
 numpy>=1.26
 scikit-learn>=1.4
+feedparser>=6.0
 
 

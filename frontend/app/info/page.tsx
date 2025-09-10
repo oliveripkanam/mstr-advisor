@@ -295,6 +295,15 @@ export default function InfoPage() {
           <div className="mt-1 text-gray-700">It reflects rule strength blended with ML probability; capped during high volatility (VIX).</div>
         </details>
         <details className="text-sm mt-2">
+          <summary className="cursor-pointer">How do real‑world events affect the call?</summary>
+          <div className="mt-1 text-gray-700">We scan public RSS feeds (news + Bitcoin) and compute a light bias/intensity score. High negative bias reduces risk and can temper a Buy; high positive bias can temper a Reduce. This overlay is modest and never overrides safety rails.</div>
+          <ul className="mt-2 list-disc pl-5 text-gray-700">
+            <li><span className="font-medium">CPI high</span>: sticks inflation → tighter policy risk → generally risk‑off tilt.</li>
+            <li><span className="font-medium">Rate cuts</span>: easier financial conditions → risk‑on tilt (but watch inflation).</li>
+            <li><span className="font-medium">BTC headlines</span>: MSTR is BTC‑sensitive; strong BTC up/down news nudges bias.</li>
+          </ul>
+        </details>
+        <details className="text-sm mt-2">
           <summary className="cursor-pointer">Why did the action change?</summary>
           <div className="mt-1 text-gray-700">Often due to price crossing moving averages, RSI shifts, or macro regime flips. See the Explainer page for day‑to‑day changes.</div>
         </details>
