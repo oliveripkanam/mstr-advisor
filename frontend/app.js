@@ -279,93 +279,12 @@
     });
     if (cell) {
       const tip = cell.querySelector('.tip');
-      if (tip) {
-        const next = tip.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
-        tip.setAttribute('aria-expanded', next);
-        if (next === 'true') positionTip(cell, tip);
-      }
+      if (tip) tip.setAttribute('aria-expanded', tip.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
       // elevate the hovered/tapped tooltip over cards
       cell.classList.add('open');
       setTimeout(() => cell.classList.remove('open'), 400);
     }
   }, { passive: true });
-
-  // add close buttons to all tips
-  function ensureCloseButtons(){
-    document.querySelectorAll('.tooltip .tip').forEach(t => {
-      if (!t.querySelector('.close')){
-        const btn = document.createElement('button');
-        btn.className = 'close';
-        btn.setAttribute('aria-label','Close');
-        btn.innerHTML = '×';
-        btn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          t.removeAttribute('aria-expanded');
-        });
-        t.appendChild(btn);
-      }
-    });
-  }
-
-  // Clamp tooltip to viewport and keep above card when possible
-  function positionTip(anchor, tip){
-    tip.classList.add('is-fixed');
-    const a = anchor.getBoundingClientRect();
-    // temporarily show to measure
-    const prevVis = tip.style.visibility;
-    const prevDisp = tip.style.display;
-    tip.style.visibility = 'hidden';
-    tip.style.display = 'block';
-    const t = tip.getBoundingClientRect();
-    tip.style.visibility = prevVis;
-    tip.style.display = prevDisp;
-
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const margin = 8;
-    const maxW = Math.min(520, vw - margin*2);
-    tip.style.maxWidth = maxW + 'px';
-
-    let width = Math.min(t.width || maxW, maxW);
-    let left = a.left + (a.width/2) - (width/2);
-    left = Math.max(margin, Math.min(left, vw - margin - width));
-
-    // prefer above, fallback below
-    let height = t.height || 120;
-    let top = a.top - height - margin;
-    if (top < margin) top = a.bottom + margin;
-    if (top + height > vh - margin) top = Math.max(margin, vh - margin - height);
-
-    tip.style.left = Math.round(left) + 'px';
-    tip.style.top = Math.round(top) + 'px';
-  }
-
-  function bindHoverPositioning(){
-    document.querySelectorAll('.tooltip').forEach(tp => {
-      const tip = tp.querySelector('.tip');
-      if (!tip) return;
-      tp.addEventListener('mouseenter', () => {
-        tip.dataset.hover = 'true';
-        tip.setAttribute('aria-expanded','true');
-        positionTip(tp, tip);
-      });
-      tp.addEventListener('mousemove', () => {
-        if (tip.getAttribute('aria-expanded') === 'true') positionTip(tp, tip);
-      });
-      tp.addEventListener('mouseleave', () => {
-        tip.removeAttribute('data-hover');
-        tip.removeAttribute('aria-expanded');
-      });
-    });
-  }
-
-  ensureCloseButtons();
-  bindHoverPositioning();
-  window.addEventListener('resize', () => {
-    document.querySelectorAll('.tooltip .tip[aria-expanded="true"]').forEach(tip => {
-      const anchor = tip.closest('.tooltip');
-      if (anchor) positionTip(anchor, tip);
-    });
-  });
 
   try {
     const data = await fetchSnapshot();
