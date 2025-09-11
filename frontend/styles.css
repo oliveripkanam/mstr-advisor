@@ -13,3 +13,14 @@ th:first-child,td:first-child{text-align:left}
 .h-title{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .subtle{color:var(--muted);font-size:12px}
 
+/* badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:9999px;border:1px solid #2a3344;font-size:12px}
+.badge.pos{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.4);color:var(--pos)}
+.badge.neg{background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.4);color:var(--neg)}
+.badge.neutral{background:#1e2430;border-color:#2a3344;color:var(--muted)}
+
+/* legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.legend .item{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.legend .swatch{width:12px;height:12px;border-radius:2px}
+

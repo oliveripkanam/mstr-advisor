@@ -1,6 +1,6 @@
 (async function () {
   const fmt = (v) => (v === null || v === undefined || Number.isNaN(v) ? '—' : (typeof v === 'number' ? v.toFixed(2) : String(v)));
-  const colorCls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : '');
+  const colorCls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : 'neutral');
 
   async function fetchSnapshot() {
     const candidates = [
@@ -19,7 +19,9 @@
 
   function renderSummary(d) {
     document.getElementById('asof').textContent = `as of ${d.asof}`;
-    document.getElementById('action').textContent = d.blended.action;
+    const actionEl = document.getElementById('action');
+    actionEl.textContent = d.blended.action;
+    actionEl.className = 'badge ' + (d.blended.score > 10 ? 'pos' : d.blended.score < -10 ? 'neg' : 'neutral');
     document.getElementById('blended').textContent = fmt(d.blended.score);
     document.getElementById('price').textContent = fmt(d.levels.price);
     document.getElementById('ma20').textContent = fmt(d.levels.ma20);
@@ -69,7 +71,7 @@
       const scoreCls = colorCls(obj.score);
       sec.innerHTML = `
         <div class="h-title">
-          <h3>${title}</h3>
+          <h3>${title} <span class="badge ${scoreCls}">${fmt(obj.score)}</span></h3>
           <div class="subtle">Score: <span class="points ${scoreCls}">${fmt(obj.score)}</span></div>
         </div>
         ${toTable(obj.terms || [])}
