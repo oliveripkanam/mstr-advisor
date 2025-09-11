@@ -1,4 +1,6 @@
-<img width="1634" height="1243" alt="image" src="https://github.com/user-attachments/assets/66bda91e-2bf9-4fe2-97ae-6e6190ba316f" />
+<p align="center">
+  <img src="mstrmonitorlogo.png" alt="MSTR Monitor" width="96" height="96" />
+</p>
 
 # MSTR Monitor
 

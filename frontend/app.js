@@ -271,21 +271,6 @@
     setInterval(refreshLive, 60000);
   }
 
-  // mobile-friendly tooltip: enable tap-to-toggle for table term cells
-  document.addEventListener('click', (e) => {
-    const cell = e.target.closest('.tooltip');
-    document.querySelectorAll('.tip[aria-expanded="true"]').forEach(el => {
-      if (!cell || !cell.contains(el)) el.removeAttribute('aria-expanded');
-    });
-    if (cell) {
-      const tip = cell.querySelector('.tip');
-      if (tip) tip.setAttribute('aria-expanded', tip.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
-      // elevate the hovered/tapped tooltip over cards
-      cell.classList.add('open');
-      setTimeout(() => cell.classList.remove('open'), 400);
-    }
-  }, { passive: true });
-
   try {
     const data = await fetchSnapshot();
     renderSummary(data);
