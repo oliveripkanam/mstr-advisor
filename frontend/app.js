@@ -3,10 +3,18 @@
   const colorCls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : '');
 
   async function fetchSnapshot() {
-    const url = 'data/public/model_snapshot.json?t=' + Date.now();
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to load model_snapshot.json');
-    return res.json();
+    const candidates = [
+      '/data/public/model_snapshot.json',
+      '../data/public/model_snapshot.json',
+      'data/public/model_snapshot.json'
+    ].map(u => u + (u.includes('?') ? '' : `?t=${Date.now()}`));
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) return res.json();
+      } catch (_) { /* try next */ }
+    }
+    throw new Error('Failed to load model_snapshot.json');
   }
 
   function renderSummary(d) {
