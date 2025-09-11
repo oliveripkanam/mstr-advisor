@@ -31,3 +31,15 @@ th:first-child,td:first-child{text-align:left}
 .tip .title{font-weight:600;margin-bottom:4px}
 .tip .desc{color:var(--muted);font-size:12px;line-height:1.4}
 
+/* equation formatting */
+.eq{display:flex;flex-direction:column;gap:12px}
+.eq-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.eq-name{font-weight:600;color:#c9d6e2;margin-right:4px}
+.eq-pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border-radius:9999px;border:1px solid #2a3344;background:#1a2230;color:var(--text);font-size:12px}
+.pill .w{color:#9fb0c3}
+.pill .v{color:#dbe7f3}
+.pill.pos{background:rgba(46,204,113,.10);border-color:rgba(46,204,113,.35)}
+.pill.neg{background:rgba(231,76,60,.10);border-color:rgba(231,76,60,.35)}
+.eq-total{margin-left:auto;font-weight:700}
+

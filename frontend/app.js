@@ -114,15 +114,51 @@
 
   function renderMath(d) {
     const blend = d.blended?.weights || { daily: 0.5, weekly: 0.3, monthly: 0.2 };
-    const mkEq = (name, obj) => {
-      const parts = (obj.terms||[]).map(t => `${(t.weight*100).toFixed(0)}%·${TERM_INFO[t.name]?.title||t.name}(${fmt(t.value)})`).join(' + ');
-      return `${name} = ${parts} = ${fmt(obj.score)} pts`;
+    const host = document.getElementById('math_eq');
+    host.innerHTML = '';
+
+    const mkLine = (label, obj) => {
+      const line = document.createElement('div');
+      line.className = 'eq-line';
+      const name = document.createElement('div');
+      name.className = 'eq-name';
+      name.textContent = label;
+      line.appendChild(name);
+
+      const pills = document.createElement('div');
+      pills.className = 'eq-pills';
+      (obj.terms||[]).forEach(t => {
+        const pill = document.createElement('div');
+        pill.className = 'pill ' + colorCls(t.points);
+        pill.innerHTML = `<span class="w">${(t.weight*100).toFixed(0)}%</span>·<span>${TERM_INFO[t.name]?.title||t.name}</span><span class="v">(${fmt(t.value)})</span>`;
+        pills.appendChild(pill);
+      });
+      line.appendChild(pills);
+
+      const total = document.createElement('div');
+      total.className = 'eq-total points ' + colorCls(obj.score);
+      total.textContent = `${fmt(obj.score)} pts`;
+      line.appendChild(total);
+
+      return line;
     };
-    const dailyEq = mkEq('Daily', d.horizons.daily);
-    const weeklyEq = mkEq('Weekly', d.horizons.weekly);
-    const monthlyEq = mkEq('Monthly', d.horizons.monthly);
-    const blended = `Blended = ${fmt(blend.daily*100)}%·Daily + ${fmt(blend.weekly*100)}%·Weekly + ${fmt(blend.monthly*100)}%·Monthly = ${fmt(d.blended.score)} pts`;
-    document.getElementById('math_text').textContent = [dailyEq, weeklyEq, monthlyEq, blended].join('\n');
+
+    host.appendChild(mkLine('Daily', d.horizons.daily));
+    host.appendChild(mkLine('Weekly', d.horizons.weekly));
+    host.appendChild(mkLine('Monthly', d.horizons.monthly));
+
+    const blended = document.createElement('div');
+    blended.className = 'eq-line';
+    blended.innerHTML = `
+      <div class="eq-name">Blended</div>
+      <div class="eq-pills">
+        <div class="pill">${fmt(blend.daily*100)}%·Daily</div>
+        <div class="pill">${fmt(blend.weekly*100)}%·Weekly</div>
+        <div class="pill">${fmt(blend.monthly*100)}%·Monthly</div>
+      </div>
+      <div class="eq-total points ${colorCls(d.blended.score)}">${fmt(d.blended.score)} pts</div>
+    `;
+    host.appendChild(blended);
   }
 
   function renderChart(d) {
