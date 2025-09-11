@@ -280,6 +280,9 @@
     if (cell) {
       const tip = cell.querySelector('.tip');
       if (tip) tip.setAttribute('aria-expanded', tip.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+      // elevate the hovered/tapped tooltip over cards
+      cell.classList.add('open');
+      setTimeout(() => cell.classList.remove('open'), 400);
     }
   }, { passive: true });
 
