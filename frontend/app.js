@@ -188,7 +188,7 @@
         datasets: [
           ds('close', '#4aa3ff'),
           ds('ma20', '#ffd166'),
-          ds('ma50', '#06d6a0'),
+          ds('ma60', '#06d6a0'),
         ]
       },
       options: {

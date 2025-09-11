@@ -17,6 +17,11 @@
     <main class="container">
       <section class="card">
         <canvas id="chart" height="220"></canvas>
+        <div class="legend" style="margin-top:8px">
+          <div class="item tooltip"><span class="swatch" style="background:#4aa3ff"></span> Close<div class="tip"><div class="title">Close</div><div class="desc">Daily closing price of MSTR. Source: Yahoo Finance via yfinance. This is the primary series used for all indicators.</div></div></div>
+          <div class="item tooltip"><span class="swatch" style="background:#ffd166"></span> MA20<div class="tip"><div class="title">MA20</div><div class="desc">20-day simple moving average. Short-term trend filter: above rising MA20 is constructive; below falling MA20 is weak.</div></div></div>
+          <div class="item tooltip"><span class="swatch" style="background:#06d6a0"></span> MA60<div class="tip"><div class="title">MA60</div><div class="desc">60-day simple moving average. Mid-term trend baseline often used instead of MA50; we switch to 60 for smoother behavior.</div></div></div>
+        </div>
       </section>
 
       <section id="summary" class="card">
@@ -65,12 +70,12 @@
         </div>
       </section>
 
-      <section id="legend" class="card">
+      <section id="legend2" class="card">
         <h2>Legend</h2>
         <div class="legend">
           <div class="item"><span class="swatch" style="background:#4aa3ff"></span> Close</div>
           <div class="item"><span class="swatch" style="background:#ffd166"></span> MA20</div>
-          <div class="item"><span class="swatch" style="background:#06d6a0"></span> MA50</div>
+          <div class="item"><span class="swatch" style="background:#06d6a0"></span> MA60</div>
           <div class="item"><span class="badge pos">Positive</span>/<span class="badge neg">Negative</span> score badges</div>
         </div>
       </section>

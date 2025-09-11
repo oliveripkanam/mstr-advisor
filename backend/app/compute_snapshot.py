@@ -105,6 +105,7 @@ def load_weights(weights_path: str) -> Dict:
 def compute_common(df_mstr: pd.DataFrame) -> Dict[str, pd.Series]:
     close = df_mstr['close']
     ma20 = close.rolling(20).mean()
+    ma60 = close.rolling(60).mean()
     ma50 = close.rolling(50).mean()
     ma200 = close.rolling(200).mean()
     ma20_slope = ma20.diff(5) / 5.0
@@ -124,6 +125,7 @@ def compute_common(df_mstr: pd.DataFrame) -> Dict[str, pd.Series]:
     return {
         'close': close,
         'ma20': ma20,
+        'ma60': ma60,
         'ma50': ma50,
         'ma200': ma200,
         'ma20_slope': ma20_slope,
@@ -357,7 +359,7 @@ def main() -> None:
     series = {
         'close': series_of(common['close']),
         'ma20': series_of(common['ma20']),
-        'ma50': series_of(common['ma50'])
+        'ma60': series_of(common['ma60'])
     }
 
     snapshot = {
