@@ -32,8 +32,10 @@ tr:hover{background:rgba(255,255,255,.04)}
 
 /* tooltips */
 .tooltip{position:relative;display:inline-block;cursor:help}
-.tooltip:hover .tip{opacity:1;pointer-events:auto;transform:translateY(-8px)}
-.tip{position:absolute;left:0;bottom:100%;background:rgba(15,20,29,.92);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 18px;min-width:320px;max-width:520px;color:var(--text);box-shadow:0 24px 48px rgba(0,0,0,.5);backdrop-filter:blur(16px);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:999}
+.tooltip:hover .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
+.tip{position:absolute;left:100%;top:50%;background:rgba(15,20,29,.92);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 18px;min-width:320px;max-width:520px;color:var(--text);box-shadow:0 24px 48px rgba(0,0,0,.5);backdrop-filter:blur(16px);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:999}
+.tooltip.top .tip{left:0;top:auto;bottom:100%}
+.tooltip.top:hover .tip{transform:translateY(-8px)}
 .tip .title{font-weight:600;margin-bottom:6px}
 .tip .desc{color:var(--muted);font-size:13px;line-height:1.5}
 
