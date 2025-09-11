@@ -30,6 +30,14 @@ tr:hover{background:rgba(255,255,255,.04)}
 .legend .item{display:flex;align-items:center;gap:6px;color:var(--muted)}
 .legend .swatch{width:12px;height:12px;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 
+/* accordion */
+.accordion details{border-top:1px solid rgba(255,255,255,.06);padding:10px 0}
+.accordion details:first-of-type{border-top:0}
+.accordion summary{cursor:pointer;list-style:none}
+.accordion summary::-webkit-details-marker{display:none}
+.accordion details[open]{background:rgba(255,255,255,.03);border-radius:10px;padding:12px}
+.accordion p{color:var(--muted);margin:8px 0 0}
+
 /* tooltips */
 .tooltip{position:relative;display:inline-block;cursor:help}
 .tooltip:hover .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
