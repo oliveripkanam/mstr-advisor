@@ -324,6 +324,21 @@ def main() -> None:
     latest_atr = last(common['atr'])
     trade = compute_trade_plan(latest_close, latest_ma20, latest_atr, common['low'])
 
+    # Volatility-scaled expected move predictions (interpretable):
+    # expected_return_h = tanh(score/25) * atr_pct * sqrt(horizon_days)
+    atr_pct_last = float(common['atr_pct'].iloc[-1]) if len(common['atr_pct']) else 0.0
+    def predict_from_score(score_pts: float, horizon_days: int) -> Dict[str, float]:
+        scale = np.sqrt(max(horizon_days, 1))
+        tilt = np.tanh(score_pts / 25.0)
+        exp_ret = float(tilt * atr_pct_last * scale)
+        pred_close = float(latest_close * (1.0 + exp_ret))
+        band = float(latest_close * atr_pct_last * scale)
+        return {
+            'expected_return': round(exp_ret, 4),
+            'predicted_close': round(pred_close, 2),
+            'vol_band': round(band, 2)
+        }
+
     # Build compact series for charting (last 180 trading days)
     last_n = 180
     idx = common['close'].index[-last_n:]
@@ -366,6 +381,11 @@ def main() -> None:
                 'score': round(monthly_score, 2),
                 'terms': [c.__dict__ for c in monthly_contribs]
             }
+        },
+        'predictions': {
+            'daily': predict_from_score(daily_score, 1),
+            'weekly': predict_from_score(weekly_score, 5),
+            'monthly': predict_from_score(monthly_score, 21)
         },
         'blended': {
             'score': round(blended_score, 2),

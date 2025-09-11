@@ -35,6 +35,15 @@
     document.getElementById('t3r').textContent = fmt(p.target_3r);
   }
 
+  function renderPred(d) {
+    const pr = d.predictions || {};
+    const pd = pr.daily || {}; const pw = pr.weekly || {}; const pm = pr.monthly || {};
+    document.getElementById('p_d').textContent = `${fmt(pd.predicted_close)} (${fmt((pd.expected_return||0)*100)}%)`;
+    document.getElementById('p_w').textContent = `${fmt(pw.predicted_close)} (${fmt((pw.expected_return||0)*100)}%)`;
+    document.getElementById('p_m').textContent = `${fmt(pm.predicted_close)} (${fmt((pm.expected_return||0)*100)}%)`;
+    document.getElementById('p_b').textContent = `±${fmt(pd.vol_band)} (D), ±${fmt(pw.vol_band)} (W), ±${fmt(pm.vol_band)} (M)`;
+  }
+
   function toTable(terms) {
     const rows = terms.map((t) => {
       const cls = colorCls(t.points);
@@ -110,6 +119,7 @@
     const data = await fetchSnapshot();
     renderSummary(data);
     renderPlan(data);
+    renderPred(data);
     renderEquations(data);
     renderChart(data);
   } catch (e) {
