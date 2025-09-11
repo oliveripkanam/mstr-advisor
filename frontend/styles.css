@@ -25,21 +25,22 @@ th:first-child,td:first-child{text-align:left}
 .legend .swatch{width:12px;height:12px;border-radius:2px}
 
 /* tooltips */
-.tooltip{position:relative;cursor:help}
-.tooltip:hover .tip{opacity:1;transform:translateX(2px);pointer-events:auto}
-.tip{position:absolute;left:100%;top:0;margin-left:8px;background:#0f141d;border:1px solid #253044;border-radius:8px;padding:10px;min-width:260px;color:var(--text);box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:20}
+.tooltip{position:relative;display:inline-block;cursor:help}
+.tooltip:hover .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
+.tip{position:absolute;left:100%;top:50%;background:#0f141d;border:1px solid #253044;border-radius:8px;padding:10px;min-width:220px;max-width:360px;color:var(--text);box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:20}
 .tip .title{font-weight:600;margin-bottom:4px}
 .tip .desc{color:var(--muted);font-size:12px;line-height:1.4}
 
 /* equation formatting */
-.eq{display:flex;flex-direction:column;gap:12px}
-.eq-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.eq{display:flex;flex-direction:column;gap:16px}
+.eq-line{position:relative;display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
 .eq-name{font-weight:600;color:#c9d6e2;margin-right:4px}
-.eq-pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border-radius:9999px;border:1px solid #2a3344;background:#1a2230;color:var(--text);font-size:12px}
+.eq-pills{display:flex;flex-wrap:wrap;gap:10px 12px}
+.pill{display:inline-flex;gap:6px;align-items:baseline;padding:0;border:none;background:transparent;color:var(--text);font-size:13px}
 .pill .w{color:#9fb0c3}
 .pill .v{color:#dbe7f3}
-.pill.pos{background:rgba(46,204,113,.10);border-color:rgba(46,204,113,.35)}
-.pill.neg{background:rgba(231,76,60,.10);border-color:rgba(231,76,60,.35)}
-.eq-total{margin-left:auto;font-weight:700}
+.pill.pos{color:var(--pos)}
+.pill.neg{color:var(--neg)}
+.eq-plus{color:#2e3a4b}
+.eq-total{position:absolute;right:0;top:0;font-weight:700;white-space:nowrap}
 
