@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="mstrmonitorlogo.png" alt="MSTR Monitor" width="96" height="96" />
-</p>
+![Uploading image.png…]()
 
 # MSTR Monitor
 

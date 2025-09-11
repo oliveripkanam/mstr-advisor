@@ -92,7 +92,9 @@ body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(120
 
 /* layering fix for interactive cards */
 .card{position:relative}
-.card:has(.tip[aria-expanded="true"]){z-index:2}
+.card:has(.tip[aria-expanded="true"]),
+.card:has(.tip[data-hover="true"]),
+.card:has(.tooltip:hover){z-index:3}
 
 /* fixed-position tooltip when JS applies .is-fixed */
 .tip.is-fixed{position:fixed;left:0;top:0;transform:none;margin:0;min-width:auto;max-width:min(520px,92vw);z-index:10000}
