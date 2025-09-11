@@ -11,12 +11,13 @@ export default function PredictPage() {
 
   useEffect(() => {
     const REPO = 'oliveripkanam/mstr-advisor';
-    const rawMain = `https://raw.githubusercontent.com/${REPO}/main/data/public/close_predictions.json?t=${Date.now()}`;
-    const pagesPath = `/mstr-advisor/data/public/close_predictions.json`;
+    const ts = Date.now();
+    const rawMain = `https://raw.githubusercontent.com/${REPO}/main/data/public/close_predictions.json?t=${ts}`;
+    const pagesPath = `/mstr-advisor/data/public/close_predictions.json?t=${ts}`;
     const paths = [
-      'data/public/close_predictions.json',
-      pagesPath,
       rawMain,
+      pagesPath,
+      'data/public/close_predictions.json',
     ];
     (async () => {
       for (const p of paths) {
