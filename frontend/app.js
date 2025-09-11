@@ -171,7 +171,12 @@
 
   function renderChart(d) {
     const ctx = document.getElementById('chart').getContext('2d');
-    const labels = (d.series?.close || []).map(p => p.t);
+    const close = d.series?.close || [];
+    const ma20 = d.series?.ma20 || [];
+    const ma60 = d.series?.ma60 || [];
+    const n = Math.min(close.length, ma20.length, ma60.length);
+    const slice = (arr, key) => arr.slice(-n).map(p => key === 't' ? p.t : p.v);
+    const labels = slice(close, 't');
     const buildDataset = (label, key, color) => ({
       label,
       data: (d.series?.[key] || []).map(p => p.v),
@@ -185,16 +190,15 @@
     const chartData = {
       labels,
       datasets: [
-        buildDataset('Close', 'close', '#4aa3ff'),
-        buildDataset('MA20', 'ma20', '#ffd166'),
-        buildDataset('MA60', 'ma60', '#06d6a0'),
+        { label: 'Close', data: slice(close, 'v'), borderColor: '#4aa3ff', backgroundColor: 'transparent', tension: 0.2, borderWidth: 1.6, pointRadius: 0 },
+        { label: 'MA20', data: slice(ma20, 'v'), borderColor: '#ffd166', backgroundColor: 'transparent', tension: 0.2, borderWidth: 1.6, pointRadius: 0 },
+        { label: 'MA60', data: slice(ma60, 'v'), borderColor: '#06d6a0', backgroundColor: 'transparent', tension: 0.2, borderWidth: 1.6, pointRadius: 0 },
       ]
     };
 
     if (window._mstrChart) {
-      window._mstrChart.data = chartData;
-      window._mstrChart.update('none');
-      return;
+      try { window._mstrChart.destroy(); } catch (_) {}
+      window._mstrChart = null;
     }
 
     window._mstrChart = new Chart(ctx, {
