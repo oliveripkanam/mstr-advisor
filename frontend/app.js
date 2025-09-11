@@ -136,7 +136,7 @@
         }
         const pill = document.createElement('div');
         pill.className = 'pill ' + colorCls(t.points);
-        pill.innerHTML = `<span class="w">${(t.weight*100).toFixed(0)}%</span> · <span class="tooltip top">${TERM_INFO[t.name]?.title||t.name}<div class=\"tip\"><div class=\"title\">${TERM_INFO[t.name]?.title||t.name}</div><div class=\"desc\">${(TERM_INFO[t.name]?.desc||'').replace(/\n/g,'<br/>')}<br/>Current: ${fmt(t.value)} | Weight: ${(t.weight*100).toFixed(0)}% | Points: ${fmt(t.points)}</div></div></span> <span class="v">(${fmt(t.value)})</span>`;
+        pill.innerHTML = `<span class="w">${(t.weight*100).toFixed(0)}%</span> · <span>${TERM_INFO[t.name]?.title||t.name}</span> <span class="v">(${fmt(t.value)})</span>`;
         pills.appendChild(pill);
       });
       line.appendChild(pills);
