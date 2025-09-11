@@ -39,7 +39,9 @@ tr:hover{background:rgba(255,255,255,.04)}
 
 /* term cell + details expanders */
 .tooltip{position:relative;display:inline-block}
-.tooltip > span{cursor:pointer;border-bottom:1px dotted rgba(255,255,255,.25)}
+.tooltip > span{cursor:pointer;border-bottom:1px dotted rgba(255,255,255,.25);padding-left:18px;position:relative}
+.tooltip > span::before{content:"▸";position:absolute;left:0;top:0;color:#9fb0c3;transition:transform .15s ease}
+.tooltip[aria-expanded="true"] > span::before{transform:rotate(90deg)}
 .tooltip details{margin-top:8px}
 .tooltip details summary{cursor:pointer;color:#c9d6e2}
 .tooltip .desc{color:var(--muted);font-size:13px;line-height:1.5;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);padding:10px 12px;border-radius:10px}

@@ -77,10 +77,9 @@
       const meta = TERM_INFO[t.name] || { title: t.name, desc: '' };
       const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}`;
       return `<tr>
-        <td class="tooltip">
+        <td class="tooltip" aria-expanded="false">
           <span>${meta.title}</span>
-          <details>
-            <summary>Explain</summary>
+          <details class="term-details">
             <div class="desc">${tip.replace(/\n/g,'<br/>')}</div>
           </details>
         </td>
