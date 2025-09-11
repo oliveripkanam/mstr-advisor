@@ -1,0 +1,15 @@
+:root{--bg:#0b0d10;--card:#141820;--text:#e8eef6;--muted:#9fb0c3;--pos:#2ecc71;--neg:#e74c3c;--accent:#3498db}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+h1{margin:0 0 8px;font-size:22px}h2{margin:0 0 12px;font-size:18px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid #1e2430;border-radius:10px;padding:16px;margin:16px 0}
+.row{display:flex;gap:16px;flex-wrap:wrap}.col{flex:1 1 160px;display:flex;flex-direction:column;gap:4px}
+.label{color:var(--muted);font-size:12px}.value{font-size:16px}
+.points{font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;margin:8px 0}th,td{padding:8px;border-bottom:1px solid #1f2633;text-align:right}
+th:first-child,td:first-child{text-align:left}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.h-title{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.subtle{color:var(--muted);font-size:12px}
+

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MSTR Advisor – Live Equation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1>MSTR Advisor</h1>
+      <div id="asof" class="muted"></div>
+    </header>
+
+    <main class="container">
+      <section id="summary" class="card">
+        <div class="row">
+          <div class="col">
+            <div class="label">Action</div>
+            <div id="action" class="value"></div>
+          </div>
+          <div class="col">
+            <div class="label">Blended score</div>
+            <div id="blended" class="value"></div>
+          </div>
+          <div class="col">
+            <div class="label">Price</div>
+            <div id="price" class="value"></div>
+          </div>
+          <div class="col">
+            <div class="label">MA20</div>
+            <div id="ma20" class="value"></div>
+          </div>
+          <div class="col">
+            <div class="label">ATR(14)</div>
+            <div id="atr" class="value"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plan" class="card">
+        <h2>Trade Plan</h2>
+        <div class="row">
+          <div class="col"><span class="label">Entry low</span><span id="entry_low" class="value"></span></div>
+          <div class="col"><span class="label">Entry high</span><span id="entry_high" class="value"></span></div>
+          <div class="col"><span class="label">Stop</span><span id="stop" class="value"></span></div>
+          <div class="col"><span class="label">Target 2R</span><span id="t2r" class="value"></span></div>
+          <div class="col"><span class="label">Target 3R</span><span id="t3r" class="value"></span></div>
+        </div>
+      </section>
+
+      <section id="equation" class="card">
+        <h2>Equation Panel</h2>
+        <div id="horizons"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+  </html>
+
+
