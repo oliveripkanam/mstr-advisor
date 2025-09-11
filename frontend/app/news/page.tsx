@@ -46,11 +46,11 @@ export default function NewsPage() {
         <ul className="divide-y">
           {items.map((it, idx) => (
             <li key={idx} className="p-3 text-sm">
-              <div className="flex items-start justify-between gap-3">
-                <a className="text-primary underline" href={it.url} target="_blank" rel="noreferrer noopener">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                <a className="text-primary underline break-words" href={it.url} target="_blank" rel="noreferrer noopener">
                   {it.title || '(no title)'}
                 </a>
-                <div className="whitespace-nowrap text-xs text-gray-500">
+                <div className="text-xs text-gray-500 sm:whitespace-nowrap">
                   {new Date(it.published_utc).toLocaleString()} · {it.source}
                   {scoreBadge(it.score)}
                 </div>

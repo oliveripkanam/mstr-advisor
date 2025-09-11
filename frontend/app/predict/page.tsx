@@ -11,17 +11,24 @@ export default function PredictPage() {
 
   useEffect(() => {
     const REPO = 'oliveripkanam/mstr-advisor';
-    const raw = `https://raw.githubusercontent.com/${REPO}/main/data/public/close_predictions.json?t=${Date.now()}`;
+    const rawMain = `https://raw.githubusercontent.com/${REPO}/main/data/public/close_predictions.json?t=${Date.now()}`;
+    const pagesPath = `/mstr-advisor/data/public/close_predictions.json`;
     const paths = [
       'data/public/close_predictions.json',
-      '/mstr-advisor/data/public/close_predictions.json',
-      raw,
+      pagesPath,
+      rawMain,
     ];
     (async () => {
       for (const p of paths) {
         try {
           const res = await fetch(p, { cache: 'no-store' });
-          if (res.ok) { setData(await res.json()); setErr(null); return; }
+          if (!res.ok) continue;
+          const d: PredFile = await res.json();
+          // Basic schema sanity: ensure arrays are arrays of numbers
+          d.history = Array.isArray(d.history) ? d.history : [];
+          setData(d);
+          setErr(null);
+          return;
         } catch {}
       }
       setErr('Unable to load predictions');
@@ -90,6 +97,9 @@ export default function PredictPage() {
           <div>Error: <span className="font-mono">{typeof latest?.abs_err === 'number' ? `$${latest!.abs_err.toFixed(2)}` : '—'}</span></div>
           <div>% Error: <span className="font-mono">{latestPctErr !== null ? `${latestPctErr.toFixed(2)}%` : '—'}</span></div>
         </div>
+        {(!latest || typeof latest?.actual !== 'number') && (
+          <div className="mt-2 text-xs text-gray-500">Note: Latest actual may be blank until the next trading day’s official close is ingested.</div>
+        )}
       </div>
 
       <div className="rounded border p-4">

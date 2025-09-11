@@ -108,14 +108,14 @@ export default function RecommendationCard() {
 
   return (
     <div className="rounded border border-gray-200 bg-white p-4">
-      <div className="mb-2 flex items-baseline gap-2">
+      <div className="mb-2 flex flex-wrap items-baseline gap-2">
         <h2 className="text-xl font-semibold">Today’s Recommendation</h2>
         <span className="text-xs text-gray-500">{rec.timestamp}</span>
         {cfg.useCombinedRecommendation && (
           <span className="ml-2 rounded bg-blue-100 px-2 py-0.5 text-[10px] text-blue-700">Combined</span>
         )}
         <span className="ml-auto" />
-        <label className="ml-auto flex items-center gap-2 text-xs text-gray-600">
+        <label className="ml-auto flex items-center gap-2 text-xs text-gray-600 sm:mt-0 mt-2">
           <input
             type="checkbox"
             checked={!!cfg.useCombinedRecommendation}
