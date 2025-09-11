@@ -112,6 +112,19 @@
     });
   }
 
+  function renderMath(d) {
+    const blend = d.blended?.weights || { daily: 0.5, weekly: 0.3, monthly: 0.2 };
+    const mkEq = (name, obj) => {
+      const parts = (obj.terms||[]).map(t => `${(t.weight*100).toFixed(0)}%·${TERM_INFO[t.name]?.title||t.name}(${fmt(t.value)})`).join(' + ');
+      return `${name} = ${parts} = ${fmt(obj.score)} pts`;
+    };
+    const dailyEq = mkEq('Daily', d.horizons.daily);
+    const weeklyEq = mkEq('Weekly', d.horizons.weekly);
+    const monthlyEq = mkEq('Monthly', d.horizons.monthly);
+    const blended = `Blended = ${fmt(blend.daily*100)}%·Daily + ${fmt(blend.weekly*100)}%·Weekly + ${fmt(blend.monthly*100)}%·Monthly = ${fmt(d.blended.score)} pts`;
+    document.getElementById('math_text').textContent = [dailyEq, weeklyEq, monthlyEq, blended].join('\n');
+  }
+
   function renderChart(d) {
     const ctx = document.getElementById('chart').getContext('2d');
     const labels = (d.series?.close || []).map(p => p.t);
@@ -155,6 +168,7 @@
     renderPlan(data);
     renderPred(data);
     renderEquations(data);
+    renderMath(data);
     renderChart(data);
   } catch (e) {
     document.getElementById('asof').textContent = 'Failed to load data';

@@ -390,7 +390,8 @@ def main() -> None:
         'blended': {
             'score': round(blended_score, 2),
             'action': action,
-            'thresholds': thresholds
+            'thresholds': thresholds,
+            'weights': weights['blend']
         },
         'plan': trade
     }
