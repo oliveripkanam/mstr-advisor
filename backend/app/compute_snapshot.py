@@ -106,7 +106,6 @@ def compute_common(df_mstr: pd.DataFrame) -> Dict[str, pd.Series]:
     close = df_mstr['close']
     ma20 = close.rolling(20).mean()
     ma60 = close.rolling(60).mean()
-    ma50 = close.rolling(50).mean()
     ma200 = close.rolling(200).mean()
     ma20_slope = ma20.diff(5) / 5.0
     rsi14 = compute_rsi(close, 14)
@@ -114,7 +113,7 @@ def compute_common(df_mstr: pd.DataFrame) -> Dict[str, pd.Series]:
     atr = compute_atr(df_mstr, 14)
     atr_pct = atr / close
     dist_20 = (close - ma20) / ma20
-    dist_50 = (close - ma50) / ma50
+    dist_60 = (close - ma60) / ma60
     bb_upper = ma20 + 2 * close.rolling(20).std(ddof=0)
     bb_lower = ma20 - 2 * close.rolling(20).std(ddof=0)
     bb_range = (bb_upper - bb_lower).replace(0, np.nan)
@@ -126,7 +125,6 @@ def compute_common(df_mstr: pd.DataFrame) -> Dict[str, pd.Series]:
         'close': close,
         'ma20': ma20,
         'ma60': ma60,
-        'ma50': ma50,
         'ma200': ma200,
         'ma20_slope': ma20_slope,
         'rsi14': rsi14,
@@ -134,7 +132,7 @@ def compute_common(df_mstr: pd.DataFrame) -> Dict[str, pd.Series]:
         'atr': atr,
         'atr_pct': atr_pct,
         'dist_20': dist_20,
-        'dist_50': dist_50,
+        'dist_60': dist_60,
         'bbp': bbp,
         'wk52_prox': proximity_52w,
         'low': df_mstr['low']
@@ -163,7 +161,7 @@ def daily_terms(df_mstr: pd.DataFrame,
 
     # Core normalized signals
     btc_impact = zscore(bret * beta_btc)
-    trend = (zscore(common['dist_20']) + zscore(common['dist_50']) + zscore(common['ma20_slope'])) / 3.0
+    trend = (zscore(common['dist_20']) + zscore(common['dist_60']) + zscore(common['ma20_slope'])) / 3.0
     momentum = ((common['rsi14'] - 50.0) / 50.0).clip(-2.5, 2.5)
     momentum = (momentum + zscore(common['roc10'])) / 2.0
     mean_rev = (-zscore((common['dist_20']).abs()) + (0.5 - (percent_rank(common['bbp']) - 0.5))) / 2.0
@@ -194,7 +192,7 @@ def weekly_terms(df_mstr: pd.DataFrame,
     bret_5 = df_btc['close'].pct_change(5)
     qret_5 = df_qqq['close'].pct_change(5)
     ma20_slope = common['ma20_slope']
-    trend_struct = (zscore(common['dist_20']) + zscore(common['dist_50']) + zscore(ma20_slope)) / 3.0
+    trend_struct = (zscore(common['dist_20']) + zscore(common['dist_60']) + zscore(ma20_slope)) / 3.0
     macro = (-zscore(df_vix['close']) + -zscore(df_uup['close'])) / 2.0
     momentum_week = zscore(df_mstr['close'].pct_change(20))
     wk52_structure = zscore(common['wk52_prox'])
@@ -218,7 +216,7 @@ def monthly_terms(df_mstr: pd.DataFrame,
                   df_uup: pd.DataFrame,
                   common: Dict[str, pd.Series]) -> Dict[str, float]:
     bret_21 = df_btc['close'].pct_change(21)
-    trend_long = (zscore(common['dist_50']) + zscore(common['ma200'].diff(5) / 5.0)) / 2.0
+    trend_long = (zscore(common['dist_60']) + zscore(common['ma200'].diff(5) / 5.0)) / 2.0
     macro = (-zscore(df_vix['close']) + -zscore(df_uup['close'])) / 2.0
     momentum_quarter = zscore(df_mstr['close'].pct_change(63))
     atr_pen_month = -zscore(common['atr_pct'].rolling(21).mean())

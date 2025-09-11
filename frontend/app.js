@@ -171,14 +171,9 @@
 
   function renderChart(d) {
     const ctx = document.getElementById('chart').getContext('2d');
-    const close = d.series?.close || [];
-    const ma20 = d.series?.ma20 || [];
-    const ma60 = d.series?.ma60 || [];
-    const n = Math.min(close.length, ma20.length, ma60.length);
-    const slice = (arr, key) => arr.slice(-n).map(p => key === 't' ? p.t : p.v);
-    const labels = slice(close, 't');
-    const buildDataset = (label, key, color) => ({
-      label,
+    const labels = (d.series?.close || []).map(p => p.t);
+    const ds = (key, color) => ({
+      label: key.toUpperCase(),
       data: (d.series?.[key] || []).map(p => p.v),
       borderColor: color,
       backgroundColor: 'transparent',
@@ -186,30 +181,45 @@
       borderWidth: 1.6,
       pointRadius: 0,
     });
-
-    const chartData = {
-      labels,
-      datasets: [
-        { label: 'Close', data: slice(close, 'v'), borderColor: '#4aa3ff', backgroundColor: 'transparent', tension: 0.2, borderWidth: 1.6, pointRadius: 0 },
-        { label: 'MA20', data: slice(ma20, 'v'), borderColor: '#ffd166', backgroundColor: 'transparent', tension: 0.2, borderWidth: 1.6, pointRadius: 0 },
-        { label: 'MA60', data: slice(ma60, 'v'), borderColor: '#06d6a0', backgroundColor: 'transparent', tension: 0.2, borderWidth: 1.6, pointRadius: 0 },
-      ]
-    };
-
-    if (window._mstrChart) {
-      try { window._mstrChart.destroy(); } catch (_) {}
-      window._mstrChart = null;
-    }
-
-    window._mstrChart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'line',
-      data: chartData,
+      data: {
+        labels,
+        datasets: [
+          ds('close', '#4aa3ff'),
+          ds('ma20', '#ffd166'),
+          ds('ma60', '#06d6a0'),
+        ]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: false,
         plugins: {
-          legend: { labels: { color: '#e8eef6' } },
+          legend: {
+            labels: { color: '#e8eef6' },
+            onHover: (evt, item) => {
+              const map = {
+                CLOSE: 'Close price of MSTR (Yahoo Finance).',
+                MA20: '20-day moving average of close; short-term trend baseline.',
+                MA60: '60-day moving average of close; smoother medium-term trend.'
+              };
+              const title = item.text.toUpperCase();
+              const tip = document.createElement('div');
+              tip.className = 'tip';
+              tip.innerHTML = `<div class="title">${item.text}</div><div class="desc">${map[title]||''}</div>`;
+              // Remove any previous temp tips
+              document.querySelectorAll('.temp-legend-tip').forEach(el=>el.remove());
+              tip.classList.add('temp-legend-tip');
+              tip.style.position='fixed';
+              tip.style.left = (evt.x + 12) + 'px';
+              tip.style.top = (evt.y - 24) + 'px';
+              tip.style.opacity = '1';
+              document.body.appendChild(tip);
+            },
+            onLeave: () => {
+              document.querySelectorAll('.temp-legend-tip').forEach(el=>el.remove());
+            }
+          },
           tooltip: { mode: 'index', intersect: false }
         },
         scales: {
