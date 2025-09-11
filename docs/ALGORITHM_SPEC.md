@@ -1,4 +1,4 @@
-## MSTR Advisor – Transparent Scoring Model (Spec)
+## MSTR Monitor – Transparent Scoring Model (Spec)
 
 Goal: a clear, auditable model producing daily/weekly/monthly scores and one blended recommendation. Every term and weight is visible, and a bottom “Equation Panel” shows today’s live inputs and contributions.
 
