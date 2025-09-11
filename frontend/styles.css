@@ -24,3 +24,10 @@ th:first-child,td:first-child{text-align:left}
 .legend .item{display:flex;align-items:center;gap:6px;color:var(--muted)}
 .legend .swatch{width:12px;height:12px;border-radius:2px}
 
+/* tooltips */
+.tooltip{position:relative;cursor:help}
+.tooltip:hover .tip{opacity:1;transform:translateY(-2px);pointer-events:auto}
+.tip{position:absolute;right:0;top:100%;margin-top:6px;background:#0f141d;border:1px solid #253044;border-radius:8px;padding:10px;min-width:240px;color:var(--text);box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:20}
+.tip .title{font-weight:600;margin-bottom:4px}
+.tip .desc{color:var(--muted);font-size:12px;line-height:1.4}
+

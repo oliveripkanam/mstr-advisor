@@ -2,6 +2,31 @@
   const fmt = (v) => (v === null || v === undefined || Number.isNaN(v) ? '—' : (typeof v === 'number' ? v.toFixed(2) : String(v)));
   const colorCls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : 'neutral');
 
+  const TERM_INFO = {
+    btc_1d_beta: { title: 'BTC 1D × Beta', desc: 'Impact from BTC daily return scaled by MSTR\'s rolling beta. Positive when BTC up and beta positive.' },
+    trend_short: { title: 'Short-term Trend', desc: 'Distance to 20/50DMA and 20DMA slope. Positive above rising MAs; negative below falling MAs.' },
+    momentum: { title: 'Momentum', desc: 'RSI(14) deviation from 50 and 10-day rate of change. Positive when momentum is improving.' },
+    mean_reversion: { title: 'Mean Reversion', desc: 'Penalizes large distance from 20DMA; Bollinger %B near extremes suggests snapback.' },
+    vix_risk: { title: 'VIX Risk', desc: 'Higher VIX implies risk-off; contributes negatively when volatility regime is elevated.' },
+    usd_risk: { title: 'USD (DXY/UUP)', desc: 'Rising USD is generally a headwind for risk assets; negative when USD strengthens.' },
+    tech_beta: { title: 'Tech Beta (QQQ)', desc: 'Exposure to broader tech market via QQQ. Positive when QQQ up and MSTR beta positive.' },
+    atr_penalty: { title: 'ATR% Penalty', desc: 'Volatility tax using ATR as a percent of price. High volatility reduces score.' },
+    news_short: { title: 'News Sentiment (24–48h)', desc: 'Headline sentiment aggregate; positive if news flow is favorable.' },
+    btc_1w_regime: { title: 'BTC 1W Regime', desc: 'Weekly BTC return/regime context driving MSTR sensitivity.' },
+    trend_struct: { title: 'Trend Structure', desc: '20/50DMA cross and slope structure on the weekly horizon.' },
+    macro_risk: { title: 'Macro Risk (VIX, USD)', desc: 'Composite of VIX and USD; higher risk is negative.' },
+    momentum_week: { title: 'Weekly Momentum', desc: '4-week rate of change for MSTR.' },
+    wk52_structure: { title: '52-Week Structure', desc: 'Proximity to 52-week high; strength context.' },
+    news_week: { title: 'News (7d)', desc: 'Weekly news sentiment aggregate.' },
+    market_beta_week: { title: 'Market Beta (QQQ 1W)', desc: 'Weekly QQQ linkage.' },
+    btc_1m_regime: { title: 'BTC 1M Regime', desc: 'Monthly BTC return/regime context.' },
+    trend_long: { title: 'Long Trend', desc: '50/200DMA slope/cross regime.' },
+    momentum_quarter: { title: 'Quarter Momentum', desc: '3-month rate of change.' },
+    atr_penalty_month: { title: 'ATR% Penalty (1M)', desc: 'Monthly volatility tax.' },
+    news_month: { title: 'News (30d)', desc: 'Monthly news sentiment aggregate.' },
+    market_beta_month: { title: 'Market Beta (QQQ 1M)', desc: 'Monthly QQQ linkage.' }
+  };
+
   async function fetchSnapshot() {
     const candidates = [
       '/data/public/model_snapshot.json',
@@ -49,7 +74,14 @@
   function toTable(terms) {
     const rows = terms.map((t) => {
       const cls = colorCls(t.points);
-      return `<tr><td>${t.name}</td><td>${fmt(t.value)}</td><td>${(t.weight*100).toFixed(0)}%</td><td class="points ${cls}">${fmt(t.points)}</td></tr>`;
+      const meta = TERM_INFO[t.name] || { title: t.name, desc: '' };
+      const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}`;
+      return `<tr>
+        <td class="tooltip"><span>${meta.title}</span><div class="tip"><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
+        <td>${fmt(t.value)}</td>
+        <td>${(t.weight*100).toFixed(0)}%</td>
+        <td class="points ${cls}">${fmt(t.points)}</td>
+      </tr>`;
     }).join('');
     return `<table><thead><tr><th>Term</th><th>Value</th><th>Weight</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
