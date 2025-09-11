@@ -172,8 +172,8 @@
   function renderChart(d) {
     const ctx = document.getElementById('chart').getContext('2d');
     const labels = (d.series?.close || []).map(p => p.t);
-    const ds = (key, color) => ({
-      label: key.toUpperCase(),
+    const buildDataset = (label, key, color) => ({
+      label,
       data: (d.series?.[key] || []).map(p => p.v),
       borderColor: color,
       backgroundColor: 'transparent',
@@ -181,19 +181,29 @@
       borderWidth: 1.6,
       pointRadius: 0,
     });
-    new Chart(ctx, {
+
+    const chartData = {
+      labels,
+      datasets: [
+        buildDataset('Close', 'close', '#4aa3ff'),
+        buildDataset('MA20', 'ma20', '#ffd166'),
+        buildDataset('MA60', 'ma60', '#06d6a0'),
+      ]
+    };
+
+    if (window._mstrChart) {
+      window._mstrChart.data = chartData;
+      window._mstrChart.update('none');
+      return;
+    }
+
+    window._mstrChart = new Chart(ctx, {
       type: 'line',
-      data: {
-        labels,
-        datasets: [
-          ds('close', '#4aa3ff'),
-          ds('ma20', '#ffd166'),
-          ds('ma60', '#06d6a0'),
-        ]
-      },
+      data: chartData,
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false,
         plugins: {
           legend: { labels: { color: '#e8eef6' } },
           tooltip: { mode: 'index', intersect: false }
