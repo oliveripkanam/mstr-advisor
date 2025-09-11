@@ -110,8 +110,7 @@ def main() -> None:
             if isinstance(row.get("pred"), (int, float)):
                 row["abs_err"] = round(abs(row["actual"] - row["pred"]), 2)
 
-    # Start history from today onward: drop any backfilled rows before the next prediction date
-    existing_history = [r for r in existing_history if isinstance(r.get("date"), str) and r["date"] >= next_date_str]
+    # Keep full forward-only log (do not drop prior rows). We will sort and deduplicate below.
 
     # Upsert today's prediction for next date
     def find_row(date_str: str) -> Optional[dict]:
@@ -132,6 +131,17 @@ def main() -> None:
         r["pred"] = round(pred_next, 2)
         if isinstance(r.get("actual"), (int, float)):
             r["abs_err"] = round(abs(r["actual"] - r["pred"]), 2)
+
+    # Sort by date and deduplicate (last write wins), keep a reasonable window
+    dedup: dict[str, dict] = {}
+    for row in existing_history:
+        d = row.get("date")
+        if isinstance(d, str):
+            dedup[d] = row
+    existing_history = [dedup[k] for k in sorted(dedup.keys())]
+    # Keep last ~365 entries to bound file size
+    if len(existing_history) > 365:
+        existing_history = existing_history[-365:]
 
     # Compute metrics on rows with actuals
     with_actual = [row for row in existing_history if isinstance(row.get("actual"), (int, float)) and isinstance(row.get("pred"), (int, float))]
