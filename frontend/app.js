@@ -194,34 +194,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            labels: { color: '#e8eef6' },
-            onHover: (evt, item) => {
-              const map = {
-                CLOSE: 'Close price of MSTR (Yahoo Finance).',
-                MA20: '20-day moving average of close; short-term trend baseline.',
-                MA60: '60-day moving average of close; smoother medium-term trend.'
-              };
-              const title = item.text.toUpperCase();
-              const tip = document.createElement('div');
-              tip.className = 'tip';
-              tip.innerHTML = `<div class="title">${item.text}</div><div class="desc">${map[title]||''}</div>`;
-              // Remove any previous temp tips
-              document.querySelectorAll('.temp-legend-tip').forEach(el=>el.remove());
-              tip.classList.add('temp-legend-tip');
-              tip.style.position='fixed';
-              tip.style.left = (evt.x + 12) + 'px';
-              tip.style.top = (evt.y - 24) + 'px';
-              tip.style.opacity = '1';
-              document.body.appendChild(tip);
-            },
-            onLeave: () => {
-              document.querySelectorAll('.temp-legend-tip').forEach(el=>el.remove());
-            }
-          },
-          tooltip: { mode: 'index', intersect: false }
-        },
+        plugins: { legend: { labels: { color: '#e8eef6' } }, tooltip: { mode: 'index', intersect: false } },
         scales: {
           x: { ticks: { color: '#9fb0c3', maxTicksLimit: 8 }, grid: { display: false } },
           y: { ticks: { color: '#9fb0c3' }, grid: { color: '#1f2633' } }
