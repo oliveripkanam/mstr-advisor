@@ -1,4 +1,4 @@
-![Uploading image.png…]()
+<img width="1634" height="1243" alt="image" src="https://github.com/user-attachments/assets/66bda91e-2bf9-4fe2-97ae-6e6190ba316f" />
 
 # MSTR Monitor
 
