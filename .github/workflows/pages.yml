@@ -1,14 +1,9 @@
-name: Frontend Pages Deploy
+name: pages
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   push:
     branches: [ main ]
-    paths:
-      - 'frontend/**'
-      - 'docs/**'
-      - 'configs/glossary.yaml'
-      - '.github/workflows/pages.yml'
 
 permissions:
   contents: read
@@ -16,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -26,40 +21,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package.json
-
-      - name: Install deps
+      - name: Prepare static site
         run: |
-          cd frontend
-          npm ci
-
-      - name: Copy public data for static site
-        run: |
-          mkdir -p frontend/public/data/public
-          mkdir -p frontend/public/configs
-          cp -r data/public/*.json frontend/public/data/public/ || true
-          cp configs/glossary.yaml frontend/public/configs/glossary.yaml || true
-          cp configs/frontend.json frontend/public/configs/frontend.json || true
-          cp configs/terminology.json frontend/public/configs/terminology.json || true
-          mkdir -p frontend/public/docs
-          cp docs/BACKTEST.md frontend/public/docs/BACKTEST.md || true
-          cp docs/HOW_I_IMPLEMENTED_THE_MODEL.md frontend/public/docs/HOW_I_IMPLEMENTED_THE_MODEL.md || true
-
-      - name: Build static export
-        run: |
-          echo "NEXT_PUBLIC_BASE_PATH=/mstr-advisor" >> $GITHUB_ENV
-          cd frontend
-          npm run build
+          rm -rf dist
+          mkdir -p dist
+          cp -r frontend/* dist/
+          mkdir -p dist/data/public
+          cp -r data/public/* dist/data/public/ || true
+          # Add repo logo as favicon if present
+          if [ -f mstrmonitorlogo.png ]; then cp mstrmonitorlogo.png dist/favicon.png; fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/out
+          path: dist
 
   deploy:
     needs: build

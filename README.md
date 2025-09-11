@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="mstrmonitorlogo.png" alt="MSTR Monitor" width="96" height="96" />
+</p>
+
 # MSTR Monitor
 
 Small, transparent stock monitor for MSTR. One page, live price marker, explainable scoring, and clear cadences.
