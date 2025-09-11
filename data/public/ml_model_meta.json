@@ -1,1 +1,0 @@
-{"model": "GradientBoostingClassifier + isotonic calibration", "splits": 3, "n_features": 25}

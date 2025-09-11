@@ -1,21 +1,22 @@
-name: Hot Data Updates
+name: hot-data
 
 on:
-  schedule:
-    - cron: '*/10 * * * 1-5'
   workflow_dispatch: {}
+  schedule:
+    # Attempt every minute; GitHub may coalesce to ~5 minutes, which is fine for free tier
+    - cron: "*/1 * * * *"
 
-permissions:
-  contents: write
+concurrency:
+  group: hotdata
+  cancel-in-progress: true
 
 jobs:
   hot:
     runs-on: ubuntu-latest
-    concurrency:
-      group: hot-data
-      cancel-in-progress: true
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -23,40 +24,27 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
 
-      - name: Install deps
+      - name: Install deps (yfinance only)
         run: |
-          pip install -r requirements.txt
-
-      - name: Switch to hotdata branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin
-          if git ls-remote --exit-code origin hotdata >/dev/null 2>&1; then
-            git checkout hotdata
-          else
-            git checkout -b hotdata
-          fi
+          python -m pip install --upgrade pip
+          pip install yfinance
 
       - name: Generate hot.json
         run: |
           python backend/app/hot_data.py
 
-      - name: Commit and push if changed
-        shell: bash
+      - name: Switch to hotdata branch
         run: |
-          set -euo pipefail
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
+          git fetch origin hotdata:hotdata || true
+          git checkout hotdata || git checkout --orphan hotdata
+          mkdir -p data/public
+          cp -f data/public/hot.json data/public/hot.json
           git add data/public/hot.json
-          if git diff --cached --quiet; then
-            echo "No changes in hot.json"
-            exit 0
-          fi
-          git commit -m "hot: update hot.json"
+          git commit -m "hot: update price [skip ci]" || echo "No changes"
           git push origin hotdata
 
 
