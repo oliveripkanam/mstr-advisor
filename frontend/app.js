@@ -77,7 +77,13 @@
       const meta = TERM_INFO[t.name] || { title: t.name, desc: '' };
       const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}`;
       return `<tr>
-        <td class="tooltip"><span>${meta.title}</span><div class="tip"><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
+        <td class="tooltip">
+          <span>${meta.title}</span>
+          <details>
+            <summary>Explain</summary>
+            <div class="desc">${tip.replace(/\n/g,'<br/>')}</div>
+          </details>
+        </td>
         <td>${fmt(t.value)}</td>
         <td>${(t.weight*100).toFixed(0)}%</td>
         <td class="points ${cls}">${fmt(t.points)}</td>
@@ -271,83 +277,17 @@
     setInterval(refreshLive, 60000);
   }
 
-  // mobile-friendly tooltip: enable tap-to-toggle for table term cells
+  // Expand/collapse equation term details when clicking the term text
   document.addEventListener('click', (e) => {
-    const cell = e.target.closest('.tooltip');
-    document.querySelectorAll('.tip[aria-expanded="true"]').forEach(el => {
-      if (!cell || !cell.contains(el)) el.removeAttribute('aria-expanded');
-    });
-    if (cell) {
-      const tip = cell.querySelector('.tip');
-      if (tip) {
-        const next = tip.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
-        tip.setAttribute('aria-expanded', next);
-        if (next === 'true') positionTip(cell, tip);
-      }
-      // elevate the hovered/tapped tooltip over cards
-      cell.classList.add('open');
-      setTimeout(() => cell.classList.remove('open'), 400);
+    const termText = e.target.closest('td.tooltip > span');
+    if (!termText) return;
+    const cell = termText.closest('td.tooltip');
+    const details = cell.querySelector('details');
+    if (details) {
+      details.open = !details.open;
+      e.preventDefault();
     }
-  }, { passive: true });
-
-  // Clamp tooltip to viewport and keep above card when possible
-  function positionTip(anchor, tip){
-    tip.classList.add('is-fixed');
-    const a = anchor.getBoundingClientRect();
-    // temporarily show to measure
-    const prevVis = tip.style.visibility;
-    const prevDisp = tip.style.display;
-    tip.style.visibility = 'hidden';
-    tip.style.display = 'block';
-    const t = tip.getBoundingClientRect();
-    tip.style.visibility = prevVis;
-    tip.style.display = prevDisp;
-
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const margin = 8;
-    const maxW = Math.min(520, vw - margin*2);
-    tip.style.maxWidth = maxW + 'px';
-
-    let width = Math.min(t.width || maxW, maxW);
-    let left = a.left + (a.width/2) - (width/2);
-    left = Math.max(margin, Math.min(left, vw - margin - width));
-
-    // prefer above, fallback below
-    let height = t.height || 120;
-    let top = a.top - height - margin;
-    if (top < margin) top = a.bottom + margin;
-    if (top + height > vh - margin) top = Math.max(margin, vh - margin - height);
-
-    tip.style.left = Math.round(left) + 'px';
-    tip.style.top = Math.round(top) + 'px';
-  }
-
-  function bindHoverPositioning(){
-    document.querySelectorAll('.tooltip').forEach(tp => {
-      const tip = tp.querySelector('.tip');
-      if (!tip) return;
-      tp.addEventListener('mouseenter', () => {
-        tip.dataset.hover = 'true';
-        tip.setAttribute('aria-expanded','true');
-        positionTip(tp, tip);
-      });
-      tp.addEventListener('mousemove', () => {
-        if (tip.getAttribute('aria-expanded') === 'true') positionTip(tp, tip);
-      });
-      tp.addEventListener('mouseleave', () => {
-        tip.removeAttribute('data-hover');
-        tip.removeAttribute('aria-expanded');
-      });
-    });
-  }
-
-  bindHoverPositioning();
-  window.addEventListener('resize', () => {
-    document.querySelectorAll('.tooltip .tip[aria-expanded="true"]').forEach(tip => {
-      const anchor = tip.closest('.tooltip');
-      if (anchor) positionTip(anchor, tip);
-    });
-  });
+  }, { passive: false });
 
   try {
     const data = await fetchSnapshot();
