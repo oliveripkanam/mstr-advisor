@@ -61,11 +61,49 @@
     });
   }
 
+  function renderChart(d) {
+    const ctx = document.getElementById('chart').getContext('2d');
+    const labels = (d.series?.close || []).map(p => p.t);
+    const ds = (key, color) => ({
+      label: key.toUpperCase(),
+      data: (d.series?.[key] || []).map(p => p.v),
+      borderColor: color,
+      backgroundColor: 'transparent',
+      tension: 0.2,
+      borderWidth: 1.6,
+      pointRadius: 0,
+    });
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          ds('close', '#4aa3ff'),
+          ds('ma20', '#ffd166'),
+          ds('ma50', '#06d6a0'),
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#e8eef6' } },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+          x: { ticks: { color: '#9fb0c3', maxTicksLimit: 8 }, grid: { display: false } },
+          y: { ticks: { color: '#9fb0c3' }, grid: { color: '#1f2633' } }
+        }
+      }
+    });
+  }
+
   try {
     const data = await fetchSnapshot();
     renderSummary(data);
     renderPlan(data);
     renderEquations(data);
+    renderChart(data);
   } catch (e) {
     document.getElementById('asof').textContent = 'Failed to load data';
     console.error(e);

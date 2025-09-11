@@ -324,6 +324,27 @@ def main() -> None:
     latest_atr = last(common['atr'])
     trade = compute_trade_plan(latest_close, latest_ma20, latest_atr, common['low'])
 
+    # Build compact series for charting (last 180 trading days)
+    last_n = 180
+    idx = common['close'].index[-last_n:]
+    def series_of(s: pd.Series) -> List[Dict[str, float]]:
+        s2 = s.reindex(idx)
+        out = []
+        for ts, val in s2.items():
+            if pd.isna(val):
+                continue
+            out.append({
+                't': ts.strftime('%Y-%m-%d'),
+                'v': float(val)
+            })
+        return out
+
+    series = {
+        'close': series_of(common['close']),
+        'ma20': series_of(common['ma20']),
+        'ma50': series_of(common['ma50'])
+    }
+
     snapshot = {
         'asof': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'levels': {
@@ -331,6 +352,7 @@ def main() -> None:
             'ma20': round(latest_ma20, 2) if latest_ma20 else None,
             'atr': round(latest_atr, 2) if latest_atr else None
         },
+        'series': series,
         'horizons': {
             'daily': {
                 'score': round(daily_score, 2),

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MSTR Advisor – Live Equation</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <header class="container">
@@ -13,6 +14,10 @@
     </header>
 
     <main class="container">
+      <section class="card">
+        <canvas id="chart" height="220"></canvas>
+      </section>
+
       <section id="summary" class="card">
         <div class="row">
           <div class="col">
