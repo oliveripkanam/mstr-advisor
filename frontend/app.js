@@ -181,7 +181,7 @@
       borderWidth: 1.6,
       pointRadius: 0,
     });
-    new Chart(ctx, {
+    const chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
@@ -201,6 +201,56 @@
         }
       }
     });
+
+    async function fetchHot() {
+      const urls = [
+        '/data/public/hot.json',
+        '../data/public/hot.json',
+        'data/public/hot.json'
+      ].map(u => u + `?t=${Date.now()}`);
+      for (const url of urls) {
+        try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) return r.json(); } catch (_) {}
+      }
+      return null;
+    }
+
+    async function drawLive() {
+      const hot = await fetchHot();
+      if (!hot || typeof hot.price !== 'number') return;
+      const price = hot.price;
+      // Draw marker
+      const yScale = chart.scales.y;
+      const xScale = chart.scales.x;
+      const y = yScale.getPixelForValue(price);
+      const x = xScale.right - 6; // near right edge
+      const ctx2 = chart.ctx;
+      ctx2.save();
+      // horizontal price line
+      ctx2.strokeStyle = 'rgba(74,163,255,0.5)';
+      ctx2.setLineDash([6,4]);
+      ctx2.beginPath();
+      ctx2.moveTo(xScale.left, y);
+      ctx2.lineTo(xScale.right, y);
+      ctx2.stroke();
+      ctx2.setLineDash([]);
+      // price label box
+      const txt = `$${price.toFixed(2)}`;
+      ctx2.font = '12px system-ui, -apple-system, Segoe UI, Roboto';
+      const w = ctx2.measureText(txt).width + 10;
+      const h = 18;
+      ctx2.fillStyle = 'rgba(74,163,255,0.85)';
+      ctx2.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx2.beginPath();
+      ctx2.roundRect(x - w, y - h/2, w, h, 6);
+      ctx2.fill();
+      ctx2.stroke();
+      ctx2.fillStyle = '#0b0d10';
+      ctx2.fillText(txt, x - w + 5, y + 4);
+      ctx2.restore();
+    }
+
+    chart.on('afterDraw', drawLive);
+    setInterval(() => { chart.draw(); }, 60000);
   }
 
   try {
