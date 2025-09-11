@@ -28,6 +28,8 @@ tr:hover{background:rgba(255,255,255,.04)}
 .legend{display:flex;gap:14px;flex-wrap:wrap}
 .legend .item{display:flex;align-items:center;gap:6px;color:var(--muted)}
 .legend .swatch{width:12px;height:12px;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.legend-explain{margin-top:10px;color:var(--muted);line-height:1.6}
+.legend-explain p{margin:6px 0 0}
 
 /* accordion */
 .accordion details{border-top:1px solid rgba(255,255,255,.06);padding:10px 0}
@@ -37,14 +39,17 @@ tr:hover{background:rgba(255,255,255,.04)}
 .accordion details[open]{background:rgba(255,255,255,.03);border-radius:10px;padding:12px}
 .accordion p{color:var(--muted);margin:8px 0 0}
 
-/* term cell + details expanders */
-.tooltip{position:relative;display:inline-block}
-.tooltip > span{cursor:pointer;border-bottom:1px dotted rgba(255,255,255,.25);padding-left:18px;position:relative}
-.tooltip > span::before{content:"▸";position:absolute;left:0;top:0;color:#9fb0c3;transition:transform .15s ease}
-.tooltip[aria-expanded="true"] > span::before{transform:rotate(90deg)}
-.tooltip details{margin-top:8px}
-.tooltip details summary{cursor:pointer;color:#c9d6e2}
-.tooltip .desc{color:var(--muted);font-size:13px;line-height:1.5;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);padding:10px 12px;border-radius:10px}
+/* tooltips */
+.tooltip{position:relative;display:inline-block;cursor:help}
+.tooltip:hover{z-index:10000}
+.tip[aria-expanded="true"]{opacity:1;pointer-events:auto}
+.tip{position:absolute;left:100%;top:50%;background:rgba(15,20,29,.92);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 18px;min-width:320px;max-width:min(520px,calc(100vw - 24px));color:var(--text);box-shadow:0 24px 48px rgba(0,0,0,.5);backdrop-filter:blur(16px);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:10001}
+.tip .close{position:absolute;top:6px;right:8px;width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#aeb8c5;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);cursor:pointer}
+.tip .close:hover{background:rgba(255,255,255,.1)}
+.tooltip.top .tip{left:0;top:auto;bottom:100%}
+.tooltip.top:hover .tip{transform:translateY(-8px)}
+.tip .title{font-weight:600;margin-bottom:6px}
+.tip .desc{color:var(--muted);font-size:13px;line-height:1.5}
 
 /* equation formatting */
 .eq{display:flex;flex-direction:column;gap:16px}
@@ -71,8 +76,9 @@ tr:hover{background:rgba(255,255,255,.04)}
   /* prevent equation total from overflowing */
   .eq-total{position:static;order:3;margin-left:auto}
   .eq-line{align-items:flex-start}
-  /* details presentation tweaks on small screens */
-  .tooltip .desc{font-size:14px}
+  /* tooltips: tap to open; ensure within viewport; center above anchor */
+  .tooltip:hover .tip{transform:none}
+  .tip{left:50%;right:auto;top:auto;bottom:100%;transform:translate(-50%,-8px);min-width:260px;max-width:min(520px,92vw);margin:0}
 }
 
 /* medium screens: allow 3 columns when space permits */
@@ -88,6 +94,13 @@ tr:hover{background:rgba(255,255,255,.04)}
 body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(120px 120px at 20% 30%, rgba(74,163,255,.12), transparent 60%), radial-gradient(180px 180px at 80% 25%, rgba(6,214,160,.10), transparent 65%), radial-gradient(160px 160px at 60% 75%, rgba(255,209,102,.10), transparent 65%);filter:blur(10px);pointer-events:none;z-index:-1}
 /* dedupe: removed duplicated base styles that were overriding mobile rules */
 
-/* no special layering needed */
+/* layering fix for interactive cards */
 .card{position:relative}
+.card:has(.tip[aria-expanded="true"]),
+.card:has(.tip[data-hover="true"]),
+.card:has(.tooltip:hover){z-index:3}
+
+/* fixed-position tooltip when JS applies .is-fixed */
+.tip.is-fixed{position:fixed;left:0;top:0;transform:none;margin:0;min-width:auto;max-width:min(520px,92vw);z-index:10000}
+.tooltip:hover .tip.is-fixed{transform:none}
 
