@@ -3,28 +3,28 @@
   const colorCls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : 'neutral');
 
   const TERM_INFO = {
-    btc_1d_beta: { title: 'BTC 1D × Beta', desc: 'Impact from BTC daily return scaled by MSTR\'s rolling beta. Positive when BTC up and beta positive.' },
-    trend_short: { title: 'Short-term Trend', desc: 'Distance to 20/50DMA and 20DMA slope. Positive above rising MAs; negative below falling MAs.' },
-    momentum: { title: 'Momentum', desc: 'RSI(14) deviation from 50 and 10-day rate of change. Positive when momentum is improving.' },
-    mean_reversion: { title: 'Mean Reversion', desc: 'Penalizes large distance from 20DMA; Bollinger %B near extremes suggests snapback.' },
-    vix_risk: { title: 'VIX Risk', desc: 'Higher VIX implies risk-off; contributes negatively when volatility regime is elevated.' },
-    usd_risk: { title: 'USD (DXY/UUP)', desc: 'Rising USD is generally a headwind for risk assets; negative when USD strengthens.' },
-    tech_beta: { title: 'Tech Beta (QQQ)', desc: 'Exposure to broader tech market via QQQ. Positive when QQQ up and MSTR beta positive.' },
-    atr_penalty: { title: 'ATR% Penalty', desc: 'Volatility tax using ATR as a percent of price. High volatility reduces score.' },
-    news_short: { title: 'News Sentiment (24–48h)', desc: 'Headline sentiment aggregate; positive if news flow is favorable.' },
-    btc_1w_regime: { title: 'BTC 1W Regime', desc: 'Weekly BTC return/regime context driving MSTR sensitivity.' },
-    trend_struct: { title: 'Trend Structure', desc: '20/50DMA cross and slope structure on the weekly horizon.' },
-    macro_risk: { title: 'Macro Risk (VIX, USD)', desc: 'Composite of VIX and USD; higher risk is negative.' },
-    momentum_week: { title: 'Weekly Momentum', desc: '4-week rate of change for MSTR.' },
-    wk52_structure: { title: '52-Week Structure', desc: 'Proximity to 52-week high; strength context.' },
-    news_week: { title: 'News (7d)', desc: 'Weekly news sentiment aggregate.' },
-    market_beta_week: { title: 'Market Beta (QQQ 1W)', desc: 'Weekly QQQ linkage.' },
-    btc_1m_regime: { title: 'BTC 1M Regime', desc: 'Monthly BTC return/regime context.' },
-    trend_long: { title: 'Long Trend', desc: '50/200DMA slope/cross regime.' },
-    momentum_quarter: { title: 'Quarter Momentum', desc: '3-month rate of change.' },
-    atr_penalty_month: { title: 'ATR% Penalty (1M)', desc: 'Monthly volatility tax.' },
-    news_month: { title: 'News (30d)', desc: 'Monthly news sentiment aggregate.' },
-    market_beta_month: { title: 'Market Beta (QQQ 1M)', desc: 'Monthly QQQ linkage.' }
+    btc_1d_beta: { title: 'BTC 1D × Beta', desc: 'Derived from BTC-USD daily returns multiplied by rolling beta of MSTR to BTC. Source: Yahoo Finance via yfinance (BTC-USD, MSTR); beta computed on 60-day rolling window.' },
+    trend_short: { title: 'Short-term Trend', desc: 'Combines distance to 20/50DMA and 20DMA slope to capture near-term trend direction and strength. Source: MSTR daily closes from Yahoo Finance; moving averages computed locally.' },
+    momentum: { title: 'Momentum', desc: 'RSI(14) deviation from neutral (50) blended with 10-day rate of change. Positive when momentum builds. Source: MSTR daily OHLC from Yahoo Finance.' },
+    mean_reversion: { title: 'Mean Reversion', desc: 'Penalizes large deviations from 20DMA and uses Bollinger %B to detect extremes where price tends to snap back. Source: MSTR daily closes from Yahoo Finance.' },
+    vix_risk: { title: 'VIX Risk', desc: 'A proxy for market fear; higher levels imply risk-off conditions. We invert/normalize VIX so higher VIX lowers score. Source: ^VIX from Yahoo Finance.' },
+    usd_risk: { title: 'USD (DXY/UUP)', desc: 'A stronger USD can pressure risk assets. We use UUP (ETF tracking the Dollar Index) daily changes; rising USD subtracts from score. Source: UUP from Yahoo Finance.' },
+    tech_beta: { title: 'Tech Beta (QQQ)', desc: 'Captures exposure to broader tech. Computed as QQQ daily return times rolling beta of MSTR to QQQ. Source: QQQ and MSTR from Yahoo Finance.' },
+    atr_penalty: { title: 'ATR% Penalty', desc: 'Volatility tax: ATR(14) as a percent of price; elevated volatility reduces risk-adjusted attractiveness. Source: MSTR daily high/low/close from Yahoo Finance.' },
+    news_short: { title: 'News Sentiment (24–48h)', desc: 'Headline sentiment summarizing last 1–2 days; positive coverage adds, negative subtracts. Source: RSS feeds (Google News, Coindesk) parsed and scored by backend.' },
+    btc_1w_regime: { title: 'BTC 1W Regime', desc: 'Weekly return/regime context for BTC affects MSTR materially due to BTC exposure. Source: BTC-USD from Yahoo Finance; 5-day change normalized.' },
+    trend_struct: { title: 'Trend Structure', desc: 'Medium-horizon structure using 20/50DMA relationship and slopes, indicating trend health beyond the very short term. Source: MSTR Yahoo Finance.' },
+    macro_risk: { title: 'Macro Risk (VIX, USD)', desc: 'Composite of VIX level and USD strength; higher macro stress dampens risk appetite. Source: ^VIX and UUP from Yahoo Finance.' },
+    momentum_week: { title: 'Weekly Momentum', desc: 'Four-week rate of change signaling persistent moves across weeks. Source: MSTR Yahoo Finance.' },
+    wk52_structure: { title: '52-Week Structure', desc: 'Proximity to 52-week high; closeness can indicate strength, while far below may indicate weakness or value depending on context. Source: MSTR Yahoo Finance.' },
+    news_week: { title: 'News (7d)', desc: 'Aggregate sentiment across the last week; sustained positive/negative coverage influences weekly stance. Source: backend RSS sentiment.' },
+    market_beta_week: { title: 'Market Beta (QQQ 1W)', desc: 'Weekly beta-adjusted exposure to tech market moves via QQQ. Source: QQQ & MSTR from Yahoo Finance.' },
+    btc_1m_regime: { title: 'BTC 1M Regime', desc: 'Monthly BTC return/regime; a key driver given MSTR’s BTC holdings. Source: BTC-USD from Yahoo Finance; 21-trading-day change normalized.' },
+    trend_long: { title: 'Long Trend', desc: 'Longer-horizon structure via 50/200DMA slope/cross capturing secular trend direction. Source: MSTR Yahoo Finance.' },
+    momentum_quarter: { title: 'Quarter Momentum', desc: 'Three-month rate of change for medium-term momentum. Source: MSTR Yahoo Finance.' },
+    atr_penalty_month: { title: 'ATR% Penalty (1M)', desc: 'Monthly volatility regime using ATR% averaged over ~1 month; penalizes unstable periods. Source: MSTR Yahoo Finance.' },
+    news_month: { title: 'News (30d)', desc: 'Monthly aggregate sentiment; prolonged positive or negative narratives affect medium-term stance. Source: backend RSS sentiment.' },
+    market_beta_month: { title: 'Market Beta (QQQ 1M)', desc: 'Monthly beta-adjusted linkage to QQQ, reflecting market tide over a longer horizon. Source: QQQ & MSTR from Yahoo Finance.' }
   };
 
   async function fetchSnapshot() {
@@ -136,7 +136,7 @@
         }
         const pill = document.createElement('div');
         pill.className = 'pill ' + colorCls(t.points);
-        pill.innerHTML = `<span class="w">${(t.weight*100).toFixed(0)}%</span> · <span class="tooltip">${TERM_INFO[t.name]?.title||t.name}<div class=\"tip\"><div class=\"title\">${TERM_INFO[t.name]?.title||t.name}</div><div class=\"desc\">${(TERM_INFO[t.name]?.desc||'').replace(/\n/g,'<br/>')}<br/>Current: ${fmt(t.value)} | Weight: ${(t.weight*100).toFixed(0)}% | Points: ${fmt(t.points)}</div></div></span> <span class="v">(${fmt(t.value)})</span>`;
+        pill.innerHTML = `<span class="w">${(t.weight*100).toFixed(0)}%</span> · <span class="tooltip top">${TERM_INFO[t.name]?.title||t.name}<div class=\"tip\"><div class=\"title\">${TERM_INFO[t.name]?.title||t.name}</div><div class=\"desc\">${(TERM_INFO[t.name]?.desc||'').replace(/\n/g,'<br/>')}<br/>Current: ${fmt(t.value)} | Weight: ${(t.weight*100).toFixed(0)}% | Points: ${fmt(t.points)}</div></div></span> <span class="v">(${fmt(t.value)})</span>`;
         pills.appendChild(pill);
       });
       line.appendChild(pills);

@@ -31,6 +31,10 @@ th:first-child,td:first-child{text-align:left}
 .tip .title{font-weight:600;margin-bottom:4px}
 .tip .desc{color:var(--muted);font-size:12px;line-height:1.4}
 
+/* tooltip variant: appear above (used in math eq chips) */
+.tooltip.top:hover .tip{opacity:1;pointer-events:auto;transform:translateY(-8px)}
+.tooltip.top .tip{left:0;top:auto;bottom:100%;}
+
 /* equation formatting */
 .eq{display:flex;flex-direction:column;gap:16px}
 .eq-line{position:relative;display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
