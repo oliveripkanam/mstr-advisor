@@ -62,9 +62,9 @@ tr:hover{background:rgba(255,255,255,.04)}
 
 /* responsive */
 @media (max-width: 768px){
-  body{font-size:15px;background:linear-gradient(180deg,#0b0d10 0%, #0b0d10 100%)}
+  body{font-size:15px;background:#0b0d10}
   .container{margin:16px auto;padding:0 12px}
-  .card{padding:12px;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
+  .card{padding:12px;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(24,28,36,.85)}
   .row{gap:12px}
   .col{flex:1 1 calc(50% - 12px)}
   canvas#chart{height:200px !important}
