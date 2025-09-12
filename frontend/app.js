@@ -1,6 +1,7 @@
 (async function () {
   const fmt = (v) => (v === null || v === undefined || Number.isNaN(v) ? '—' : (typeof v === 'number' ? v.toFixed(2) : String(v)));
   const colorCls = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : 'neutral');
+  const debug = (typeof window !== 'undefined') && /(?:[?&])debug=1(?:&|$)/.test(window.location.search);
 
   const TERM_INFO = {
     btc_1d_beta: { title: 'BTC 1D × Beta', desc: 'Derived from BTC-USD daily returns multiplied by rolling beta of MSTR to BTC. Source: Yahoo Finance via yfinance (BTC-USD, MSTR); beta computed on 60-day rolling window.' },
@@ -346,14 +347,20 @@
       ].map(u => u + `?t=${Date.now()}`);
       let best = null;
       let bestTs = -1;
+      const seen = [];
       for (const url of urls) {
         try {
           const r = await fetch(url, { cache: 'no-store' });
           if (!r.ok) continue;
           const j = await r.json();
           const ts = j && j.asof_utc ? Date.parse(j.asof_utc) : 0;
+          seen.push({ url, ts, asof_utc: j?.asof_utc });
           if (ts > bestTs) { bestTs = ts; best = { url, json: j }; }
         } catch (_) { /* next */ }
+      }
+      if (debug) {
+        try { console.debug('[hot] candidates', seen); } catch (_) {}
+        if (best) { console.debug('[hot] selected', best.url, best.json?.asof_utc); }
       }
       return best;
     }
@@ -373,6 +380,7 @@
         const stale = (Date.now() - asofDate.getTime()) > 15*60*1000;
         asofEl.innerHTML = `Last update: <strong>${hk} HKT${stale ? ' (stale)' : ''}</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
         asofEl.classList.add('notice');
+        if (debug) { try { console.debug('[hot] render', { src, asof_hkt: hk, stale }); } catch (_) {} }
         chart.draw();
       }
     }
