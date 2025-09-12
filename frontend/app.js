@@ -266,7 +266,7 @@
     // mobile tooltip open/close behavior
     const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     if (isMobile) {
-      document.addEventListener('click', function (e) {
+      document.addEventListener('pointerdown', function (e) {
         const el = e.target;
         if (!el || !el.closest) return;
         const closeBtn = el.closest('.tip-close');
@@ -275,13 +275,10 @@
           e.stopPropagation();
           const tip = closeBtn.closest('.tip');
           if (tip) tip.classList.remove('mobile');
-          const cell = closeBtn.closest('.tooltip');
-          if (cell && cell.blur) cell.blur();
           return;
         }
         const cell = el.closest('.tooltip');
         if (cell) {
-          // prevent native focus opening another under the finger; toggle current
           e.preventDefault();
           const tip = cell.querySelector('.tip');
           if (tip) {

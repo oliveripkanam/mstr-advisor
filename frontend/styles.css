@@ -72,10 +72,11 @@ tr:hover{background:rgba(255,255,255,.04)}
   .row{gap:12px}
   .col{flex:1 1 calc(50% - 12px)}
   canvas#chart{height:200px !important}
+  /* Disable hover/focus reveal on mobile; use .tip.mobile instead */
+  .tooltip:hover .tip,.tooltip:focus .tip{opacity:0 !important;pointer-events:none !important}
   .tip{left:50% !important;right:auto;top:auto;bottom:100%;min-width:300px;max-width:96vw;transform:translate(-50%,-8px)}
-  .tooltip:hover .tip,.tooltip:focus .tip{transform:translate(-50%,-8px)}
   /* Modal-like positioning when JS sets .mobile on small screens */
-  .tip.mobile{position:fixed !important;left:50% !important;top:18vh !important;bottom:auto !important;transform:translate(-50%,0) !important;max-width:92vw !important;min-width:320px}
+  .tip.mobile{position:fixed !important;left:50% !important;top:18vh !important;bottom:auto !important;transform:translate(-50%,0) !important;max-width:92vw !important;min-width:320px;opacity:1 !important;pointer-events:auto !important;z-index:1000}
   .eq-total{position:static}
 }
 
