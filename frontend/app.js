@@ -37,7 +37,10 @@
       'data/public/model_snapshot.json',
       '../data/public/model_snapshot.json'
     ];
-    const pagesOnly = [`/${repo}/data/public/model_snapshot.json`];
+    const pagesOnly = [
+      `/${repo}/data/public/model_snapshot.json`,
+      `/mstr-advisor/data/public/model_snapshot.json`
+    ];
     const rawList = [
       'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/main/data/public/model_snapshot.json',
       'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/revamp/data/public/model_snapshot.json'
@@ -61,6 +64,7 @@
     actionEl.textContent = d.blended.action;
     actionEl.className = 'badge ' + (d.blended.score > 10 ? 'pos' : d.blended.score < -10 ? 'neg' : 'neutral');
     document.getElementById('blended').textContent = fmt(d.blended.score);
+    // Seed price from snapshot for initial render; live updater will overwrite
     document.getElementById('price').textContent = fmt(d.levels.price);
     document.getElementById('ma20').textContent = fmt(d.levels.ma20);
     document.getElementById('atr').textContent = fmt(d.levels.atr);
@@ -338,12 +342,14 @@
     });
 
     async function fetchHot() {
+      const isPages = typeof window !== 'undefined' && /github\.io$/.test(window.location.hostname);
+      const repo = 'mstr-advisor';
       const urls = [
         'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/hotdata/data/public/hot.json',
         'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/main/data/public/hot.json',
-        '/data/public/hot.json',
-        '../data/public/hot.json',
-        'data/public/hot.json'
+        isPages ? `/mstr-advisor/data/public/hot.json` : '/data/public/hot.json',
+        'data/public/hot.json',
+        '../data/public/hot.json'
       ].map(u => u + `?t=${Date.now()}`);
       let best = null;
       let bestTs = -1;
@@ -381,6 +387,9 @@
         asofEl.innerHTML = `Last update: <strong>${hk} HKT${stale ? ' (stale)' : ''}</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
         asofEl.classList.add('notice');
         if (debug) { try { console.debug('[hot] render', { src, asof_hkt: hk, stale }); } catch (_) {} }
+        // Update the Summary price with live value if available
+        const priceEl = document.getElementById('price');
+        if (priceEl && typeof livePrice === 'number') priceEl.textContent = fmt(livePrice);
         chart.draw();
       }
     }
