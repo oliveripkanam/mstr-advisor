@@ -60,3 +60,20 @@ tr:hover{background:rgba(255,255,255,.04)}
 .eq-plus{color:#2e3a4b}
 .eq-total{position:absolute;right:0;top:0;font-weight:700;white-space:nowrap}
 
+/* responsive */
+@media (max-width: 768px){
+  body{font-size:15px;background:linear-gradient(180deg,#0b0d10 0%, #0b0d10 100%)}
+  .container{margin:16px auto;padding:0 12px}
+  .card{padding:12px;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)}
+  .row{gap:12px}
+  .col{flex:1 1 calc(50% - 12px)}
+  canvas#chart{height:200px !important}
+  .tip{min-width:260px;max-width:92vw}
+  .eq-total{position:static}
+}
+
+@media (max-width: 420px){
+  .col{flex:1 1 100%}
+  h1{font-size:20px}
+  h2{font-size:16px}
+}

@@ -236,7 +236,6 @@
 
         if (livePrice == null) return;
         const y = yScale.getPixelForValue(livePrice);
-        const x = xScale.right - 6;
         ctx2.save();
         ctx2.strokeStyle = 'rgba(74,163,255,0.5)';
         ctx2.setLineDash([6,4]);
@@ -244,28 +243,6 @@
         ctx2.moveTo(xScale.left, y);
         ctx2.lineTo(xScale.right, y);
         ctx2.stroke();
-        ctx2.setLineDash([]);
-        const diff = (prevClose != null) ? (livePrice - prevClose) : 0;
-        const up = diff >= 0;
-        const txt = `$${livePrice.toFixed(2)}`;
-        ctx2.font = '12px system-ui, -apple-system, Segoe UI, Roboto';
-        const w = ctx2.measureText(txt).width + 14;
-        const h = 20;
-        // glassy pill with subtle shadow, green/red based on move vs prev close
-        ctx2.shadowColor = 'rgba(0,0,0,0.35)';
-        ctx2.shadowBlur = 8;
-        ctx2.fillStyle = up ? 'rgba(46, 204, 113, 0.9)' : 'rgba(231, 76, 60, 0.9)';
-        ctx2.strokeStyle = 'rgba(255,255,255,0.25)';
-        if (typeof ctx2.roundRect === 'function') {
-          ctx2.beginPath();
-          ctx2.roundRect(x - w, y - h/2, w, h, 10);
-          ctx2.fill();
-          ctx2.stroke();
-        } else {
-          ctx2.fillRect(x - w, y - h/2, w, h);
-        }
-        ctx2.fillStyle = '#0b0d10';
-        ctx2.fillText(txt, x - w + 7, y + 5);
         ctx2.restore();
       }
     };
