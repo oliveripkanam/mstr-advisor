@@ -8,21 +8,31 @@ import yfinance as yf
 
 def main() -> None:
     t = yf.Ticker("MSTR")
-    # Prefer fast_info for speed
     try:
         fi = t.fast_info
-        last = float(fi.get("last_price") or fi.get("last_close") or 0.0)
-        prev = float(fi.get("previous_close") or 0.0)
+        # Prefer extended-hours price when available
+        last = float(
+            fi.get("last_price")
+            or fi.get("regular_market_price")
+            or fi.get("last_close")
+            or 0.0
+        )
+        prev = float(fi.get("previous_close") or fi.get("regular_market_previous_close") or 0.0)
     except Exception:
         fi = {}
         last = 0.0
         prev = 0.0
 
-    # Fallback using quote summary if needed
     if not last or last <= 0:
         try:
             info = t.info
-            last = float(info.get("regularMarketPrice") or 0.0)
+            # extendedMarketPrice: pre/after hours if available
+            last = float(
+                info.get("postMarketPrice")
+                or info.get("preMarketPrice")
+                or info.get("regularMarketPrice")
+                or 0.0
+            )
             prev = float(info.get("regularMarketPreviousClose") or 0.0)
         except Exception:
             pass
@@ -37,6 +47,7 @@ def main() -> None:
         "prev_close": round(prev, 2) if prev else None,
         "change": round(change, 2),
         "change_pct": round(change_pct, 2),
+        "extended_hours": True,
     }
 
     out = "data/public/hot.json"

@@ -1,4 +1,4 @@
-/* Glassmorphism theme */
+/* theme */
 :root{--bg:#0b0d10;--card:rgba(20,24,32,.35);--card-border:rgba(255,255,255,.12);--text:#e8eef6;--muted:#9fb0c3;--pos:#2ecc71;--neg:#e74c3c;--accent:#4aa3ff}
 *{box-sizing:border-box}
 body{margin:0;color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial;min-height:100vh;background:radial-gradient(1200px 800px at 10% 10%, #142033 0%, rgba(10,12,16,0) 60%), radial-gradient(1000px 700px at 90% 20%, #1e2a44 0%, rgba(10,12,16,0) 55%), linear-gradient(180deg,#0b0d10 0%, #0b0d10 100%);position:relative;overflow-x:hidden}

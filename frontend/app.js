@@ -202,11 +202,11 @@
       borderWidth: 1.6,
       pointRadius: 0,
     });
-    // live and previous close caches
+    // live/prev close caches
     let livePrice = null;
     let prevClose = null;
 
-    // plugin to draw live marker after datasets render
+    // live marker disabled
     const liveMarkerPlugin = { id: 'liveMarker', afterDraw() { /* disabled */ } };
 
     Chart.register(liveMarkerPlugin);
@@ -234,7 +234,7 @@
 
     async function fetchHot() {
       const urls = [
-        // Prefer hotdata branch raw file for minute cadence
+        // primary: hotdata raw
         'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/hotdata/data/public/hot.json',
         '/data/public/hot.json',
         '../data/public/hot.json',
@@ -255,7 +255,7 @@
       }
     }
 
-    // Initialize markers from last close so there is always a label
+    // seed from last close
     const closeSeries = (d.series?.close || []).map(p => p.v).filter(v => typeof v === 'number');
     if (closeSeries.length > 0) {
       prevClose = closeSeries[closeSeries.length - 1];
