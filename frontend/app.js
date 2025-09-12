@@ -235,8 +235,8 @@
 
     async function fetchHot() {
       const urls = [
-        // primary: hotdata raw
         'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/hotdata/data/public/hot.json',
+        'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/main/data/public/hot.json',
         '/data/public/hot.json',
         '../data/public/hot.json',
         'data/public/hot.json'
@@ -253,10 +253,12 @@
       if (hot && typeof hot.price === 'number') {
         livePrice = hot.price;
         if (typeof hot.prev_close === 'number') prevClose = hot.prev_close;
-        const hk = (new Date(hot.asof_utc || Date.now())).toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
+        const asofDate = new Date(hot.asof_utc || Date.now());
+        const hk = asofDate.toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
         const src = res.url.replace(/\?t=.*/, '');
         const asofEl = document.getElementById('asof');
-        asofEl.innerHTML = `Last update: <strong>${hk} HKT</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
+        const stale = (Date.now() - asofDate.getTime()) > 15*60*1000;
+        asofEl.innerHTML = `Last update: <strong>${hk} HKT${stale ? ' (stale)' : ''}</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
         asofEl.classList.add('notice');
         chart.draw();
       }
