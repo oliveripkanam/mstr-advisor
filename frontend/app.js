@@ -263,17 +263,37 @@
     renderEquations(data);
     renderMath(data);
     renderChart(data);
-    // mobile tooltip close handler
-    document.addEventListener('click', function (e) {
-      const target = e.target;
-      if (target && target.closest) {
-        const btn = target.closest('.tip-close');
-        if (btn) {
-          const cell = btn.closest('.tooltip');
+    // mobile tooltip open/close behavior
+    const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+      document.addEventListener('click', function (e) {
+        const el = e.target;
+        if (!el || !el.closest) return;
+        const closeBtn = el.closest('.tip-close');
+        if (closeBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const tip = closeBtn.closest('.tip');
+          if (tip) tip.classList.remove('mobile');
+          const cell = closeBtn.closest('.tooltip');
           if (cell && cell.blur) cell.blur();
+          return;
         }
-      }
-    }, false);
+        const cell = el.closest('.tooltip');
+        if (cell) {
+          // prevent native focus opening another under the finger; toggle current
+          e.preventDefault();
+          const tip = cell.querySelector('.tip');
+          if (tip) {
+            const open = tip.classList.contains('mobile');
+            document.querySelectorAll('.tip.mobile').forEach((n) => n.classList.remove('mobile'));
+            if (!open) tip.classList.add('mobile');
+          }
+        } else {
+          document.querySelectorAll('.tip.mobile').forEach((n) => n.classList.remove('mobile'));
+        }
+      }, true);
+    }
   } catch (e) {
     document.getElementById('asof').textContent = 'Failed to load data';
     console.error(e);

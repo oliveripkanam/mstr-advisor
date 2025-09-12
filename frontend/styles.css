@@ -41,7 +41,7 @@ tr:hover{background:rgba(255,255,255,.04)}
 
 /* tooltips */
 .tooltip{position:relative;display:inline-block;cursor:help}
-.tooltip:hover .tip,.tooltip:focus .tip,.tooltip:active .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
+.tooltip:hover .tip,.tooltip:focus .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
 .tip{position:absolute;left:100%;top:50%;background:rgba(15,20,29,.92);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 18px;min-width:320px;max-width:520px;color:var(--text);box-shadow:0 24px 48px rgba(0,0,0,.5);backdrop-filter:blur(16px);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:999}
 .tip .tip-close{position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#e8eef6;cursor:pointer}
 .tooltip.top .tip{left:0;top:auto;bottom:100%}
@@ -73,7 +73,9 @@ tr:hover{background:rgba(255,255,255,.04)}
   .col{flex:1 1 calc(50% - 12px)}
   canvas#chart{height:200px !important}
   .tip{left:50% !important;right:auto;top:auto;bottom:100%;min-width:300px;max-width:96vw;transform:translate(-50%,-8px)}
-  .tooltip:hover .tip,.tooltip:focus .tip,.tooltip:active .tip{transform:translate(-50%,-8px)}
+  .tooltip:hover .tip,.tooltip:focus .tip{transform:translate(-50%,-8px)}
+  /* Modal-like positioning when JS sets .mobile on small screens */
+  .tip.mobile{position:fixed !important;left:50% !important;top:18vh !important;bottom:auto !important;transform:translate(-50%,0) !important;max-width:92vw !important;min-width:320px}
   .eq-total{position:static}
 }
 
