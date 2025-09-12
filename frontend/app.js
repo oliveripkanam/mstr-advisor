@@ -59,7 +59,7 @@
   function renderSummary(d) {
     const dt = new Date(d.asof);
     const hk = dt.toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: true }).replace(',', '');
-    document.getElementById('asof').innerHTML = `Last update: <strong>${hk} HKT</strong>`;
+    document.getElementById('asof').innerHTML = `<span class="badge neutral">Live</span> Last update: <strong>${hk} HKT</strong>`;
     const actionEl = document.getElementById('action');
     actionEl.textContent = d.blended.action;
     actionEl.className = 'badge ' + (d.blended.score > 10 ? 'pos' : d.blended.score < -10 ? 'neg' : 'neutral');
@@ -391,7 +391,7 @@
         const src = res.url.replace(/\?t=.*/, '');
         const asofEl = document.getElementById('asof');
         const stale = (Date.now() - asofDate.getTime()) > 15*60*1000;
-        asofEl.innerHTML = `Last update: <strong>${hk} HKT${stale ? ' (stale)' : ''}</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
+        asofEl.innerHTML = `<span class="badge ${stale ? 'neutral' : 'pos'}">${stale ? 'Stale' : 'Live'}</span> Last update: <strong>${hk} HKT</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
         asofEl.classList.add('notice');
         if (debug) { try { console.debug('[hot] render', { src, asof_hkt: hk, stale }); } catch (_) {} }
         // Update the Summary price with live value if available
