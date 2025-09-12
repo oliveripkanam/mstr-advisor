@@ -86,6 +86,17 @@
       const cls = colorCls(t.points);
       const meta = TERM_INFO[t.name] || { title: t.name, desc: '' };
       const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}`;
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        return `
+          <tr class="mrow" data-key="${t.name}">
+            <td><button class="mterm" data-key="${t.name}">${meta.title}</button></td>
+            <td>${fmt(t.value)}</td>
+            <td>${(t.weight*100).toFixed(0)}%</td>
+            <td class="points ${cls}">${fmt(t.points)}</td>
+          </tr>
+          <tr class="mdetail" data-key="${t.name}"><td colspan="4"><div class="mdesc"><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td></tr>
+        `;
+      }
       return `<tr>
         <td class="tooltip" tabindex="0"><span>${meta.title}</span><div class="tip"><button class="tip-close" aria-label="Close">×</button><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
         <td>${fmt(t.value)}</td>
@@ -263,33 +274,17 @@
     renderEquations(data);
     renderMath(data);
     renderChart(data);
-    // mobile tooltip open/close behavior
+    // Mobile-only: expand/collapse rows
     const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     if (isMobile) {
-      document.addEventListener('pointerdown', function (e) {
-        const el = e.target;
-        if (!el || !el.closest) return;
-        const closeBtn = el.closest('.tip-close');
-        if (closeBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const tip = closeBtn.closest('.tip');
-          if (tip) tip.classList.remove('mobile');
-          return;
-        }
-        const cell = el.closest('.tooltip');
-        if (cell) {
-          e.preventDefault();
-          const tip = cell.querySelector('.tip');
-          if (tip) {
-            const open = tip.classList.contains('mobile');
-            document.querySelectorAll('.tip.mobile').forEach((n) => n.classList.remove('mobile'));
-            if (!open) tip.classList.add('mobile');
-          }
-        } else {
-          document.querySelectorAll('.tip.mobile').forEach((n) => n.classList.remove('mobile'));
-        }
-      }, true);
+      const horizons = document.getElementById('horizons');
+      horizons.addEventListener('click', function (e) {
+        const btn = e.target && e.target.closest ? e.target.closest('.mterm') : null;
+        if (!btn) return;
+        const key = btn.getAttribute('data-key');
+        const row = horizons.querySelector(`tr.mdetail[data-key="${key}"]`);
+        if (row) row.classList.toggle('open');
+      });
     }
   } catch (e) {
     document.getElementById('asof').textContent = 'Failed to load data';

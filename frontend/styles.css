@@ -15,6 +15,10 @@ th,td{padding:8px 10px;border-bottom:0;text-align:right;background:transparent}
 th:first-child,td:first-child{text-align:left}
 tr{background:rgba(255,255,255,.02)}
 tr:hover{background:rgba(255,255,255,.04)}
+.mdetail{display:none}
+.mdetail.open{display:table-row}
+.mterm{all:unset;cursor:pointer;color:#c9d6e2}
+.mdesc{padding:8px 0;color:var(--muted)}
 .pos{color:var(--pos)}.neg{color:var(--neg)}
 .h-title{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
 .subtle{color:var(--muted);font-size:12px}
