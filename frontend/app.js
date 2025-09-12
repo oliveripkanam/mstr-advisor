@@ -344,10 +344,18 @@
         '../data/public/hot.json',
         'data/public/hot.json'
       ].map(u => u + `?t=${Date.now()}`);
+      let best = null;
+      let bestTs = -1;
       for (const url of urls) {
-        try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) return { url, json: await r.json() }; } catch (_) {}
+        try {
+          const r = await fetch(url, { cache: 'no-store' });
+          if (!r.ok) continue;
+          const j = await r.json();
+          const ts = j && j.asof_utc ? Date.parse(j.asof_utc) : 0;
+          if (ts > bestTs) { bestTs = ts; best = { url, json: j }; }
+        } catch (_) { /* next */ }
       }
-      return null;
+      return best;
     }
 
     async function refreshLive() {
@@ -359,7 +367,7 @@
         const pc = typeof hot.prev_close === 'number' ? hot.prev_close : (typeof hot.previous_close === 'number' ? hot.previous_close : null);
         if (typeof pc === 'number') prevClose = pc;
         const asofDate = new Date(hot.asof_utc || Date.now());
-        const hk = asofDate.toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
+        const hk = asofDate.toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: true }).replace(',', '');
         const src = res.url.replace(/\?t=.*/, '');
         const asofEl = document.getElementById('asof');
         const stale = (Date.now() - asofDate.getTime()) > 15*60*1000;
