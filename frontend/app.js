@@ -53,7 +53,8 @@
   }
 
   function renderSummary(d) {
-    const hk = (new Date(d.asof)).toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
+    const dt = new Date(d.asof);
+    const hk = dt.toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: true }).replace(',', '');
     document.getElementById('asof').innerHTML = `Last update: <strong>${hk} HKT</strong>`;
     const actionEl = document.getElementById('action');
     actionEl.textContent = d.blended.action;
@@ -191,6 +192,75 @@
     host.appendChild(blended);
   }
 
+  function setupTimers() {
+    const timers = [
+      { key: 'price', label: 'Price (hot.json)', intervalMs: 15*60*1000, source: 'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/hotdata/data/public/hot.json' },
+      { key: 'news', label: 'News & sentiment', intervalMs: 10*60*1000, source: null },
+      { key: 'snapshot', label: 'Snapshot (scores)', intervalMs: 60*60*1000, source: null },
+      { key: 'daily', label: 'Daily datasets', intervalMs: 24*60*60*1000, source: null },
+      { key: 'weekly', label: 'ML retrain', intervalMs: 7*24*60*60*1000, source: null },
+    ];
+    const host = document.getElementById('timers');
+    if (!host) return;
+    host.innerHTML = '';
+    const now = Date.now();
+    timers.forEach(t => {
+      const box = document.createElement('div');
+      box.className = 'col';
+      const span = document.createElement('span');
+      span.className = 'label';
+      span.textContent = t.label;
+      const val = document.createElement('span');
+      val.className = 'value';
+      val.id = `timer_${t.key}`;
+      val.textContent = '—';
+      box.appendChild(span);
+      box.appendChild(val);
+      host.appendChild(box);
+    });
+
+    function fmtCountdown(ms) {
+      const s = Math.max(0, Math.floor(ms/1000));
+      const h = Math.floor(s/3600);
+      const m = Math.floor((s%3600)/60);
+      const sec = s%60;
+      if (h) return `${h}h ${m}m ${sec}s`;
+      if (m) return `${m}m ${sec}s`;
+      return `${sec}s`;
+    }
+
+    let lastPriceUtc = null;
+    async function updateLastPriceTime() {
+      try {
+        const r = await fetch('https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/hotdata/data/public/hot.json?t=' + Date.now(), { cache: 'no-store' });
+        if (r.ok) {
+          const j = await r.json();
+          if (j && j.asof_utc) lastPriceUtc = Date.parse(j.asof_utc);
+        }
+      } catch(_) {}
+    }
+    updateLastPriceTime();
+    setInterval(updateLastPriceTime, 60*1000);
+
+    function tick() {
+      const now = Date.now();
+      timers.forEach(t => {
+        let nextIn = null;
+        if (t.key === 'price' && lastPriceUtc) {
+          const next = lastPriceUtc + t.intervalMs;
+          nextIn = next - now;
+        } else {
+          // Fallback: just show interval
+          nextIn = t.intervalMs;
+        }
+        const el = document.getElementById(`timer_${t.key}`);
+        if (el) el.textContent = `next in ${fmtCountdown(nextIn)}`;
+      });
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
   function renderChart(d) {
     const ctx = document.getElementById('chart').getContext('2d');
     const labels = (d.series?.close || []).map(p => p.t);
@@ -284,6 +354,7 @@
     renderPred(data);
     renderEquations(data);
     renderMath(data);
+    setupTimers();
     renderChart(data);
     // Mobile-only: expand/collapse rows
     const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches;

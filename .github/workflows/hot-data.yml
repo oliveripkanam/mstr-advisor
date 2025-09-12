@@ -3,8 +3,8 @@ name: hot-data
 on:
   workflow_dispatch: {}
   schedule:
-    # Attempt every minute; GitHub may coalesce to ~5 minutes, which is fine for free tier
-    - cron: "*/1 * * * *"
+    # Run every 15 minutes (closer to real cadence on GitHub free tier)
+    - cron: "*/15 * * * *"
 
 concurrency:
   group: hotdata
