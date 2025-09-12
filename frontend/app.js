@@ -87,7 +87,7 @@
       const meta = TERM_INFO[t.name] || { title: t.name, desc: '' };
       const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}`;
       return `<tr>
-        <td class="tooltip" tabindex="0"><span>${meta.title}</span><div class="tip"><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
+        <td class="tooltip" tabindex="0"><span>${meta.title}</span><div class="tip"><button class="tip-close" aria-label="Close">×</button><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
         <td>${fmt(t.value)}</td>
         <td>${(t.weight*100).toFixed(0)}%</td>
         <td class="points ${cls}">${fmt(t.points)}</td>
@@ -263,6 +263,17 @@
     renderEquations(data);
     renderMath(data);
     renderChart(data);
+    // mobile tooltip close handler
+    document.addEventListener('click', function (e) {
+      const target = e.target;
+      if (target && target.closest) {
+        const btn = target.closest('.tip-close');
+        if (btn) {
+          const cell = btn.closest('.tooltip');
+          if (cell && cell.blur) cell.blur();
+        }
+      }
+    }, false);
   } catch (e) {
     document.getElementById('asof').textContent = 'Failed to load data';
     console.error(e);
