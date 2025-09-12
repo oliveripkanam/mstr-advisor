@@ -196,58 +196,7 @@
     let prevClose = null;
 
     // plugin to draw live marker after datasets render
-    const liveMarkerPlugin = {
-      id: 'liveMarker',
-      afterDraw(c) {
-        const yScale = c.scales.y;
-        const xScale = c.scales.x;
-        const ctx2 = c.ctx;
-
-        // Draw previous close dashed reference line (no label)
-        if (prevClose != null) {
-          const y0 = yScale.getPixelForValue(prevClose);
-          ctx2.save();
-          ctx2.strokeStyle = 'rgba(158, 173, 190, 0.35)';
-          ctx2.setLineDash([4,4]);
-          ctx2.beginPath();
-          ctx2.moveTo(xScale.left, y0);
-          ctx2.lineTo(xScale.right, y0);
-          ctx2.stroke();
-          ctx2.restore();
-        }
-
-        if (livePrice == null) return;
-        const y = yScale.getPixelForValue(livePrice);
-        const x = xScale.right - 6;
-        ctx2.save();
-        // live dashed guide
-        ctx2.strokeStyle = 'rgba(74,163,255,0.5)';
-        ctx2.setLineDash([6,4]);
-        ctx2.beginPath();
-        ctx2.moveTo(xScale.left, y);
-        ctx2.lineTo(xScale.right, y);
-        ctx2.stroke();
-        ctx2.setLineDash([]);
-        // compact accent pill with price
-        const txt = `$${livePrice.toFixed(2)}`;
-        ctx2.font = '12px system-ui, -apple-system, Segoe UI, Roboto';
-        const w = ctx2.measureText(txt).width + 12;
-        const h = 18;
-        ctx2.fillStyle = 'rgba(74,163,255,0.9)';
-        ctx2.strokeStyle = 'rgba(255,255,255,0.25)';
-        if (typeof ctx2.roundRect === 'function') {
-          ctx2.beginPath();
-          ctx2.roundRect(x - w, y - h/2, w, h, 8);
-          ctx2.fill();
-          ctx2.stroke();
-        } else {
-          ctx2.fillRect(x - w, y - h/2, w, h);
-        }
-        ctx2.fillStyle = '#0b0d10';
-        ctx2.fillText(txt, x - w + 6, y + 4);
-        ctx2.restore();
-      }
-    };
+    const liveMarkerPlugin = { id: 'liveMarker', afterDraw() { /* disabled */ } };
 
     Chart.register(liveMarkerPlugin);
 
