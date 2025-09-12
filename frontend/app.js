@@ -94,7 +94,7 @@
             <td>${(t.weight*100).toFixed(0)}%</td>
             <td class="points ${cls}">${fmt(t.points)}</td>
           </tr>
-          <tr class="mdetail" data-key="${t.name}"><td colspan="4"><div class="mdesc"><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td></tr>
+          <tr class="mdetail" data-key="${t.name}"><td colspan="4"><div class="mdesc" hidden><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td></tr>
         `;
       }
       return `<tr>
@@ -283,7 +283,14 @@
         if (!btn) return;
         const key = btn.getAttribute('data-key');
         const row = horizons.querySelector(`tr.mdetail[data-key="${key}"]`);
-        if (row) row.classList.toggle('open');
+        if (row) {
+          row.classList.toggle('open');
+          const box = row.querySelector('.mdesc');
+          if (box) {
+            const isHidden = box.hasAttribute('hidden');
+            if (isHidden) box.removeAttribute('hidden'); else box.setAttribute('hidden','');
+          }
+        }
       });
     }
   } catch (e) {
