@@ -229,6 +229,33 @@
       return `${sec}s`;
     }
 
+    function roundUpTo(nextBaseMs, intervalMs) {
+      return Math.ceil(nextBaseMs / intervalMs) * intervalMs;
+    }
+
+    // Compute next cron-like boundaries in UTC
+    function nextBoundaryUtc(nowMs, minutesStep) {
+      const d = new Date(nowMs);
+      const m = d.getUTCMinutes();
+      const nextM = minutesStep * Math.ceil((m + d.getUTCSeconds()/60) / minutesStep);
+      const next = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), nextM, 0, 0));
+      return next.getTime();
+    }
+
+    function nextDailyUtc(nowMs) {
+      const d = new Date(nowMs);
+      const next = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()+1, 0, 0, 0, 0));
+      return next.getTime();
+    }
+
+    function nextWeeklyUtc(nowMs) {
+      const d = new Date(nowMs);
+      const day = d.getUTCDay();
+      const daysUntilMonday = (8 - day) % 7; // Monday = 1
+      const next = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + daysUntilMonday, 0, 0, 0, 0));
+      return next.getTime();
+    }
+
     let lastPriceUtc = null;
     async function updateLastPriceTime() {
       try {
@@ -245,16 +272,22 @@
     function tick() {
       const now = Date.now();
       timers.forEach(t => {
-        let nextIn = null;
-        if (t.key === 'price' && lastPriceUtc) {
-          const next = lastPriceUtc + t.intervalMs;
-          nextIn = next - now;
-        } else {
-          // Fallback: just show interval
-          nextIn = t.intervalMs;
+        let nextTs;
+        if (t.key === 'price') {
+          // next 0,15,30,45 minute in UTC
+          nextTs = nextBoundaryUtc(now, 15);
+        } else if (t.key === 'news') {
+          nextTs = nextBoundaryUtc(now, 10);
+        } else if (t.key === 'snapshot') {
+          nextTs = nextBoundaryUtc(now, 60);
+        } else if (t.key === 'daily') {
+          nextTs = nextDailyUtc(now);
+        } else if (t.key === 'weekly') {
+          nextTs = nextWeeklyUtc(now);
         }
+        const nextIn = nextTs - now;
         const el = document.getElementById(`timer_${t.key}`);
-        if (el) el.textContent = `next in ${fmtCountdown(nextIn)}`;
+        if (el) el.textContent = nextIn <= 0 ? 'running…' : `next in ${fmtCountdown(nextIn)}`;
       });
     }
     tick();
