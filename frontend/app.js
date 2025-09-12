@@ -28,10 +28,18 @@
   };
 
   async function fetchSnapshot() {
+    const base = (typeof window !== 'undefined' ? window.location.pathname.replace(/\/[^/]*$/, '') : '') || '';
     const candidates = [
+      // Relative paths (local dev / file server)
+      `${base}/data/public/model_snapshot.json`,
       '/data/public/model_snapshot.json',
       '../data/public/model_snapshot.json',
-      'data/public/model_snapshot.json'
+      'data/public/model_snapshot.json',
+      // GitHub Pages site path
+      '/mstr-advisor/data/public/model_snapshot.json',
+      // Raw GitHub fallbacks
+      'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/main/data/public/model_snapshot.json',
+      'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/revamp/data/public/model_snapshot.json'
     ].map(u => u + (u.includes('?') ? '' : `?t=${Date.now()}`));
     for (const url of candidates) {
       try {
@@ -235,22 +243,27 @@
         ctx2.lineTo(xScale.right, y);
         ctx2.stroke();
         ctx2.setLineDash([]);
+        const diff = (prevClose != null) ? (livePrice - prevClose) : 0;
+        const up = diff >= 0;
         const txt = `$${livePrice.toFixed(2)}`;
         ctx2.font = '12px system-ui, -apple-system, Segoe UI, Roboto';
-        const w = ctx2.measureText(txt).width + 10;
-        const h = 18;
-        ctx2.fillStyle = 'rgba(74,163,255,0.85)';
+        const w = ctx2.measureText(txt).width + 14;
+        const h = 20;
+        // glassy pill with subtle shadow, green/red based on move vs prev close
+        ctx2.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx2.shadowBlur = 8;
+        ctx2.fillStyle = up ? 'rgba(46, 204, 113, 0.9)' : 'rgba(231, 76, 60, 0.9)';
         ctx2.strokeStyle = 'rgba(255,255,255,0.25)';
         if (typeof ctx2.roundRect === 'function') {
           ctx2.beginPath();
-          ctx2.roundRect(x - w, y - h/2, w, h, 6);
+          ctx2.roundRect(x - w, y - h/2, w, h, 10);
           ctx2.fill();
           ctx2.stroke();
         } else {
           ctx2.fillRect(x - w, y - h/2, w, h);
         }
         ctx2.fillStyle = '#0b0d10';
-        ctx2.fillText(txt, x - w + 5, y + 4);
+        ctx2.fillText(txt, x - w + 7, y + 5);
         ctx2.restore();
       }
     };
