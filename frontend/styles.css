@@ -29,6 +29,7 @@ tr:hover{background:rgba(255,255,255,.04)}
 .legend{display:flex;gap:14px;flex-wrap:wrap}
 .legend .item{display:flex;align-items:center;gap:6px;color:var(--muted)}
 .legend .swatch{width:12px;height:12px;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.legend-desc{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.6}
 
 /* accordion */
 .accordion details{border-top:1px solid rgba(255,255,255,.06);padding:10px 0}
@@ -40,7 +41,7 @@ tr:hover{background:rgba(255,255,255,.04)}
 
 /* tooltips */
 .tooltip{position:relative;display:inline-block;cursor:help}
-.tooltip:hover .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
+.tooltip:hover .tip,.tooltip:focus .tip,.tooltip:active .tip{opacity:1;pointer-events:auto;transform:translate(8px,-50%)}
 .tip{position:absolute;left:100%;top:50%;background:rgba(15,20,29,.92);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px 18px;min-width:320px;max-width:520px;color:var(--text);box-shadow:0 24px 48px rgba(0,0,0,.5);backdrop-filter:blur(16px);opacity:0;transition:opacity .15s ease,transform .15s ease;z-index:999}
 .tooltip.top .tip{left:0;top:auto;bottom:100%}
 .tooltip.top:hover .tip{transform:translateY(-8px)}
