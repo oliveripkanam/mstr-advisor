@@ -6,6 +6,7 @@ body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(120
 .container{max-width:1100px;margin:24px auto;padding:0 16px}
 h1{margin:0 0 8px;font-size:22px}h2{margin:0 0 12px;font-size:18px}
 .muted{color:var(--muted)}
+.notice{color:#e8eef6;font-weight:600}
 .card{background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:16px;margin:16px 0;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08)}
 .row{display:flex;gap:16px;flex-wrap:wrap}.col{flex:1 1 160px;display:flex;flex-direction:column;gap:4px}
 .label{color:var(--muted);font-size:12px}.value{font-size:16px}

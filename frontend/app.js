@@ -53,7 +53,8 @@
   }
 
   function renderSummary(d) {
-    document.getElementById('asof').textContent = `as of ${d.asof}`;
+    const hk = (new Date(d.asof)).toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
+    document.getElementById('asof').innerHTML = `Last update: <strong>${hk} HKT</strong>`;
     const actionEl = document.getElementById('action');
     actionEl.textContent = d.blended.action;
     actionEl.className = 'badge ' + (d.blended.score > 10 ? 'pos' : d.blended.score < -10 ? 'neg' : 'neutral');
@@ -241,16 +242,22 @@
         'data/public/hot.json'
       ].map(u => u + `?t=${Date.now()}`);
       for (const url of urls) {
-        try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) return r.json(); } catch (_) {}
+        try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) return { url, json: await r.json() }; } catch (_) {}
       }
       return null;
     }
 
     async function refreshLive() {
-      const hot = await fetchHot();
+      const res = await fetchHot();
+      const hot = res && res.json;
       if (hot && typeof hot.price === 'number') {
         livePrice = hot.price;
         if (typeof hot.prev_close === 'number') prevClose = hot.prev_close;
+        const hk = (new Date(hot.asof_utc || Date.now())).toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
+        const src = res.url.replace(/\?t=.*/, '');
+        const asofEl = document.getElementById('asof');
+        asofEl.innerHTML = `Last update: <strong>${hk} HKT</strong> · <a href="${src}" target="_blank" rel="noopener">price source</a>`;
+        asofEl.classList.add('notice');
         chart.draw();
       }
     }
