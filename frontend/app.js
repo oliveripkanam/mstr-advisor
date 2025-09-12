@@ -28,19 +28,21 @@
   };
 
   async function fetchSnapshot() {
-    const base = (typeof window !== 'undefined' ? window.location.pathname.replace(/\/[^/]*$/, '') : '') || '';
-    const candidates = [
-      // Relative paths (local dev / file server)
-      `${base}/data/public/model_snapshot.json`,
-      '/data/public/model_snapshot.json',
-      '../data/public/model_snapshot.json',
+    const isPages = typeof window !== 'undefined' && /github\.io$/.test(window.location.hostname);
+    const repo = 'mstr-advisor';
+    const basePath = isPages ? `/${repo}` : '';
+    const localList = [
+      `${basePath}/data/public/model_snapshot.json`,
       'data/public/model_snapshot.json',
-      // GitHub Pages site path
-      '/mstr-advisor/data/public/model_snapshot.json',
-      // Raw GitHub fallbacks
+      '../data/public/model_snapshot.json'
+    ];
+    const pagesOnly = [`/${repo}/data/public/model_snapshot.json`];
+    const rawList = [
       'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/main/data/public/model_snapshot.json',
       'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/revamp/data/public/model_snapshot.json'
-    ].map(u => u + (u.includes('?') ? '' : `?t=${Date.now()}`));
+    ];
+    const candidates = (isPages ? [...pagesOnly, ...rawList] : [...localList, ...rawList])
+      .map(u => u + (u.includes('?') ? '' : `?t=${Date.now()}`));
     for (const url of candidates) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
