@@ -213,7 +213,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#e8eef6' } }, tooltip: { mode: 'index', intersect: false } },
+        plugins: { legend: { labels: { color: '#e8eef6' } }, tooltip: { enabled: false } },
         scales: {
           x: { ticks: { color: '#9fb0c3', maxTicksLimit: 8 }, grid: { display: false } },
           y: { ticks: { color: '#9fb0c3' }, grid: { color: '#1f2633' } }
