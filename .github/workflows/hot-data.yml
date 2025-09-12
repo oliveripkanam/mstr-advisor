@@ -44,13 +44,17 @@ jobs:
 
       - name: Commit and push hot.json to hotdata
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
           mkdir -p hotdata/data/public
           cp -f data/public/hot.json hotdata/data/public/hot.json
           cd hotdata
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/public/hot.json
-          git commit -m "hot: update price [skip ci]" || echo "No changes"
-          git push origin HEAD:hotdata
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "hot: update price [skip ci]"
+            git push origin HEAD:hotdata
+          fi
 
 
