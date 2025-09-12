@@ -333,7 +333,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#e8eef6' } }, tooltip: { enabled: false } },
+        plugins: { legend: { labels: { color: '#e8eef6' } }, tooltip: { enabled: true, mode: 'index', intersect: false } },
         scales: {
           x: { ticks: { color: '#9fb0c3', maxTicksLimit: 8 }, grid: { display: false } },
           y: { ticks: { color: '#9fb0c3' }, grid: { color: '#1f2633' } }
@@ -343,11 +343,18 @@
 
     async function fetchHot() {
       const isPages = typeof window !== 'undefined' && /github\.io$/.test(window.location.hostname);
-      const repo = 'mstr-advisor';
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const repoPath = '/mstr-advisor';
+      const pagesAbs = `${origin}${repoPath}/data/public/hot.json`;
+      const pagesRel = `${repoPath}/data/public/hot.json`;
       const urls = [
+        // Prefer Pages-hosted file (absolute then relative)
+        pagesAbs,
+        pagesRel,
+        // Then raw branches
         'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/hotdata/data/public/hot.json',
         'https://raw.githubusercontent.com/oliveripkanam/mstr-advisor/main/data/public/hot.json',
-        isPages ? `/mstr-advisor/data/public/hot.json` : '/data/public/hot.json',
+        // Finally, local relative fallbacks (for localhost dev)
         'data/public/hot.json',
         '../data/public/hot.json'
       ].map(u => u + `?t=${Date.now()}`);
