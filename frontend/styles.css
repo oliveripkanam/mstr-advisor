@@ -71,7 +71,8 @@ tr:hover{background:rgba(255,255,255,.04)}
   .row{gap:12px}
   .col{flex:1 1 calc(50% - 12px)}
   canvas#chart{height:200px !important}
-  .tip{min-width:260px;max-width:92vw}
+  .tip{left:50% !important;right:auto;top:auto;bottom:100%;min-width:auto;max-width:92vw;transform:translate(-50%,-8px)}
+  .tooltip:hover .tip,.tooltip:focus .tip,.tooltip:active .tip{transform:translate(-50%,-8px)}
   .eq-total{position:static}
 }
 
