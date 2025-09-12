@@ -181,19 +181,52 @@
       borderWidth: 1.6,
       pointRadius: 0,
     });
-    // live price cache
+    // live and previous close caches
     let livePrice = null;
+    let prevClose = null;
 
     // plugin to draw live marker after datasets render
     const liveMarkerPlugin = {
       id: 'liveMarker',
       afterDraw(c) {
-        if (livePrice == null) return;
         const yScale = c.scales.y;
         const xScale = c.scales.x;
+        const ctx2 = c.ctx;
+
+        // Draw previous close reference if available
+        if (prevClose != null) {
+          const y0 = yScale.getPixelForValue(prevClose);
+          ctx2.save();
+          ctx2.strokeStyle = 'rgba(158, 173, 190, 0.35)';
+          ctx2.setLineDash([4,4]);
+          ctx2.beginPath();
+          ctx2.moveTo(xScale.left, y0);
+          ctx2.lineTo(xScale.right, y0);
+          ctx2.stroke();
+          ctx2.setLineDash([]);
+          const label = `Prev close  $${prevClose.toFixed(2)}`;
+          ctx2.font = '12px system-ui, -apple-system, Segoe UI, Roboto';
+          const w0 = ctx2.measureText(label).width + 12;
+          const h0 = 18;
+          const x0 = xScale.right - 6;
+          ctx2.fillStyle = 'rgba(229, 233, 239, 0.75)';
+          ctx2.strokeStyle = 'rgba(255,255,255,0.2)';
+          if (typeof ctx2.roundRect === 'function') {
+            ctx2.beginPath();
+            ctx2.roundRect(x0 - w0, y0 - h0/2, w0, h0, 6);
+            ctx2.fill();
+            ctx2.stroke();
+          } else {
+            ctx2.fillRect(x0 - w0, y0 - h0/2, w0, h0);
+          }
+          ctx2.fillStyle = '#0b0d10';
+          ctx2.fillText(label, x0 - w0 + 6, y0 + 4);
+          ctx2.restore();
+        }
+
+        if (livePrice == null) return;
         const y = yScale.getPixelForValue(livePrice);
         const x = xScale.right - 6;
-        const ctx2 = c.ctx;
         ctx2.save();
         ctx2.strokeStyle = 'rgba(74,163,255,0.5)';
         ctx2.setLineDash([6,4]);
@@ -263,10 +296,18 @@
       const hot = await fetchHot();
       if (hot && typeof hot.price === 'number') {
         livePrice = hot.price;
+        if (typeof hot.prev_close === 'number') prevClose = hot.prev_close;
         chart.draw();
       }
     }
 
+    // Initialize markers from last close so there is always a label
+    const closeSeries = (d.series?.close || []).map(p => p.v).filter(v => typeof v === 'number');
+    if (closeSeries.length > 0) {
+      prevClose = closeSeries[closeSeries.length - 1];
+      livePrice = prevClose;
+      chart.draw();
+    }
     refreshLive();
     setInterval(refreshLive, 60000);
   }

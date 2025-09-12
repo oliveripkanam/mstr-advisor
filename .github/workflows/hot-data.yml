@@ -35,16 +35,22 @@ jobs:
         run: |
           python backend/app/hot_data.py
 
-      - name: Switch to hotdata branch
+      - name: Checkout hotdata branch into subdir
+        uses: actions/checkout@v4
+        with:
+          ref: hotdata
+          fetch-depth: 0
+          path: hotdata
+
+      - name: Commit and push hot.json to hotdata
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git fetch origin hotdata:hotdata || true
-          git checkout hotdata || git checkout --orphan hotdata
-          mkdir -p data/public
-          cp -f data/public/hot.json data/public/hot.json
+          mkdir -p hotdata/data/public
+          cp -f data/public/hot.json hotdata/data/public/hot.json
+          cd hotdata
           git add data/public/hot.json
           git commit -m "hot: update price [skip ci]" || echo "No changes"
-          git push origin hotdata
+          git push origin HEAD:hotdata
 
 
