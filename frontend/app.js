@@ -250,9 +250,11 @@
     async function refreshLive() {
       const res = await fetchHot();
       const hot = res && res.json;
-      if (hot && typeof hot.price === 'number') {
-        livePrice = hot.price;
-        if (typeof hot.prev_close === 'number') prevClose = hot.prev_close;
+      if (hot) {
+        const p = typeof hot.price === 'number' ? hot.price : (typeof hot.last_price === 'number' ? hot.last_price : null);
+        if (typeof p === 'number') livePrice = p;
+        const pc = typeof hot.prev_close === 'number' ? hot.prev_close : (typeof hot.previous_close === 'number' ? hot.previous_close : null);
+        if (typeof pc === 'number') prevClose = pc;
         const asofDate = new Date(hot.asof_utc || Date.now());
         const hk = asofDate.toLocaleString('en-GB', { timeZone: 'Asia/Hong_Kong', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',', '');
         const src = res.url.replace(/\?t=.*/, '');
