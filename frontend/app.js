@@ -85,18 +85,20 @@
     document.getElementById('p_d').textContent = `${fmt(pd.predicted_close)} (${fmt((pd.expected_return||0)*100)}%)`;
     document.getElementById('p_w').textContent = `${fmt(pw.predicted_close)} (${fmt((pw.expected_return||0)*100)}%)`;
     document.getElementById('p_m').textContent = `${fmt(pm.predicted_close)} (${fmt((pm.expected_return||0)*100)}%)`;
-    document.getElementById('p_b').textContent = `±${fmt(pd.vol_band)} (D), ±${fmt(pw.vol_band)} (W), ±${fmt(pm.vol_band)} (M)`;
+    const bands = `50%: ±${fmt(pd.band50)} (D), ±${fmt(pw.band50)} (W), ±${fmt(pm.band50)} (M) · 80%: ±${fmt(pd.band80)} (D), ±${fmt(pw.band80)} (W), ±${fmt(pm.band80)} (M) · Median move: ${fmt((pd.median_move_pct||0)*100)}% (D)`;
+    document.getElementById('p_b').textContent = bands;
   }
 
   function toTable(terms) {
     const rows = terms.map((t) => {
       const cls = colorCls(t.points);
       const meta = TERM_INFO[t.name] || { title: t.name, desc: '' };
-      const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}`;
+      const staleBadge = t.stale ? ' <span class="badge neutral" title="Stale for its expected cadence">Stale</span>' : '';
+      const tip = `${meta.desc}\nCurrent: ${fmt(t.value)}  |  Weight: ${(t.weight*100).toFixed(0)}%  |  Points: ${fmt(t.points)}\nCadence: ${t.cadence_label}${t.stale ? ' (stale)' : ''}`;
       if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
         return `
           <tr class="mrow" data-key="${t.name}">
-            <td><button class="mterm" data-key="${t.name}">${meta.title}</button></td>
+            <td><button class="mterm" data-key="${t.name}">${meta.title}${staleBadge}</button></td>
             <td>${fmt(t.value)}</td>
             <td>${(t.weight*100).toFixed(0)}%</td>
             <td class="points ${cls}">${fmt(t.points)}</td>
@@ -105,7 +107,7 @@
         `;
       }
       return `<tr>
-        <td class="tooltip" tabindex="0"><span>${meta.title}</span><div class="tip"><button class="tip-close" aria-label="Close">×</button><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
+        <td class="tooltip" tabindex="0"><span>${meta.title}${staleBadge}</span><div class="tip"><button class="tip-close" aria-label="Close">×</button><div class="title">${meta.title}</div><div class="desc">${tip.replace(/\n/g,'<br/>')}</div></div></td>
         <td>${fmt(t.value)}</td>
         <td>${(t.weight*100).toFixed(0)}%</td>
         <td class="points ${cls}">${fmt(t.points)}</td>
@@ -144,6 +146,17 @@
     const blend = d.blended?.weights || { daily: 0.5, weekly: 0.3, monthly: 0.2 };
     const host = document.getElementById('math_eq');
     host.innerHTML = '';
+    // Confidence chip
+    const conf = d.meta && d.meta.confidence ? d.meta.confidence : null;
+    if (conf) {
+      const chip = document.createElement('div');
+      chip.className = 'eq-line';
+      const v = typeof conf.value === 'number' ? conf.value : 0;
+      const lab = conf.label || '';
+      const cls = v >= 0.66 ? 'pos' : v < 0.33 ? 'neg' : 'neutral';
+      chip.innerHTML = `<div class="eq-name">Confidence</div><div class="eq-pills"><div class="pill ${cls}">${(v*100).toFixed(0)}% · ${lab}</div></div>`;
+      host.appendChild(chip);
+    }
 
     const mkLine = (label, obj) => {
       const line = document.createElement('div');
