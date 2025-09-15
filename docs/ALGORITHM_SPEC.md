@@ -60,7 +60,7 @@ All raw indicators are normalized (z‑score or percent‑rank), then clipped to
 
 ### 5) Data Inputs
 
-- MSTR, BTC‑USD, QQQ (or SPY), VIX, USD (DXY or UUP) daily OHLCV
+- MSTR, BTC‑USD, QQQ (or SPY), VIX, USD (DXY or UUP) daily OHLCV; live price uses pre/regular/post sessions when available
 - Rolling indicators: 20/50/200DMA, slopes, RSI, ROC, ATR%, Bollinger %B
 - Regimes/correlations: MSTR↔BTC, MSTR↔QQQ (rolling betas)
 - News sentiment: keyword‑based, aggregated over 24h/7d/30d

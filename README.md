@@ -14,7 +14,7 @@ Small, transparent stock monitor for MSTR. One page, live price marker, explaina
 - Update cadence card so users know what’s fresh
 
 ## How data updates
-- Price: `data/public/hot.json` every minute (GitHub Actions → `hotdata` branch). Frontend polls raw file.
+- Price: `data/public/hot.json` every minute (pre/regular/post hours). Frontend polls the raw file from the `hotdata` branch.
 - Snapshot/Features: built from daily OHLCV + cross‑asset; by default refreshed EOD (can run hourly if wanted).
 - Weekly ML + backtests: heavier jobs; kept to weekends.
 

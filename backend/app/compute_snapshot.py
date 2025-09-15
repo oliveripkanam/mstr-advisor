@@ -327,33 +327,16 @@ def main() -> None:
     # Volatility-scaled expected move predictions (interpretable):
     # expected_return_h = tanh(score/25) * atr_pct * sqrt(horizon_days)
     atr_pct_last = float(common['atr_pct'].iloc[-1]) if len(common['atr_pct']) else 0.0
-    # Realized median absolute daily return for band calibration
-    abs_ret = df_mstr['close'].pct_change().abs().dropna()
-    med_abs_ret = float(abs_ret.median()) if len(abs_ret) else 0.0
-
     def predict_from_score(score_pts: float, horizon_days: int) -> Dict[str, float]:
         scale = np.sqrt(max(horizon_days, 1))
         tilt = np.tanh(score_pts / 25.0)
         exp_ret = float(tilt * atr_pct_last * scale)
         pred_close = float(latest_close * (1.0 + exp_ret))
-        # Treat sigma prox as ATR%-scaled move
-        sigma_price = float(latest_close * atr_pct_last * scale)
-        # Normal quantiles for central intervals
-        z50 = 0.674
-        z80 = 1.282
-        band50 = float(z50 * sigma_price)
-        band80 = float(z80 * sigma_price)
-        # Median move from realized median absolute return
-        median_move_pct = float(med_abs_ret * scale)
-        median_move_price = float(latest_close * median_move_pct)
+        band = float(latest_close * atr_pct_last * scale)
         return {
             'expected_return': round(exp_ret, 4),
             'predicted_close': round(pred_close, 2),
-            'sigma_price': round(sigma_price, 2),
-            'band50': round(band50, 2),
-            'band80': round(band80, 2),
-            'median_move_pct': round(median_move_pct, 4),
-            'median_move_price': round(median_move_price, 2)
+            'vol_band': round(band, 2)
         }
 
     # Build compact series for charting (last 180 trading days)
@@ -377,115 +360,8 @@ def main() -> None:
         'ma60': series_of(common['ma60'])
     }
 
-    # Build inputs freshness meta
-    now_utc = datetime.now(timezone.utc)
-    def ts_of(df: pd.DataFrame) -> datetime:
-        if df.index.size == 0:
-            return now_utc
-        ts = df.index[-1]
-        if isinstance(ts, pd.Timestamp):
-            if ts.tzinfo is None:
-                ts = ts.tz_localize(timezone.utc)
-            else:
-                ts = ts.tz_convert(timezone.utc)
-            return ts.to_pydatetime()
-        return now_utc
-
-    inputs_meta = {
-        'MSTR': ts_of(df_mstr),
-        'BTC-USD': ts_of(df_btc),
-        'QQQ': ts_of(df_qqq),
-        '^VIX': ts_of(df_vix),
-        'UUP': ts_of(df_uup)
-    }
-    inputs = {}
-    for k, ts in inputs_meta.items():
-        age = (now_utc - ts).total_seconds()
-        inputs[k] = {
-            'asof': ts.strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'age_sec': int(age)
-        }
-
-    CADENCE = {
-        'daily': {'label': 'Daily', 'max_age_sec': 36*3600},
-        'weekly': {'label': 'Weekly', 'max_age_sec': 8*24*3600},
-        'monthly': {'label': 'Monthly', 'max_age_sec': 32*24*3600}
-    }
-    TERM_CADENCE = {
-        # daily
-        'btc_1d_beta': 'daily',
-        'trend_short': 'daily',
-        'momentum': 'daily',
-        'mean_reversion': 'daily',
-        'vix_risk': 'daily',
-        'usd_risk': 'daily',
-        'tech_beta': 'daily',
-        'atr_penalty': 'daily',
-        'news_short': 'daily',
-        # weekly
-        'btc_1w_regime': 'weekly',
-        'trend_struct': 'weekly',
-        'macro_risk': 'weekly',
-        'momentum_week': 'weekly',
-        'wk52_structure': 'weekly',
-        'news_week': 'weekly',
-        'market_beta_week': 'weekly',
-        # monthly
-        'btc_1m_regime': 'monthly',
-        'trend_long': 'monthly',
-        'momentum_quarter': 'monthly',
-        'atr_penalty_month': 'monthly',
-        'news_month': 'monthly',
-        'market_beta_month': 'monthly',
-        'macro_risk_month': 'monthly'
-    }
-
-    # Post-process term lists to add cadence and staleness
-    def enrich_terms(contribs: List[TermContribution]) -> List[Dict[str, float]]:
-        out: List[Dict[str, float]] = []
-        for c in contribs:
-            d = c.__dict__.copy()
-            cad_key = TERM_CADENCE.get(c.name, 'daily')
-            d['cadence'] = cad_key
-            d['cadence_label'] = CADENCE[cad_key]['label']
-            # Staleness by cadence window
-            max_age = CADENCE[cad_key]['max_age_sec']
-            # Use MSTR input age as baseline; if macro term, consider its input too
-            ref_ages = [inputs['MSTR']['age_sec']]
-            if 'btc' in c.name:
-                ref_ages.append(inputs['BTC-USD']['age_sec'])
-            if 'market_beta' in c.name or 'tech_beta' in c.name:
-                ref_ages.append(inputs['QQQ']['age_sec'])
-            if 'vix' in c.name or 'macro' in c.name:
-                ref_ages.append(inputs['^VIX']['age_sec'])
-            if 'usd' in c.name:
-                ref_ages.append(inputs['UUP']['age_sec'])
-            stale = max(ref_ages) > max_age
-            d['stale'] = bool(stale)
-            out.append(d)
-        return out
-
-    daily_terms_en = enrich_terms(daily_contribs)
-    weekly_terms_en = enrich_terms(weekly_contribs)
-    monthly_terms_en = enrich_terms(monthly_contribs)
-
-    # Confidence metric 0..1
-    # Base from volatility
-    base = 1.0 - min(max(atr_pct_last / 0.10, 0.0), 1.0)  # 10% ATR% -> low confidence
-    # Stale penalty across all terms
-    all_terms = daily_terms_en + weekly_terms_en + monthly_terms_en
-    stale_ratio = float(sum(1 for t in all_terms if t.get('stale'))) / float(max(len(all_terms), 1))
-    stale_pen = 0.25 * stale_ratio
-    # Horizon disagreement
-    scores = np.array([daily_score, weekly_score, monthly_score], dtype=float)
-    disagreement = float(np.std(scores) / 40.0)  # normalize by a broad 40pt scale
-    disagreement = min(max(disagreement, 0.0), 1.0)
-    conf = base - stale_pen - 0.25 * disagreement
-    conf = float(min(max(conf, 0.0), 1.0))
-    conf_label = 'High' if conf >= 0.66 else ('Medium' if conf >= 0.33 else 'Low')
-
     snapshot = {
-        'asof': now_utc.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'asof': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'levels': {
             'price': round(latest_close, 2),
             'ma20': round(latest_ma20, 2) if latest_ma20 else None,
@@ -495,15 +371,15 @@ def main() -> None:
         'horizons': {
             'daily': {
                 'score': round(daily_score, 2),
-                'terms': daily_terms_en
+                'terms': [c.__dict__ for c in daily_contribs]
             },
             'weekly': {
                 'score': round(weekly_score, 2),
-                'terms': weekly_terms_en
+                'terms': [c.__dict__ for c in weekly_contribs]
             },
             'monthly': {
                 'score': round(monthly_score, 2),
-                'terms': monthly_terms_en
+                'terms': [c.__dict__ for c in monthly_contribs]
             }
         },
         'predictions': {
@@ -517,51 +393,15 @@ def main() -> None:
             'thresholds': thresholds,
             'weights': weights['blend']
         },
-        'plan': trade,
-        'meta': {
-            'inputs': inputs,
-            'cadence': CADENCE,
-            'confidence': {
-                'value': round(conf, 2),
-                'label': conf_label,
-                'reasons': {
-                    'high_volatility': atr_pct_last >= 0.10,
-                    'stale_terms_ratio': round(stale_ratio, 2),
-                    'horizon_disagreement': round(disagreement, 2)
-                }
-            }
-        }
+        'plan': trade
     }
 
-    # Compute version hash
-    snapshot_clean = replace_nonfinite(snapshot)
-    payload = json.dumps(snapshot_clean, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
-    try:
-        import hashlib
-        sha256 = hashlib.sha256(payload).hexdigest()
-    except Exception:
-        sha256 = None
-    snapshot_clean['version'] = {
-        'sha256': sha256,
-        'git_sha': os.getenv('GITHUB_SHA'),
-        'generated_at': snapshot_clean['asof']
-    }
-
-    # Write latest
     out_path = os.path.join('data', 'public', 'model_snapshot.json')
     ensure_dirs(out_path)
+    snapshot_clean = replace_nonfinite(snapshot)
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(snapshot_clean, f, ensure_ascii=False)
     print(f"Wrote {out_path}")
-
-    # Append-only daily archive with timestamped filename
-    day_dir = os.path.join('data', 'public', 'snapshots', now_utc.strftime('%Y-%m-%d'))
-    ensure_dirs(os.path.join(day_dir, 'x'))  # ensure folder
-    ts_name = now_utc.strftime('model_snapshot_%Y%m%d_%H%M%SZ.json')
-    day_file = os.path.join(day_dir, ts_name)
-    with open(day_file, 'w', encoding='utf-8') as f:
-        json.dump(snapshot_clean, f, ensure_ascii=False)
-    print(f"Archived {day_file}")
 
 
 if __name__ == '__main__':
