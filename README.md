@@ -1,43 +1,41 @@
 
-  # MSTR/BTC Monitor Dashboard
+  # MSTR/BTC Monitor
 
-  This is a code bundle for MSTR/BTC Monitor Dashboard. The original project is available at https://www.figma.com/design/LNZbekZWrANga4WFmjyB4a/MSTR-BTC-Monitor-Dashboard.
+  A simple, focused dashboard for watching Bitcoin and MicroStrategy side‑by‑side, plus a handful of useful reads at a glance. No fluff.
 
-  ## Running the code
+  ## What you’ll see
 
-  Run `npm i` to install the dependencies.
+  - Two charts up top
+    - BTC on the left, MSTR on the right. Timeframe buttons across the header (1m → 1D).
+    - Hit “Compare” to view both charts together and use TradingView’s compare tools.
+    - Theme toggle flips everything between dark/light.
 
-  Run `npm run dev` to start the development server.
-  
-  ## TradingView chart
-  
-  The top chart now embeds the official TradingView widget (tv.js). It auto-maps:
-  
-  - BTC → BINANCE:BTCUSDT (no API key needed)
-  - MSTR → NASDAQ:MSTR
-  - Timeframes like 1m/5m/15m/1h/4h/1D → the corresponding TradingView intervals
-  - Theme follows the app theme toggle (dark/light)
-  
-  Compare mode can be enabled from the chart toolbar. The app also exposes a "Compare" toggle which turns on the ability to add overlays from the TV UI.
-  
-  No credentials are required and this widget works on localhost and GitHub Pages by default.
+  - Quick tiles
+    - Mini snapshots for BTC, MSTR, and the MSTR/BTC ratio.
+    - The tiny squiggles show recent direction; click a tile to focus that symbol.
 
-  ## Live MSTR data (Yahoo) and CORS
+  - Perp Funding + OI (BTC)
+    - Funding rate with a compact sparkline and open interest context.
+    - Reads live from Binance and refreshes automatically.
 
-  Yahoo Finance blocks browser requests with CORS in production. For a reliable setup:
+  - Short‑term Momentum (BTC)
+    - A blended take from common indicators (RSI/MACD/ROC) across a few timeframes.
+    - Updates regularly and surfaces a simple “how it feels right now”.
 
-  - Local dev: already proxied via Vite. Nothing to configure; just run `npm run dev`.
-  - Production: deploy the included Cloudflare Worker to proxy Yahoo and set the frontend env.
+  - Support/Resistance + Targets (BTC)
+    - Finds nearby levels using swing points, volume hotspots, and simple fibs.
+    - Merges confluence, shows distance, a rough probability, and a target in that direction.
 
-  Steps:
-  1. Deploy proxy-worker
-    - cd `proxy-worker`
-    - Install Wrangler once globally if needed
-    - Run `npm run deploy` (or `npm run dev` to test locally)
-  2. Copy the Worker URL (e.g., https://mstr-yahoo-proxy.<account>.workers.dev)
-  3. Create `.env` at repo root and set:
-    - `VITE_YAHOO_PROXY_URL=<your worker url>`
-  4. Build and deploy the site. The app will use the proxy in production automatically.
+  ## How to use it
 
-  Optional: In `proxy-worker/wrangler.toml`, set `ALLOWED_ORIGINS` to restrict which sites can call your proxy.
+  - Pick a timeframe in the header; both charts follow.
+  - Toggle dark/light if you prefer a different look.
+  - Click tiles to switch focus; use Compare when you want both.
+  - Skim the cards below the charts for quick positioning—no need to deep dive unless you want to.
+
+  ## Notes
+
+  - Data is kept lean and refreshes quickly. The BTC side uses public endpoints.
+  - Signals are intentionally compact—use them as a nudge, not gospel.
+  - If anything looks off, refresh the page; it’s meant to be resilient and fast.
   

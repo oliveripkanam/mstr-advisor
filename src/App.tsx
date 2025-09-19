@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import TradingViewWidget, { mapTimeframeToTVInterval } from "./components/TradingViewWidget";
 import { MonitorTiles } from "./components/MonitorTiles";
-// Liquidation heatmap removed
 import { MomentumIndicator } from "./components/MomentumIndicator";
 import PerpFundingOI from "./components/PerpFundingOI";
 import { SupportResistance } from "./components/SupportResistance";
@@ -13,21 +12,19 @@ export default function App() {
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(['15m']);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  // Initialize dark mode
+  // Apply theme to <html> element
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
-  const handleThemeToggle = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.add('light');
+      root.classList.remove('dark');
     }
-  };
+  }, [theme]);
+
+  const handleThemeToggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
   const handleTileClick = (symbol: string) => {
     if (symbol === 'Compare') {
@@ -38,12 +35,10 @@ export default function App() {
   };
 
   const handlePriceHover = (price: number) => {
-    // In a real implementation, this would highlight the price level on the chart
     console.log('Hover price:', price);
   };
 
   const handleTargetClick = (price: number) => {
-    // In a real implementation, this would set a price marker on the chart
     console.log('Target price:', price);
   };
 
@@ -58,8 +53,7 @@ export default function App() {
         onThemeToggle={handleThemeToggle}
       />
 
-      <main className="container px-4 pb-8">
-        {/* TradingView Chart Section */}
+      <main className="w-full max-w-none px-0 pb-8">
         <div className="mt-6">
           {(() => {
             const hasCompare = selectedSymbols.includes('Compare');
@@ -70,9 +64,8 @@ export default function App() {
             const interval = mapTimeframeToTVInterval(tf);
 
             if (hasCompare) {
-              // Render two synced charts side by side for clarity
               return (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4">
                   <TradingViewWidget
                     symbol={primarySymbol}
                     interval={interval}
@@ -112,11 +105,9 @@ export default function App() {
           })()}
         </div>
 
-  {/* Monitor Tiles Section */}
   <MonitorTiles onTileClick={handleTileClick} timeframe={(selectedTimeframes[0] as any) ?? '15m'} />
 
-        {/* Analytics Grid Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-4">
           {/* Top Row: Perp Funding + OI */}
           <div className="lg:col-span-2">
             <PerpFundingOI />

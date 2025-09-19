@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/card';
 
-// Minimal, dependency-light card that shows Funding + OI for BTC perps on Binance only.
-// Polls every 30s; shows a compact sparkline from Binance 5m OI history.
-
 interface SeriesPoint { ts: number; value: number; }
 
 interface Snapshot {
@@ -40,7 +37,6 @@ export default function PerpFundingOI() {
   const [snap, setSnap] = useState<Snapshot>({});
   const [oiSeries, setOiSeries] = useState<SeriesPoint[]>([]);
 
-  // Fetch helpers use Vite dev proxies
   async function getJson(url: string) {
     const r = await fetch(url);
     if (!r.ok) throw new Error('fetch failed');
@@ -49,11 +45,9 @@ export default function PerpFundingOI() {
 
   async function fetchBinance() {
     try {
-      // Funding snapshot
       const prem = await getJson('/proxy/binance-fapi/fapi/v1/premiumIndex?symbol=BTCUSDT');
       const fundingRate8h = Number(prem?.lastFundingRate ?? prem?.lastFundingRate);
       const nextFundingTime = Number(prem?.nextFundingTime);
-      // Open Interest series (5m) — returns USDT notional directly
       const oiHist = await getJson('/proxy/binance-fapi/futures/data/openInterestHist?symbol=BTCUSDT&period=5m&limit=200');
       const series: SeriesPoint[] = Array.isArray(oiHist)
         ? oiHist.map((p: any) => ({ ts: Number(p.timestamp), value: Number(p.sumOpenInterestValue) }))
@@ -64,7 +58,6 @@ export default function PerpFundingOI() {
     } catch {}
   }
 
-  // Initial load + 5m backfill cadence, with a 30s snapshot refresh
   useEffect(() => { fetchBinance(); }, []);
   useInterval(() => { fetchBinance(); }, 30_000);
 
@@ -121,7 +114,6 @@ export default function PerpFundingOI() {
         </Card>
       </div>
 
-      {/* Compact sparkline with smoothing + subtle area fill */}
       <div className="rounded-sm border border-border p-1">
         {activeSeries.length === 0 ? (
           <div className="text-xs text-muted-foreground">No data yet. Waiting for exchange responses...</div>
