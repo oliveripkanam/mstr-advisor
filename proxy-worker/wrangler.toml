@@ -1,0 +1,10 @@
+name = "mstr-yahoo-proxy"
+main = "src/worker.ts"
+compatibility_date = "2025-09-19"
+
+[vars]
+# Optional: restrict to specific origins (comma-separated). Empty means allow all.
+ALLOWED_ORIGINS = "*"
+
+[observability]
+enabled = true

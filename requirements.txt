@@ -1,0 +1,4 @@
+# Core runtime deps for backend scripts
+numpy>=1.24,<2
+pandas>=2.0,<3
+yfinance>=0.2.40,<0.3

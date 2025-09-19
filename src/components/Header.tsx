@@ -1,0 +1,95 @@
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Moon, Sun } from "lucide-react";
+
+interface HeaderProps {
+  selectedSymbols: string[];
+  onSymbolChange: (symbols: string[]) => void;
+  selectedTimeframes: string[];
+  onTimeframeChange: (timeframes: string[]) => void;
+  theme: 'dark' | 'light';
+  onThemeToggle: () => void;
+}
+
+export function Header({ 
+  selectedSymbols, 
+  onSymbolChange, 
+  selectedTimeframes, 
+  onTimeframeChange, 
+  theme, 
+  onThemeToggle 
+}: HeaderProps) {
+  const symbols = ['BTC', 'MSTR', 'Compare'];
+  const timeframes = ['1m', '5m', '15m', '1h', '4h', '1D'];
+
+  const toggleSymbol = (symbol: string) => {
+    const hasCompare = selectedSymbols.includes('Compare');
+
+    if (symbol === 'Compare') {
+      // When Compare is pressed, neither BTC nor MSTR should be selected
+      const enable = !hasCompare;
+      onSymbolChange(enable ? ['Compare'] : []);
+      return;
+    }
+
+    // symbol is BTC or MSTR; make it exclusive; if Compare is currently on, turn it off
+    onSymbolChange([symbol]);
+  };
+
+  const toggleTimeframe = (timeframe: string) => {
+    // Single-select timeframe; always set the chosen one
+    onTimeframeChange([timeframe]);
+  };
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-14">
+      <div className="container flex h-14 items-center justify-between px-4">
+        <div className="flex items-center gap-6">
+          <h1 className="text-lg font-semibold">MSTR/BTC Monitor</h1>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Symbols:</span>
+            {symbols.map((symbol) => (
+              <Button
+                key={symbol}
+                variant={selectedSymbols.includes(symbol) ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleSymbol(symbol)}
+                className="h-8"
+              >
+                {symbol}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Timeframe:</span>
+            {timeframes.map((timeframe) => (
+              <Button
+                key={timeframe}
+                variant={selectedTimeframes.includes(timeframe) ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleTimeframe(timeframe)}
+                className="h-8 px-3"
+              >
+                {timeframe}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onThemeToggle}
+            className="h-8 w-8"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}

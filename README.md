@@ -1,43 +1,43 @@
-<p align="center">
-  <img src="mstrmonitorlogo.png" alt="MSTR Monitor" width="96" height="96" />
-</p>
 
-# MSTR Monitor
+  # MSTR/BTC Monitor Dashboard
 
-Small, transparent stock monitor for MSTR. One page, live price marker, explainable scoring, and clear cadences.
+  This is a code bundle for MSTR/BTC Monitor Dashboard. The original project is available at https://www.figma.com/design/LNZbekZWrANga4WFmjyB4a/MSTR-BTC-Monitor-Dashboard.
 
-## What it does
-- Shows price with MA20/MA60 and a 1‑minute live marker
-- Calculates daily/weekly/monthly scores with per‑term contributions
-- Displays trade plan (entry zone, stop, targets)
-- News list with lightweight sentiment
-- Update cadence card so users know what’s fresh
+  ## Running the code
 
-## How data updates
-- Price: `data/public/hot.json` every minute (pre/regular/post hours). Frontend polls the raw file from the `hotdata` branch.
-- Snapshot/Features: built from daily OHLCV + cross‑asset; by default refreshed EOD (can run hourly if wanted).
-- Weekly ML + backtests: heavier jobs; kept to weekends.
+  Run `npm i` to install the dependencies.
 
-## Workflows
-- `.github/workflows/pages.yml` – builds `frontend/` + `data/public/` and deploys to Pages on pushes to `main`.
-- `.github/workflows/hot-data.yml` – writes `data/public/hot.json` every minute to the `hotdata` branch.
+  Run `npm run dev` to start the development server.
+  
+  ## TradingView chart
+  
+  The top chart now embeds the official TradingView widget (tv.js). It auto-maps:
+  
+  - BTC → BINANCE:BTCUSDT (no API key needed)
+  - MSTR → NASDAQ:MSTR
+  - Timeframes like 1m/5m/15m/1h/4h/1D → the corresponding TradingView intervals
+  - Theme follows the app theme toggle (dark/light)
+  
+  Compare mode can be enabled from the chart toolbar. The app also exposes a "Compare" toggle which turns on the ability to add overlays from the TV UI.
+  
+  No credentials are required and this widget works on localhost and GitHub Pages by default.
 
-Branches:
-- `main` – static site (Pages).
-- `hotdata` – tiny live artifacts (only `hot.json`).
+  ## Live MSTR data (Yahoo) and CORS
 
-## Local preview
-```bash
-python -m http.server 8080
-# open http://localhost:8080/frontend/index.html
-```
+  Yahoo Finance blocks browser requests with CORS in production. For a reliable setup:
 
-## Deploy
-1) Push to `main` → Pages workflow publishes.
-2) In repo Settings → Pages → Source: GitHub Actions.
-3) Run the “hot-data” workflow once (workflow_dispatch) to seed `hotdata`.
+  - Local dev: already proxied via Vite. Nothing to configure; just run `npm run dev`.
+  - Production: deploy the included Cloudflare Worker to proxy Yahoo and set the frontend env.
 
-## Stack
-- Frontend: static HTML/CSS/Chart.js (no framework)
-- Backend scripts: Python + yfinance
-- Hosting: GitHub Pages; Live data: raw file from `hotdata`
+  Steps:
+  1. Deploy proxy-worker
+    - cd `proxy-worker`
+    - Install Wrangler once globally if needed
+    - Run `npm run deploy` (or `npm run dev` to test locally)
+  2. Copy the Worker URL (e.g., https://mstr-yahoo-proxy.<account>.workers.dev)
+  3. Create `.env` at repo root and set:
+    - `VITE_YAHOO_PROXY_URL=<your worker url>`
+  4. Build and deploy the site. The app will use the proxy in production automatically.
+
+  Optional: In `proxy-worker/wrangler.toml`, set `ALLOWED_ORIGINS` to restrict which sites can call your proxy.
+  

@@ -253,7 +253,8 @@ def action_from_score(score: float, thresholds: Dict[str, float]) -> str:
         return 'Buy/Add'
     if score >= thresholds.get('accumulate', 10):
         return 'Accumulate on dips'
-    if score > thresholds.get('hold_low', -10):
+    # Treat boundary as Hold when score is exactly equal to hold_low
+    if score >= thresholds.get('hold_low', -10):
         return 'Hold'
     if score >= thresholds.get('trim_reduce', -30):
         return 'Trim/Reduce'

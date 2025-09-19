@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "functions": {
+    "api/yahoo.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    { "src": "/api/yahoo/(.*)", "dest": "/api/yahoo.ts" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
