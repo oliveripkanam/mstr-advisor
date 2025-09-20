@@ -13,9 +13,9 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-background/95 backdrop-blur">
-      <div className="container px-4 py-3">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-4">
+      <div className="w-full px-3 sm:px-4 py-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <Database className="h-3 w-3" />
               <span>Data Sources:</span>
@@ -25,7 +25,7 @@ export function Footer() {
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-1">
               <Wifi className="h-3 w-3 text-green-400" />
               <span>Live</span>

@@ -158,14 +158,14 @@ export function MomentumIndicator() {
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="font-medium">Short-term Momentum</h3>
           <Badge variant="outline" className={getStateColor(composite.state)}>
             {composite.state.charAt(0).toUpperCase() + composite.state.slice(1)}
           </Badge>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {displayResults.map((item) => (
             <div
               key={item.timeframe}

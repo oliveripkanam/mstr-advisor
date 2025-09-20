@@ -217,17 +217,17 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
 
   return (
     <Card className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-3">
           <h3 className="font-medium">Support/Resistance + Targets</h3>
           <Badge variant="outline" className="text-xs">
             Current: ${currentPrice.toLocaleString()}
           </Badge>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Select value={method} onValueChange={(v) => setMethod((v as any))}>
-            <SelectTrigger className="w-32 h-8">
+            <SelectTrigger className="w-36 h-8">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -239,7 +239,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Select>
           
           <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="w-20 h-8">
+            <SelectTrigger className="w-24 h-8">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -271,9 +271,9 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
               className="group p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
               onMouseEnter={() => onLevelHover(level.price)}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-sm font-mono">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="text-sm font-mono whitespace-nowrap">
                     ${level.price.toLocaleString()}
                   </div>
                   

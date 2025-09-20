@@ -53,7 +53,7 @@ export default function App() {
         onThemeToggle={handleThemeToggle}
       />
 
-      <main className="w-full max-w-none px-0 pb-8">
+  <main className="w-full max-w-none px-0 pb-8">
         <div className="mt-6">
           {(() => {
             const hasCompare = selectedSymbols.includes('Compare');
@@ -65,7 +65,7 @@ export default function App() {
 
             if (hasCompare) {
               return (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-3 sm:px-4">
                   <TradingViewWidget
                     symbol={primarySymbol}
                     interval={interval}
@@ -107,7 +107,7 @@ export default function App() {
 
   <MonitorTiles onTileClick={handleTileClick} timeframe={(selectedTimeframes[0] as any) ?? '15m'} />
 
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-4">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6 px-3 sm:px-4">
           {/* Top Row: Perp Funding + OI */}
           <div className="lg:col-span-2">
             <PerpFundingOI />
