@@ -1,1 +1,5 @@
+/proxy/binance-fapi/* https://fapi.binance.com/:splat 200
+/proxy/okx/* https://www.okx.com/:splat 200
+/proxy/bybit/* https://api.bybit.com/:splat 200
+/api/yahoo/* https://query1.finance.yahoo.com/:splat 200
 /* /index.html 200
