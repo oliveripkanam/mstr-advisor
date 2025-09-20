@@ -38,4 +38,8 @@
   - Data is kept lean and refreshes quickly. The BTC side uses public endpoints.
   - Signals are intentionally compact—use them as a nudge, not gospel.
   - If anything looks off, refresh the page; it’s meant to be resilient and fast.
+
+  ## Old Website
+
+  - https://oliveripkanam.github.io/mstr-advisor/
   
