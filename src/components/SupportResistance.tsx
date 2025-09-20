@@ -271,7 +271,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
               className="group p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer overflow-hidden"
               onMouseEnter={() => onLevelHover(level.price)}
             >
-              <div className="flex items-center justify-between flex-wrap gap-2 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 w-full">
                 <div className="flex items-center gap-3 flex-wrap min-w-0">
                   <div className="text-sm font-mono whitespace-nowrap">
                     ${level.price.toLocaleString()}
@@ -302,7 +302,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 text-xs"
+                      className="h-6 px-2 text-xs shrink-0"
                       onClick={() => onTargetClick(level.target!)}
                     >
                       <Target className="h-3 w-3 mr-1" />

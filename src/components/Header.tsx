@@ -58,7 +58,7 @@ export function Header({
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full min-w-0">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full min-w-0 pr-10">
             <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline">Symbols:</span>
             {symbols.map((symbol) => (
               <Button
@@ -73,7 +73,7 @@ export function Header({
             ))}
           </div>
 
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full min-w-0">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full min-w-0 pr-10">
             <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline">Timeframe:</span>
             {timeframes.map((timeframe) => (
               <Button
