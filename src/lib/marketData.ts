@@ -79,17 +79,12 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
     const range = '1d';
   const PROXY = import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined; // Cloudflare Worker URL
   const VERCEL = import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined; // Optional Vercel function base e.g. https://your-app.vercel.app/api/yahoo
+  const YAHOO_BASE = PROXY ?? VERCEL ?? '/api/yahoo';
 
     // 1) Prefer chart endpoint (more CORS-friendly via proxy) and derive price/change/range from it
   const chartParams = `interval=${interval}&range=${range}&includePrePost=false`;
-    const chartUrl = PROXY
-      ? `${PROXY}/v8/finance/chart/MSTR?${chartParams}`
-      : VERCEL
-      ? `${VERCEL}/v8/finance/chart/MSTR?${chartParams}`
-      : import.meta.env.DEV
-      ? `/api/yahoo/v8/finance/chart/MSTR?${chartParams}`
-      : `https://query1.finance.yahoo.com/v8/finance/chart/MSTR?${chartParams}`;
-    const c = (PROXY || VERCEL || import.meta.env.DEV) ? await fetchJson(chartUrl) : await fetchJsonWithCorsFallback(chartUrl);
+    const chartUrl = `${YAHOO_BASE}/v8/finance/chart/MSTR?${chartParams}`;
+    const c = await fetchJson(chartUrl);
 
   const result = c?.chart?.result?.[0];
   const meta = result?.meta;
@@ -117,14 +112,8 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
 
     // 2) Try to enhance with quote endpoint, but don't fail if it errors
     try {
-      const quoteUrl = PROXY
-        ? `${PROXY}/v7/finance/quote?symbols=MSTR`
-        : VERCEL
-        ? `${VERCEL}/v7/finance/quote?symbols=MSTR`
-        : import.meta.env.DEV
-        ? '/api/yahoo/v7/finance/quote?symbols=MSTR'
-        : 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=MSTR';
-      const q = (PROXY || VERCEL || import.meta.env.DEV) ? await fetchJson(quoteUrl) : await fetchJsonWithCorsFallback(quoteUrl);
+      const quoteUrl = `${YAHOO_BASE}/v7/finance/quote?symbols=MSTR`;
+      const q = await fetchJson(quoteUrl);
       const item = q?.quoteResponse?.result?.[0];
       const marketState = String(item?.marketState || '').toUpperCase();
       const qRegPrice = Number(item?.regularMarketPrice);
