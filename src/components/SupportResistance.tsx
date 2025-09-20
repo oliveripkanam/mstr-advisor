@@ -183,16 +183,25 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
     supports.forEach((l, i) => { l.target = supports[i + 1]?.price ?? l.price * 0.975; });
     resistances.forEach((l, i) => { l.target = resistances[i + 1]?.price ?? l.price * 1.025; });
 
-    const ranked = uniq
+    // Score levels by probability and proximity
+    const scored = uniq
       .map(l => ({
         ...l,
         score: l.probability * (1 - Math.min(0.15, Math.abs(l.price - currentPrice) / (currentPrice * 0.15)))
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, count)
-      .map(({ score, ...rest }) => rest);
+      }));
 
-    return ranked;
+    // Pick top 1 support and top 1 resistance
+    const bestSupport = scored
+      .filter(l => l.type === 'support')
+      .sort((a, b) => b.score - a.score)[0];
+    const bestResistance = scored
+      .filter(l => l.type === 'resistance')
+      .sort((a, b) => b.score - a.score)[0];
+
+    const limited = [bestSupport, bestResistance].filter(Boolean) as typeof scored;
+    // Sort by score desc for display consistency
+    limited.sort((a, b) => b.score - a.score);
+    return limited.map(({ score, ...rest }) => rest);
   }, [klines, currentPrice, count, method]);
 
   useEffect(() => { setLevels(computedLevels); }, [computedLevels]);

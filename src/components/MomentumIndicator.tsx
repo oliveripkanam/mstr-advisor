@@ -219,9 +219,7 @@ export function MomentumIndicator() {
             value={composite.percent} 
             className="h-2"
           />
-          {updatedAt && (
-            <div className="mt-2 text-[10px] text-muted-foreground">Updated {Math.max(0, Math.floor((Date.now()-updatedAt)/1000))}s ago</div>
-          )}
+          {/* Removed 'Updated Xs ago' per request */}
         </div>
       </div>
     </Card>
