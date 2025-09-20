@@ -231,17 +231,17 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
 
   return (
   <Card className="p-4 overflow-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+      {/* Mobile: stacked header */}
+      <div className="only-mobile mb-4 space-y-2">
         <div className="flex items-center gap-3">
           <h3 className="font-medium">Support/Resistance + Targets</h3>
           <Badge variant="outline" className="text-xs">
             Current: ${currentPrice.toLocaleString()}
           </Badge>
         </div>
-        
-        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto sm:flex-nowrap">
+        <div className="flex items-center gap-2">
           <Select value={method} onValueChange={(v) => setMethod((v as any))}>
-            <SelectTrigger className="h-8 w-auto max-w-full px-3 truncate">
+            <SelectTrigger className="h-8 w-auto px-3 truncate">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -253,7 +253,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Select>
           
           <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="h-8 w-auto sm:w-20 max-w-full">
+            <SelectTrigger className="h-8 w-20">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -262,8 +262,40 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
               <SelectItem value="15">15</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
 
-          {/* Show on Chart button removed */}
+      {/* Desktop/Tablet: single row; controls at far right on PC (lg+) */}
+      <div className="only-desktop items-center gap-2 mb-4 w-full pc-row">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <h3 className="font-medium">Support/Resistance + Targets</h3>
+          <Badge variant="outline" className="text-xs">
+            Current: ${currentPrice.toLocaleString()}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2 whitespace-nowrap pc-ml-auto">
+          <Select value={method} onValueChange={(v) => setMethod((v as any))}>
+            <SelectTrigger className="h-8 w-auto px-3 truncate">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="volume">Volume</SelectItem>
+              <SelectItem value="swing">Swing</SelectItem>
+              <SelectItem value="fibonacci">Fib</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
+            <SelectTrigger className="h-8 w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="15">15</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

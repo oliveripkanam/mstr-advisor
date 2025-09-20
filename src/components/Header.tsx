@@ -1,6 +1,4 @@
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { Moon, Sun } from "lucide-react";
 
 interface HeaderProps {
@@ -45,12 +43,21 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="w-full max-w-none px-3 sm:px-4 py-2">
-        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
-          <h1 className="text-base sm:text-lg font-semibold">MSTR/BTC Monitor</h1>
-
-          {/* Symbols group */}
+  {/* Mobile layout (stacked): Title+Theme, then Symbols, then Timeframe */}
+        <div className="only-mobile space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-base sm:text-lg font-semibold">MSTR/BTC Monitor</h1>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onThemeToggle}
+              className="h-8 w-8"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+          </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline">Symbols:</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">Symbols:</span>
             {symbols.map((symbol) => (
               <Button
                 key={symbol}
@@ -63,10 +70,8 @@ export function Header({
               </Button>
             ))}
           </div>
-
-          {/* Timeframe group: force to new line on mobile */}
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline">Timeframe:</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm text-muted-foreground">Timeframe:</span>
             {timeframes.map((timeframe) => (
               <Button
                 key={timeframe}
@@ -79,15 +84,51 @@ export function Header({
               </Button>
             ))}
           </div>
+        </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onThemeToggle}
-            className="h-8 w-8 shrink-0 ml-auto"
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+        {/* Tablet/Desktop layout (md+): single row, theme pinned to far right */}
+        <div className="only-desktop items-center justify-between gap-3 md:flex-nowrap">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <h1 className="text-base sm:text-lg font-semibold flex-shrink-0">MSTR/BTC Monitor</h1>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Symbols:</span>
+              {symbols.map((symbol) => (
+                <Button
+                  key={symbol}
+                  variant={selectedSymbols.includes(symbol) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleSymbol(symbol)}
+                  className="h-8 px-3 whitespace-nowrap"
+                >
+                  {symbol}
+                </Button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Timeframe:</span>
+              {timeframes.map((timeframe) => (
+                <Button
+                  key={timeframe}
+                  variant={selectedTimeframes.includes(timeframe) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleTimeframe(timeframe)}
+                  className="h-8 px-3 whitespace-nowrap"
+                >
+                  {timeframe}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onThemeToggle}
+              className="h-8 w-8"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </div>
     </header>

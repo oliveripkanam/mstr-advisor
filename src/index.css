@@ -1896,6 +1896,21 @@ html {
   font-size: var(--font-size);
 }
 
+/* Visibility helpers */
+.only-mobile { display: block; }
+.only-desktop { display: none; }
+
+@media (width >= 48rem) {
+  .only-mobile { display: none; }
+  .only-desktop { display: flex; }
+}
+
+/* PC-only helpers (>= 64rem ~ lg) */
+@media (width >= 64rem) {
+  .pc-ml-auto { margin-left: auto; }
+  .pc-row { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: calc(var(--spacing) * 2); }
+}
+
 @property --tw-translate-x {
   syntax: "*";
   inherits: false;
