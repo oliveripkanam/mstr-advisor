@@ -1,0 +1,36 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/proxy/binance-fapi/*"
+  to = "https://fapi.binance.com/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/proxy/okx/*"
+  to = "https://www.okx.com/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/proxy/bybit/*"
+  to = "https://api.bybit.com/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/yahoo/*"
+  to = "https://query1.finance.yahoo.com/:splat"
+  status = 200
+
+# Single Page App fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
