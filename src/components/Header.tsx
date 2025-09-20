@@ -45,7 +45,7 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="w-full max-w-none px-3 sm:px-4 py-2">
-        <div className="flex flex-col gap-2 sm:gap-3">
+  <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <h1 className="text-base sm:text-lg font-semibold">MSTR/BTC Monitor</h1>
             <Button
@@ -58,7 +58,7 @@ export function Header({
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full min-w-0 pr-10">
+          <div className="flex items-center flex-wrap gap-3 overflow-x-auto no-scrollbar w-full min-w-0 pr-10">
             <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline">Symbols:</span>
             {symbols.map((symbol) => (
               <Button
@@ -71,10 +71,7 @@ export function Header({
                 {symbol}
               </Button>
             ))}
-          </div>
-
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full min-w-0 pr-10">
-            <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline">Timeframe:</span>
+            <span className="text-xs sm:text-sm text-muted-foreground hidden xs:inline ml-4">Timeframe:</span>
             {timeframes.map((timeframe) => (
               <Button
                 key={timeframe}

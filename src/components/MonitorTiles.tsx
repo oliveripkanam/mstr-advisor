@@ -86,7 +86,7 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
   const correlation = 0.73;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 px-3 sm:px-4">
       {/* BTC Tile */}
       <Card 
         className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
