@@ -1,3 +1,4 @@
+<img width="2539" height="1230" alt="image" src="https://github.com/user-attachments/assets/01a29477-b156-4be0-9fef-c4960aec13dc" />
 
   # MSTR/BTC Monitor
 
