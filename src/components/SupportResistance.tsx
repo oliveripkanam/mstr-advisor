@@ -27,6 +27,24 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
   const [klines, setKlines] = useState<any[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const handleShowOnChart = async () => {
+    try {
+      // Broadcast levels to any listener (e.g., TradingView widget)
+      const event = new CustomEvent("mstr:show-sr", { detail: { levels } as any });
+      window.dispatchEvent(event);
+    } catch {}
+    try {
+      const text = levels
+        .map(l => `${l.type.toUpperCase()} ${l.price.toLocaleString()}  → target ${l.target ? l.target.toLocaleString() : '-'}`)
+        .join("\n");
+      await navigator.clipboard.writeText(text);
+      // Basic feedback
+      console.log("S/R levels copied to clipboard:", text);
+    } catch (e) {
+      console.log("Clipboard copy failed", e);
+    }
+  };
+
   async function getJson(url: string) {
     const r = await fetch(url);
     if (!r.ok) throw new Error('fetch failed');
@@ -225,9 +243,9 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Badge>
         </div>
         
-        <div className="flex items-center gap-2 flex-wrap w-full">
+  <div className="flex items-center gap-2 flex-wrap w-full basis-full sm:basis-auto sm:w-auto sm:flex-nowrap">
           <Select value={method} onValueChange={(v) => setMethod((v as any))}>
-            <SelectTrigger className="h-8 w-auto max-w-full px-3 truncate">
+            <SelectTrigger className="h-8 w-full sm:w-auto max-w-full px-3 truncate">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -239,7 +257,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Select>
           
           <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="h-8 w-16 sm:w-20 max-w-full">
+            <SelectTrigger className="h-8 w-full sm:w-20 max-w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -249,7 +267,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="sm" className="px-3">
+          <Button variant="outline" size="sm" className="px-3 w-full sm:w-auto" onClick={handleShowOnChart}>
             Show<span className="hidden sm:inline"> on Chart</span>
           </Button>
         </div>

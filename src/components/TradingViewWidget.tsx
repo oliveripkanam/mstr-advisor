@@ -76,6 +76,7 @@ export default function TradingViewWidget({
 }: TradingViewWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetRef = useRef<any | null>(null);
+  const shapesRef = useRef<any[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,6 +136,56 @@ export default function TradingViewWidget({
       }
     };
   }, [symbol, interval, theme, withToolbar, autosize, allowCompare, JSON.stringify(studies)]);
+
+  useEffect(() => {
+    function clearShapes() {
+      for (const s of shapesRef.current) {
+        try { s.remove?.(); } catch {}
+      }
+      shapesRef.current = [];
+    }
+
+    function drawLevels(levels: Array<{ price: number; type: string }>) {
+      const w: any = widgetRef.current;
+      if (!w) return;
+      const chart = typeof w.activeChart === "function" ? w.activeChart() : (typeof w.chart === "function" ? w.chart() : null);
+      if (!chart || typeof chart.createMultipointShape !== "function") return;
+      clearShapes();
+      for (const lvl of levels) {
+        try {
+          const shape = chart.createMultipointShape(
+            [ { time: Math.floor(Date.now()/1000), price: lvl.price } ],
+            {
+              shape: "horizontal_line",
+              disableSelection: true,
+              lock: true,
+              text: `${(lvl.type || '').toUpperCase()} ${Math.round(lvl.price)}`,
+              overrides: {
+                linecolor: lvl.type === 'support' ? '#10B981' : '#EF4444',
+                linewidth: 2,
+              },
+            }
+          );
+          if (shape) shapesRef.current.push(shape);
+        } catch {}
+      }
+    }
+
+    const handler = (e: any) => {
+      const levels = e?.detail?.levels || [];
+      const w: any = widgetRef.current;
+      if (w && typeof w.onChartReady === 'function') {
+        w.onChartReady(() => drawLevels(levels));
+      } else {
+        drawLevels(levels);
+      }
+    };
+    window.addEventListener('mstr:show-sr', handler as any);
+    return () => {
+      window.removeEventListener('mstr:show-sr', handler as any);
+      clearShapes();
+    };
+  }, []);
 
   // Unique container id per mount
   const containerId = useRef(`tv_${Math.random().toString(36).slice(2)}`);

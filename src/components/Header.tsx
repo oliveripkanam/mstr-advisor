@@ -21,7 +21,7 @@ export function Header({
   onThemeToggle 
 }: HeaderProps) {
   const symbols = ['BTC', 'MSTR', 'Compare'];
-  const timeframes = ['1m', '5m', '15m', '1h', '4h', '1D'];
+  const timeframes = ['1m', '5m', '15m', '1h', '4h'];
 
   const toggleSymbol = (symbol: string) => {
     const hasCompare = selectedSymbols.includes('Compare');
