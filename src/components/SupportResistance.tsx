@@ -27,23 +27,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
   const [klines, setKlines] = useState<any[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleShowOnChart = async () => {
-    try {
-      // Broadcast levels to any listener (e.g., TradingView widget)
-      const event = new CustomEvent("mstr:show-sr", { detail: { levels } as any });
-      window.dispatchEvent(event);
-    } catch {}
-    try {
-      const text = levels
-        .map(l => `${l.type.toUpperCase()} ${l.price.toLocaleString()}  → target ${l.target ? l.target.toLocaleString() : '-'}`)
-        .join("\n");
-      await navigator.clipboard.writeText(text);
-      // Basic feedback
-      console.log("S/R levels copied to clipboard:", text);
-    } catch (e) {
-      console.log("Clipboard copy failed", e);
-    }
-  };
+  // Show on Chart removed per request
 
   async function getJson(url: string) {
     const r = await fetch(url);
@@ -117,7 +101,10 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
     const range = lastHigh - lastLow || 1;
     const fibs = [0.382, 0.5, 0.618].map(r => lastHigh - r * range);
 
-    const tol = currentPrice * 0.0025; // ~0.25%
+  // Tolerances: smaller values to avoid over-merging distinct levels
+  const pivotTol = Math.max(1, currentPrice * 0.0010); // ~0.10% for clustering swing pivots
+  const mergeTol = Math.max(1, currentPrice * 0.0015); // ~0.15% when merging across methods
+  const uniqTol  = Math.max(1, currentPrice * 0.0010); // ~0.10% for final uniqueness pass
     const pivotClusters: { price: number; type: 'support' | 'resistance'; swingScore: number }[] = [];
     const pivotSorted = [...pivots].sort((a, b) => a.price - b.price);
     let cluster: { prices: number[]; type: 'support' | 'resistance'; score: number } | null = null;
@@ -125,7 +112,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
       const t: 'support' | 'resistance' = p.type === 'low' ? 'support' : 'resistance';
       if (!cluster) {
         cluster = { prices: [p.price], type: t, score: p.score };
-      } else if (Math.abs(p.price - cluster.prices[cluster.prices.length - 1]) <= tol) {
+      } else if (Math.abs(p.price - cluster.prices[cluster.prices.length - 1]) <= pivotTol) {
         cluster.prices.push(p.price);
         cluster.score += p.score;
       } else {
@@ -170,7 +157,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
     let cur: SRLevel | null = null;
     for (const c of sorted) {
       if (!cur) { cur = { ...c }; continue; }
-      if (Math.abs(c.price - cur.price) <= tol) {
+      if (Math.abs(c.price - cur.price) <= mergeTol) {
         const weight1 = cur.probability;
         const weight2 = c.probability;
         const price = (cur.price * weight1 + c.price * weight2) / (weight1 + weight2 || 1);
@@ -188,7 +175,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
 
     const uniq: SRLevel[] = [];
     for (const lvl of merged) {
-      if (!uniq.some(u => Math.abs(u.price - lvl.price) <= tol)) uniq.push(lvl);
+      if (!uniq.some(u => Math.abs(u.price - lvl.price) <= uniqTol)) uniq.push(lvl);
     }
 
     const supports = uniq.filter(l => l.type === 'support').sort((a, b) => b.price - a.price);
@@ -267,9 +254,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="sm" className="px-3 w-full sm:w-auto" onClick={handleShowOnChart}>
-            Show<span className="hidden sm:inline"> on Chart</span>
-          </Button>
+          {/* Show on Chart button removed */}
         </div>
       </div>
 
