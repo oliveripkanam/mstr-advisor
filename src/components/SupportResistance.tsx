@@ -241,7 +241,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
         
         <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto sm:flex-nowrap">
           <Select value={method} onValueChange={(v) => setMethod((v as any))}>
-            <SelectTrigger className="h-8 w-full sm:w-auto max-w-full px-3 truncate">
+            <SelectTrigger className="h-8 w-auto max-w-full px-3 truncate">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -253,7 +253,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Select>
           
           <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="h-8 w-full sm:w-20 max-w-full">
+            <SelectTrigger className="h-8 w-auto sm:w-20 max-w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
