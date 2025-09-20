@@ -225,21 +225,21 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Badge>
         </div>
         
-  <div className="flex items-center gap-2 flex-wrap w-full">
+        <div className="flex items-center gap-2 flex-wrap w-full">
           <Select value={method} onValueChange={(v) => setMethod((v as any))}>
-            <SelectTrigger className="h-8 w-full sm:w-36 max-w-full">
+            <SelectTrigger className="h-8 w-auto max-w-full px-3 truncate">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="volume">Volume Profile</SelectItem>
-              <SelectItem value="swing">Swing Levels</SelectItem>
-              <SelectItem value="fibonacci">Fibonacci</SelectItem>
+              <SelectItem value="volume">Volume</SelectItem>
+              <SelectItem value="swing">Swing</SelectItem>
+              <SelectItem value="fibonacci">Fib</SelectItem>
               <SelectItem value="all">All</SelectItem>
             </SelectContent>
           </Select>
           
           <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="h-8 w-24 sm:w-24 max-w-full">
+            <SelectTrigger className="h-8 w-16 sm:w-20 max-w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -249,8 +249,8 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="sm">
-            Show on Chart
+          <Button variant="outline" size="sm" className="px-3">
+            Show<span className="hidden sm:inline"> on Chart</span>
           </Button>
         </div>
       </div>
