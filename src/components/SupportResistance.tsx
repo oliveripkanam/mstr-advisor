@@ -231,7 +231,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
 
   return (
   <Card className="p-4 overflow-hidden">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
         <div className="flex items-center gap-3">
           <h3 className="font-medium">Support/Resistance + Targets</h3>
           <Badge variant="outline" className="text-xs">
@@ -239,7 +239,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
           </Badge>
         </div>
         
-  <div className="flex items-center gap-2 flex-wrap w-full basis-full sm:basis-auto sm:w-auto sm:flex-nowrap">
+        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto sm:flex-nowrap">
           <Select value={method} onValueChange={(v) => setMethod((v as any))}>
             <SelectTrigger className="h-8 w-full sm:w-auto max-w-full px-3 truncate">
               <SelectValue />
