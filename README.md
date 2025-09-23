@@ -33,13 +33,7 @@
   - Toggle dark/light if you prefer a different look.
   - Click tiles to switch focus; use Compare when you want both.
   - Skim the cards below the charts for quick positioning—no need to deep dive unless you want to.
-
-  ## Notes
-
-  - Data is kept lean and refreshes quickly. The BTC side uses public endpoints.
-  - Signals are intentionally compact—use them as a nudge, not gospel.
-  - If anything looks off, refresh the page; it’s meant to be resilient and fast.
-
+    
   ## Old Website (Unused)
 
   - https://oliveripkanam.github.io/mstr-advisor/
