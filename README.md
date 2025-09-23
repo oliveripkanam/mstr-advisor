@@ -2,7 +2,7 @@
 
   # MSTR/BTC Monitor
 
-  A simple, focused dashboard for watching Bitcoin and MicroStrategy side‑by‑side, plus a handful of useful reads at a glance. No fluff.
+  A simple, focused dashboard for watching Bitcoin and MicroStrategy side‑by‑side, plus a handful of useful reads at a glance!
 
   ## What you’ll see
 
@@ -40,7 +40,7 @@
   - Signals are intentionally compact—use them as a nudge, not gospel.
   - If anything looks off, refresh the page; it’s meant to be resilient and fast.
 
-  ## Old Website
+  ## Old Website (Unused)
 
   - https://oliveripkanam.github.io/mstr-advisor/
   
