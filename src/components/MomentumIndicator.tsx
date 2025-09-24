@@ -221,6 +221,10 @@ export function MomentumIndicator() {
           />
           {/* Removed 'Updated Xs ago' per request */}
         </div>
+
+        <div className="mt-2 text-xs text-muted-foreground">
+          For each timeframe (5m, 15m, 1h), we pull the latest ~300 BTCUSDT closes from Binance Futures.
+        </div>
       </div>
     </Card>
   );
