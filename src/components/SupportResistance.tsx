@@ -21,7 +21,6 @@ interface SupportResistanceProps {
 
 export function SupportResistance({ onLevelHover, onTargetClick }: SupportResistanceProps) {
   const [method, setMethod] = useState<'volume' | 'swing' | 'fibonacci' | 'all'>("volume");
-  const [count, setCount] = useState<number>(10);
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const [levels, setLevels] = useState<SRLevel[]>([]);
   const [klines, setKlines] = useState<any[] | null>(null);
@@ -202,7 +201,7 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
     // Sort by score desc for display consistency
     limited.sort((a, b) => b.score - a.score);
     return limited.map(({ score, ...rest }) => rest);
-  }, [klines, currentPrice, count, method]);
+  }, [klines, currentPrice, method]);
 
   useEffect(() => { setLevels(computedLevels); }, [computedLevels]);
 
@@ -251,17 +250,6 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
               <SelectItem value="all">All</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="h-8 w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="15">15</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -285,22 +273,11 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
               <SelectItem value="all">All</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Select value={String(count)} onValueChange={(v) => setCount(Number(v))}>
-            <SelectTrigger className="h-8 w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="15">15</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
       <div className="space-y-3">
-        {(levels.length ? levels : Array.from({ length: Math.min(5, count) }, () => null)).map((level, index) => {
+        {(levels.length ? levels : Array.from({ length: 2 }, () => null)).map((level, index) => {
           if (!level) {
             return (
               <div key={index} className="p-3 rounded-lg border bg-muted/10 animate-pulse" />
