@@ -11,6 +11,39 @@ interface MonitorTilesProps {
   timeframe?: Timeframe; // single selected timeframe drives summaries
 }
 
+// --- Compare card helpers (Yahoo daily closes) ---
+type DailyClose = { day: string; close: number };
+
+const YAHOO_BASE = (import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined)
+  ?? (import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined)
+  ?? '/api/yahoo';
+
+async function fetchYahooDailyCloses(symbol: string): Promise<DailyClose[]> {
+  try {
+    const url = `${YAHOO_BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2mo&includePrePost=false`;
+    const r = await fetch(url);
+    if (!r.ok) return [];
+    const j = await r.json();
+    const result = j?.chart?.result?.[0];
+    const ts: number[] | undefined = result?.timestamp;
+    const closes: Array<number | null | undefined> | undefined = result?.indicators?.quote?.[0]?.close;
+    if (!Array.isArray(ts) || !Array.isArray(closes)) return [];
+    const out: DailyClose[] = [];
+    const n = Math.min(ts.length, closes.length);
+    for (let i = 0; i < n; i++) {
+      const c = closes[i];
+      const t = ts[i];
+      if (typeof c === 'number' && isFinite(c) && typeof t === 'number' && isFinite(t)) {
+        const day = new Date(t * 1000).toISOString().slice(0, 10); // YYYY-MM-DD UTC
+        out.push({ day, close: c });
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesProps) {
   const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0 });
   const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0 });
@@ -69,6 +102,44 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
     };
   }, [timeframe]);
 
+  // Compute 30D correlation and beta (hourly cadence)
+  useEffect(() => {
+    let mounted = true;
+    let timer: number | undefined;
+
+    async function compute() {
+      setCorrLoading(true);
+      try {
+        const [mstrDaily, btcDaily] = await Promise.all([
+          fetchYahooDailyCloses('MSTR'),
+          fetchYahooDailyCloses('BTC-USD'),
+        ]);
+        if (!mounted) return;
+        const { a: mPrices, b: bPrices } = alignLast31(mstrDaily, btcDaily);
+        const rx = computeLogReturns(mPrices);
+        const ry = computeLogReturns(bPrices);
+        const { corr: c, beta: be } = statsCorrBeta(rx, ry);
+        setCorr(c);
+        setBeta(be);
+        setCorrLastTs(Date.now());
+      } catch {
+        if (!mounted) return;
+        setCorr(undefined);
+        setBeta(undefined);
+      } finally {
+        if (mounted) setCorrLoading(false);
+      }
+    }
+
+    compute();
+    // hourly cadence
+    timer = window.setInterval(compute, 60 * 60 * 1000);
+    return () => {
+      mounted = false;
+      if (timer) window.clearInterval(timer);
+    };
+  }, []);
+
   const btcRaw = btc.sparkline ?? [];
   const mstrRaw = mstr.sparkline ?? [];
   const btcSparkline = (function(){
@@ -87,8 +158,8 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
   // percent removed; the mini-graph conveys direction/magnitude
   const ratioNum = btc.price > 0 ? (mstr.price / btc.price * 1000) : 0;
   const ratio = ratioNum ? ratioNum.toFixed(3) : '-';
-  // Placeholder correlation for now; real calc would need closing series alignment
-  const correlation = 0.73;
+  const corrStr = corrLoading ? '...' : (corr != null && isFinite(corr) ? Number(corr).toFixed(2) : '-');
+  const betaStr = corrLoading ? '...' : (beta != null && isFinite(beta) ? `${Number(beta).toFixed(2)}x` : '-');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 px-3 sm:px-4">
@@ -203,11 +274,64 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
         <div className="space-y-2">
           <div className="text-2xl font-mono">{ratio}</div>
           <div className="text-xs text-muted-foreground space-y-1">
-            <div>30D Correlation: {correlation}</div>
-            <div>Beta vs BTC: 1.8x</div>
+            <div>30D Correlation: {corrStr}</div>
+            <div>Beta vs BTC: {betaStr}</div>
           </div>
         </div>
       </Card>
     </div>
   );
+}
+
+// Inner-join two series by day and keep last 31 days (for 30 return samples)
+function alignLast31(a: DailyClose[], b: DailyClose[]): { a: number[]; b: number[] } {
+  const mapA = new Map(a.map(d => [d.day, d.close] as const));
+  const mapB = new Map(b.map(d => [d.day, d.close] as const));
+  const days = [...mapA.keys()].filter(d => mapB.has(d)).sort();
+  const keep = days.slice(-31);
+  const outA: number[] = [];
+  const outB: number[] = [];
+  for (const d of keep) {
+    const va = mapA.get(d);
+    const vb = mapB.get(d);
+    if (typeof va === 'number' && isFinite(va) && typeof vb === 'number' && isFinite(vb)) {
+      outA.push(va);
+      outB.push(vb);
+    }
+  }
+  return { a: outA, b: outB };
+}
+
+function computeLogReturns(prices: number[]): number[] {
+  const out: number[] = [];
+  for (let i = 1; i < prices.length; i++) {
+    const p0 = prices[i - 1];
+    const p1 = prices[i];
+    if (p0 > 0 && p1 > 0 && isFinite(p0) && isFinite(p1)) {
+      out.push(Math.log(p1 / p0));
+    }
+  }
+  return out;
+}
+
+function statsCorrBeta(x: number[], y: number[]): { corr?: number; beta?: number } {
+  const n = Math.min(x.length, y.length);
+  if (n < 10) return {}; // guard: insufficient samples
+  let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+  for (let i = 0; i < n; i++) {
+    const xi = x[i];
+    const yi = y[i];
+    sx += xi; sy += yi;
+    sxx += xi * xi; syy += yi * yi; sxy += xi * yi;
+  }
+  const nx = n;
+  const mx = sx / nx;
+  const my = sy / nx;
+  const cov = (sxy / nx) - (mx * my);
+  const varx = (sxx / nx) - (mx * mx);
+  const vary = (syy / nx) - (my * my);
+  if (!(varx > 0) || !(vary > 0)) return {};
+  const corr = cov / Math.sqrt(varx * vary);
+  const beta = cov / vary; // beta of x relative to y (x = MSTR, y = BTC)
+  return { corr, beta };
 }
