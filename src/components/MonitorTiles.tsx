@@ -14,6 +14,11 @@ interface MonitorTilesProps {
 export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesProps) {
   const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0 });
   const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0 });
+  // Compare card analytics (MSTR/BTC)
+  const [corr, setCorr] = useState<number | undefined>(undefined);
+  const [beta, setBeta] = useState<number | undefined>(undefined);
+  const [corrLoading, setCorrLoading] = useState<boolean>(false);
+  const [corrLastTs, setCorrLastTs] = useState<number | undefined>(undefined);
   const fmt2 = (v?: number) => (v != null && isFinite(v)) ? v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
   const wsRef = useRef<WebSocket | null>(null);
 
