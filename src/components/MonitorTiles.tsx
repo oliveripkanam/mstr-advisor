@@ -115,10 +115,10 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
           fetchYahooDailyCloses('BTC-USD'),
         ]);
         if (!mounted) return;
-        const { a: mPrices, b: bPrices } = alignLast31(mstrDaily, btcDaily);
-        const rx = computeLogReturns(mPrices);
-        const ry = computeLogReturns(bPrices);
-        const { corr: c, beta: be } = statsCorrBeta(rx, ry);
+  const { a: mPrices, b: bPrices } = alignLast31(mstrDaily, btcDaily);
+  const mRet = computeLogReturns(mPrices);
+  const bRet = computeLogReturns(bPrices);
+  const { corr: c, beta: be } = statsCorrBeta(mRet, bRet);
         setCorr(c);
         setBeta(be);
         setCorrLastTs(Date.now());
@@ -314,24 +314,24 @@ function computeLogReturns(prices: number[]): number[] {
   return out;
 }
 
-function statsCorrBeta(x: number[], y: number[]): { corr?: number; beta?: number } {
-  const n = Math.min(x.length, y.length);
-  if (n < 10) return {}; // guard: insufficient samples
+// Given MSTR returns first and BTC returns second
+function statsCorrBeta(mstrRet: number[], btcRet: number[]): { corr?: number; beta?: number } {
+  const n = Math.min(mstrRet.length, btcRet.length);
+  if (n < 20) return {}; // guard: require >= 20 return observations
   let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
   for (let i = 0; i < n; i++) {
-    const xi = x[i];
-    const yi = y[i];
+    const yi = mstrRet[i]; // dependent variable (MSTR)
+    const xi = btcRet[i];  // independent variable (BTC)
     sx += xi; sy += yi;
     sxx += xi * xi; syy += yi * yi; sxy += xi * yi;
   }
-  const nx = n;
-  const mx = sx / nx;
-  const my = sy / nx;
-  const cov = (sxy / nx) - (mx * my);
-  const varx = (sxx / nx) - (mx * mx);
-  const vary = (syy / nx) - (my * my);
-  if (!(varx > 0) || !(vary > 0)) return {};
-  const corr = cov / Math.sqrt(varx * vary);
-  const beta = cov / vary; // beta of x relative to y (x = MSTR, y = BTC)
+  const mx = sx / n;
+  const my = sy / n;
+  const cov = (sxy / n) - (mx * my);
+  const varX = (sxx / n) - (mx * mx); // variance of BTC
+  const varY = (syy / n) - (my * my); // variance of MSTR
+
+  const corr = varX > 0 && varY > 0 ? (cov / Math.sqrt(varX * varY)) : undefined;
+  const beta = varX > 0 ? (cov / varX) : undefined; // beta vs BTC
   return { corr, beta };
 }
