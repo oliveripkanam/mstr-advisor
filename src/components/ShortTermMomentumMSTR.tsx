@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
@@ -9,14 +9,19 @@ type TF = '5m' | '15m' | '1h';
 interface TFResult {
   timeframe: TF;
   rsi?: number;
-  macd?: number; // MACD line (fast-slow)
+  macd?: number; // MACD line (fast-slow) or histogram, we keep parity with BTC card by using line
   signal?: number; // signal line
   roc?: number; // %
   state: 'bullish' | 'bearish' | 'neutral';
   confidence: number; // 0..100
 }
 
+const YAHOO_BASE = (import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined)
+  ?? (import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined)
+  ?? '/api/yahoo';
+
 function ema(values: number[], period: number): number[] {
+  if (!values.length) return [];
   const k = 2 / (period + 1);
   const out: number[] = [];
   let prev = values[0];
@@ -66,31 +71,44 @@ function calcROC(closes: number[], n = 10): number | undefined {
 }
 
 function scoreAndState(rsi?: number, macd?: number, signal?: number, roc?: number): { state: TFResult['state']; confidence: number } {
-  const rsiScore = rsi == null ? 0 : Math.max(-1, Math.min(1, (rsi - 50) / 25));
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+  const rsiScore = rsi == null ? 0 : clamp((rsi - 50) / 25, -1, 1);
   const macdScore = macd == null || signal == null ? 0 : (macd - signal > 0 ? 0.6 : -0.6);
-  const rocScore = roc == null ? 0 : Math.max(-1, Math.min(1, roc / 2));
+  const rocScore = roc == null ? 0 : clamp(roc / 2, -1, 1);
   const total = 0.45 * rsiScore + 0.35 * rocScore + 0.20 * macdScore;
   const state: TFResult['state'] = total > 0.12 ? 'bullish' : total < -0.12 ? 'bearish' : 'neutral';
   const confidence = Math.round(Math.min(1, Math.abs(total)) * 100);
   return { state, confidence };
 }
 
-async function fetchCloses(interval: TF, limit = 300): Promise<number[]> {
-  const url = `/proxy/binance-fapi/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('klines fetch failed');
-  const j = await r.json();
-  if (!Array.isArray(j)) throw new Error('bad klines');
-  return j.map((k: any) => Number(k[4])).filter((v: any) => isFinite(v));
+type YahooInterval = '5m' | '15m' | '60m';
+function tfToYahoo(tf: TF): { interval: YahooInterval; range: string } {
+  switch (tf) {
+    case '5m': return { interval: '5m', range: '5d' };
+    case '15m': return { interval: '15m', range: '1mo' };
+    case '1h': return { interval: '60m', range: '3mo' };
+  }
 }
 
-export function MomentumIndicator() {
+async function fetchMstrCloses(tf: TF, limit = 320): Promise<number[]> {
+  const { interval, range } = tfToYahoo(tf);
+  const url = `${YAHOO_BASE}/v8/finance/chart/MSTR?interval=${interval}&range=${range}&includePrePost=true`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('MSTR chart fetch failed');
+  const j = await r.json();
+  const closes: Array<number | null | undefined> = j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close ?? [];
+  const filtered = (closes || []).filter((v): v is number => typeof v === 'number' && isFinite(v));
+  return filtered.slice(-limit);
+}
+
+export function ShortTermMomentumMSTR() {
   const [results, setResults] = useState<TFResult[] | null>(null);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
-  async function computeFor(tf: TF): Promise<TFResult> {
+  const computeFor = useCallback(async (tf: TF): Promise<TFResult> => {
     try {
-      const closes = await fetchCloses(tf, 300);
+      const closes = await fetchMstrCloses(tf, 320);
       const rsi = calcRSI14(closes);
       const { macd, signal } = calcMACD(closes);
       const roc = calcROC(closes, 10);
@@ -99,18 +117,19 @@ export function MomentumIndicator() {
     } catch {
       return { timeframe: tf, state: 'neutral', confidence: 0 };
     }
-  }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     async function run() {
+      setStatus('loading');
       const res = await Promise.all([computeFor('5m'), computeFor('15m'), computeFor('1h')]);
-      if (!cancelled) { setResults(res); setUpdatedAt(Date.now()); }
+      if (!cancelled) { setResults(res); setUpdatedAt(Date.now()); setStatus('ready'); }
     }
     run();
     const id = setInterval(run, 60_000);
     return () => { cancelled = true; clearInterval(id); };
-  }, []);
+  }, [computeFor]);
 
   const getStateIcon = (state: string) => {
     switch (state) {
@@ -136,7 +155,6 @@ export function MomentumIndicator() {
 
   const composite = useMemo(() => {
     if (!results) return { percent: 0, state: 'neutral' as const };
-    // Weights: 5m 0.2, 15m 0.3, 1h 0.5 using signed confidence
     const score = results.reduce((acc, r) => {
       const w = r.timeframe === '5m' ? 0.2 : r.timeframe === '15m' ? 0.3 : 0.5;
       const s = r.state === 'bullish' ? 1 : r.state === 'bearish' ? -1 : 0;
@@ -159,7 +177,7 @@ export function MomentumIndicator() {
     <Card className="p-4">
       <div className="space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <h3 className="font-medium">Short-term Momentum (BTCUSD)</h3>
+          <h3 className="font-medium">Short-term Momentum (MSTR)</h3>
           <Badge variant="outline" className={getStateColor(composite.state)}>
             {composite.state.charAt(0).toUpperCase() + composite.state.slice(1)}
           </Badge>
@@ -219,13 +237,14 @@ export function MomentumIndicator() {
             value={composite.percent} 
             className="h-2"
           />
-          {/* Removed 'Updated Xs ago' per request */}
         </div>
 
         <div className="mt-2 text-xs text-muted-foreground">
-          For each timeframe (5m, 15m, 1h), we pull the latest ~300 BTCUSDT closes from Binance Futures.
+          For each timeframe (5m, 15m, 1h), we pull the latest intraday MSTR closes from Yahoo Finance via the app proxy and apply the same RSI/MACD/ROC blend.
         </div>
       </div>
     </Card>
   );
 }
+
+export default ShortTermMomentumMSTR;

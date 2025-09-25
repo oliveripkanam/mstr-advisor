@@ -3,6 +3,7 @@ import { Header } from "./components/Header";
 import TradingViewWidget, { mapTimeframeToTVInterval } from "./components/TradingViewWidget";
 import { MonitorTiles } from "./components/MonitorTiles";
 import { MomentumIndicator } from "./components/MomentumIndicator";
+import ShortTermMomentumMSTR from "./components/ShortTermMomentumMSTR";
 import PerpFundingOI from "./components/PerpFundingOI";
 import { SupportResistance } from "./components/SupportResistance";
 import { Footer } from "./components/Footer";
@@ -107,18 +108,25 @@ export default function App() {
 
   <MonitorTiles onTileClick={handleTileClick} timeframe={(selectedTimeframes[0] as any) ?? '15m'} />
 
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6 px-3 sm:px-4">
-          {/* Top Row: Perp Funding + OI */}
-          <div className="lg:col-span-2">
+  <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-6 px-3 sm:px-4">
+          {/* Row: Perp Funding + OI full width */}
+          <div>
             <PerpFundingOI />
           </div>
 
-          {/* Bottom Row */}
-          <MomentumIndicator />
-          <SupportResistance
-            onLevelHover={handlePriceHover}
-            onTargetClick={handleTargetClick}
-          />
+          {/* Row: Two-column momentum cards (BTC left, MSTR right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <MomentumIndicator />
+            <ShortTermMomentumMSTR />
+          </div>
+
+          {/* Row: Support/Resistance full width */}
+          <div>
+            <SupportResistance
+              onLevelHover={handlePriceHover}
+              onTargetClick={handleTargetClick}
+            />
+          </div>
         </div>
       </main>
 

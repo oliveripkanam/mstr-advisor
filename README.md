@@ -26,15 +26,7 @@
   - Support/Resistance + Targets (BTC)
     - Finds nearby levels using swing points, volume hotspots, and simple fibs.
     - Merges confluence, shows distance, a rough probability, and a target in that direction.
-
-  ## How to use it
-
-  - Pick a timeframe in the header; both charts follow.
-  - Toggle dark/light if you prefer a different look.
-  - Click tiles to switch focus; use Compare when you want both.
-  - Skim the cards below the charts for quick positioning—no need to deep dive unless you want to.
     
   ## Old Website (Unused)
 
   - https://oliveripkanam.github.io/mstr-advisor/
-  

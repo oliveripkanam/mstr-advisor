@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 // percent indicators removed
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { fetchBtcSummary, fetchMstrSummary, formatCompactNumber, type Timeframe } from "../lib/marketData";
+import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
+import { useIsMobile } from "./ui/use-mobile";
 import type { Summary } from "../lib/marketData";
 
 interface MonitorTilesProps {
@@ -45,6 +47,7 @@ async function fetchYahooDailyCloses(symbol: string): Promise<DailyClose[]> {
 }
 
 export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesProps) {
+  const isMobile = useIsMobile();
   const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0 });
   const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0 });
   // Compare card analytics (MSTR/BTC)
@@ -272,14 +275,77 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
         </div>
         
         <div className="space-y-2">
-          <div className="text-2xl font-mono">{ratio}</div>
+          <InfoTooltip
+            isMobile={isMobile}
+            content={
+              "MSTR/BTC ratio = MSTR price / BTC price × 1000. Shows MSTR in mBTC; higher = MSTR relatively stronger vs BTC; lower = relatively weaker."
+            }
+          >
+            <span className="text-2xl font-mono cursor-help inline-block" aria-label="MSTR/BTC ratio help">{ratio}</span>
+          </InfoTooltip>
           <div className="text-xs text-muted-foreground space-y-1">
-            <div>30D Correlation: {corrStr}</div>
-            <div>Beta vs BTC: {betaStr}</div>
+            <div>
+              30D Correlation: 
+              <InfoTooltip
+                isMobile={isMobile}
+                content={
+                  "Pearson correlation of daily log returns over ~30 days. +1 together, 0 unrelated, −1 opposite; higher means less diversification."
+                }
+              >
+                <span className="ml-1 underline decoration-dotted cursor-help" aria-label="correlation help">{corrStr}</span>
+              </InfoTooltip>
+            </div>
+            <div>
+              Beta vs BTC: 
+              <InfoTooltip
+                isMobile={isMobile}
+                content={
+                  "Slope from regressing MSTR returns (y) on BTC returns (x): cov(x,y)/var(x). >1 amplifies BTC moves; ~1 similar; <1 less sensitive."
+                }
+              >
+                <span className="ml-1 underline decoration-dotted cursor-help" aria-label="beta help">{betaStr}</span>
+              </InfoTooltip>
+            </div>
           </div>
         </div>
       </Card>
     </div>
+  );
+}
+
+// Small helper to unify tooltip behavior across desktop and mobile.
+function InfoTooltip({
+  children,
+  content,
+  isMobile,
+}: {
+  children: ReactNode;
+  content: ReactNode;
+  isMobile: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const triggerProps = isMobile
+    ? {
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        },
+      }
+    : {};
+  const contentClass = isMobile
+    ? "max-w-[240px] whitespace-normal break-words leading-snug"
+    : "max-w-[420px] whitespace-normal break-words leading-snug";
+  return (
+    <Tooltip {...(isMobile ? { open, onOpenChange: setOpen } : {})}>
+      <TooltipTrigger asChild {...triggerProps}>
+        {/* span to ensure focusability when needed */}
+        <span tabIndex={0}>{children}</span>
+      </TooltipTrigger>
+      <TooltipContent side="top" align="center" sideOffset={8} className={contentClass}>
+        {content}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
