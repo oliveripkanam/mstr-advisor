@@ -136,7 +136,7 @@ function isWeekendInTimeZone(ms: number, timeZone: string): boolean {
 
 function determineStaleInfo(context: MomentumContext, nowMs: number): StaleInfo | null {
   const exchangeTimezone = context.exchangeTimezone || 'America/New_York';
-  const referenceTimestamp = context.lastRegularTimestamp ?? context.latestTimestamp;
+  const referenceTimestamp = context.latestTimestamp ?? context.lastRegularTimestamp;
   const marketState = (context.marketState ?? '').toUpperCase();
   const weekend = isWeekendInTimeZone(nowMs, exchangeTimezone);
   const hoursSinceReference = referenceTimestamp ? (nowMs - referenceTimestamp) / 3_600_000 : Number.POSITIVE_INFINITY;
@@ -346,13 +346,6 @@ export function ShortTermMomentumMSTR() {
           </Badge>
         </div>
 
-        {staleInfo && (
-          <div className="flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-200">
-            <Clock className="h-3 w-3" />
-            <span>{staleInfo.message}</span>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {displayResults.map((item) => (
             <div
@@ -408,6 +401,13 @@ export function ShortTermMomentumMSTR() {
             className="h-2"
           />
         </div>
+
+        {staleInfo && (
+          <div className="mt-2 flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-200">
+            <Clock className="h-3 w-3" />
+            <span>{staleInfo.message}</span>
+          </div>
+        )}
 
         <div className="mt-2 text-xs text-muted-foreground space-y-1">
           <div>

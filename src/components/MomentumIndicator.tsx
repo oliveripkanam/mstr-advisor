@@ -6,6 +6,20 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 type TF = '5m' | '15m' | '1h';
 
+const BTC_TIMEZONE = 'America/New_York';
+
+function formatInTimeZone(ms: number, timeZone: string): string {
+  const date = new Date(ms);
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  }).format(date);
+}
+
 interface TFResult {
   timeframe: TF;
   rsi?: number;
@@ -222,8 +236,15 @@ export function MomentumIndicator() {
           {/* Removed 'Updated Xs ago' per request */}
         </div>
 
-        <div className="mt-2 text-xs text-muted-foreground">
-          For each timeframe (5m, 15m, 1h), we pull the latest ~300 BTCUSDT closes from Binance Futures.
+        <div className="mt-2 text-xs text-muted-foreground space-y-1">
+          <div>
+            For each timeframe (5m, 15m, 1h), we pull the latest ~300 BTCUSDT closes from Binance Futures.
+          </div>
+          {updatedAt && (
+            <div>
+              Last update: {formatInTimeZone(updatedAt, BTC_TIMEZONE)}
+            </div>
+          )}
         </div>
       </div>
     </Card>
