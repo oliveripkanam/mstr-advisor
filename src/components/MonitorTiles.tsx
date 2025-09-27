@@ -228,9 +228,18 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="text-2xl font-mono">${mstr.price ? mstr.price.toFixed(2) : '-'}</div>
-            {mstr.priceSource === 'regular' && (
-              <Badge variant="outline" className="text-[10px] uppercase">Reg</Badge>
-            )}
+              {(() => {
+                switch (mstr.priceSource) {
+                  case 'regular':
+                    return <Badge variant="outline" className="text-[10px] uppercase">Reg</Badge>;
+                  case 'pre':
+                    return <Badge variant="outline" className="text-[10px] uppercase">Pre</Badge>;
+                  case 'post':
+                    return <Badge variant="outline" className="text-[10px] uppercase">Post</Badge>;
+                  default:
+                    return null;
+                }
+              })()}
           </div>
           <div className="text-xs text-muted-foreground space-y-1">
             <div>Range: ${fmt2(mstr.low)} - ${fmt2(mstr.high)} </div>

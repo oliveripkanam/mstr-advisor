@@ -80,11 +80,12 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
   const PROXY = import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined; // Cloudflare Worker URL
   const VERCEL = import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined; // Optional Vercel function base e.g. https://your-app.vercel.app/api/yahoo
   const YAHOO_BASE = PROXY ?? VERCEL ?? '/api/yahoo';
-  const ENABLE_QUOTE = String(import.meta.env.VITE_ENABLE_YAHOO_QUOTE || '').toLowerCase() === 'true';
+  const RAW_SYMBOL = 'MSTR';
+  const TV_SYMBOL = 'NASDAQ:MSTR';
 
     // 1) Prefer chart endpoint (more CORS-friendly via proxy) and derive price/change/range from it
   const chartParams = `interval=${interval}&range=${range}&includePrePost=false`;
-    const chartUrl = `${YAHOO_BASE}/v8/finance/chart/MSTR?${chartParams}`;
+  const chartUrl = `${YAHOO_BASE}/v8/finance/chart/${RAW_SYMBOL}?${chartParams}`;
     const c = await fetchJson(chartUrl);
 
   const result = c?.chart?.result?.[0];
@@ -108,49 +109,79 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
     let high = series.length ? Math.max(...series) : undefined;
     const sparkline = series;
   let volume = undefined as number | undefined;
-  let priceSource: 'regular' | 'pre' | 'post' | 'chart' = 'chart';
+  let priceSource: Summary['priceSource'] = 'chart';
   let tsOut: number | undefined = undefined;
 
-    // 2) Optional: enhance with quote endpoint (disabled by default to avoid 401 noise in production)
-    if (ENABLE_QUOTE) {
-      try {
-        const quoteUrl = `${YAHOO_BASE}/v7/finance/quote?symbols=MSTR`;
-        const q = await fetchJson(quoteUrl);
-        const item = q?.quoteResponse?.result?.[0];
-        const marketState = String(item?.marketState || '').toUpperCase();
-        const qRegPrice = Number(item?.regularMarketPrice);
-        const qPostPrice = Number(item?.postMarketPrice);
-        const qPrePrice  = Number(item?.preMarketPrice);
-        const qChangePct = Number(item?.regularMarketChangePercent);
-        const qLow = Number(item?.regularMarketDayLow);
-        const qHigh = Number(item?.regularMarketDayHigh);
-        const qVol = Number(item?.regularMarketVolume);
-        const regTs = Number(item?.regularMarketTime);
-        const postTs = Number(item?.postMarketTime);
-        const preTs  = Number(item?.preMarketTime);
+    // 2) Enhance with quote endpoint for live NASDAQ pricing to align with TradingView
+    try {
+      const quoteParams = new URLSearchParams({
+        symbols: TV_SYMBOL,
+        region: 'US',
+        lang: 'en-US',
+      });
+      const quoteUrl = `${YAHOO_BASE}/v7/finance/quote?${quoteParams.toString()}`;
+      const q = await fetchJson(quoteUrl);
+      const items: any[] | undefined = q?.quoteResponse?.result;
+      const item = Array.isArray(items) ? items.find((it) => String(it?.symbol || '').toUpperCase().includes('MSTR')) : undefined;
+      if (item) {
+        const marketState = String(item.marketState || '').toUpperCase();
+        const qRegPrice = Number(item.regularMarketPrice);
+        const qPostPrice = Number(item.postMarketPrice);
+        const qPrePrice = Number(item.preMarketPrice);
+        const qChangePct = Number(item.regularMarketChangePercent);
+        const qPostChangePct = Number(item.postMarketChangePercent);
+        const qPreChangePct = Number(item.preMarketChangePercent);
+        const qLow = Number(item.regularMarketDayLow);
+        const qHigh = Number(item.regularMarketDayHigh);
+        const qVol = Number(item.regularMarketVolume);
+        const regTs = Number(item.regularMarketTime);
+        const postTs = Number(item.postMarketTime);
+        const preTs = Number(item.preMarketTime);
+        const prevClose = Number(item.regularMarketPreviousClose);
 
-        // Regular-only logic: if REGULAR, show live regular price; otherwise, show previous close
-        const prevClose = Number(item?.regularMarketPreviousClose);
-        if (marketState === 'REGULAR' && isFinite(qRegPrice)) {
-          price = qRegPrice;
-          priceSource = 'regular';
-          tsOut = isFinite(regTs) ? regTs : undefined;
-          if (isFinite(qChangePct)) changePct = qChangePct;
-        } else if (isFinite(prevClose)) {
-          price = prevClose;
-          priceSource = 'regular';
-          tsOut = isFinite(regTs) ? regTs : undefined;
-          // At close price: show 0% change (or keep day's change if desired). We use 0 to avoid confusion post-market.
-          changePct = 0;
+        const applyQuote = (value: number | undefined, pct: number | undefined, source: 'regular' | 'pre' | 'post', tsCandidate?: number) => {
+          if (!isFinite(value ?? NaN)) return false;
+          price = value as number;
+          priceSource = source;
+          if (isFinite(pct ?? NaN)) {
+            changePct = pct as number;
+          } else if (source !== 'regular' && isFinite(qChangePct)) {
+            changePct = qChangePct;
+          }
+          if (isFinite(tsCandidate ?? NaN)) {
+            tsOut = tsCandidate;
+          }
+          return true;
+        };
+
+        let applied = false;
+        if (marketState === 'REGULAR') {
+          applied = applyQuote(qRegPrice, qChangePct, 'regular', regTs);
+        } else if (marketState.startsWith('PRE')) {
+          applied = applyQuote(qPrePrice, qPreChangePct, 'pre', preTs) || applyQuote(qRegPrice, qChangePct, 'regular', regTs);
+        } else if (marketState.startsWith('POST')) {
+          applied = applyQuote(qPostPrice, qPostChangePct, 'post', postTs) || applyQuote(qRegPrice, qChangePct, 'regular', regTs);
         }
+
+        if (!applied) {
+          // Market closed or unknown state; fall back to regular price or previous close
+          if (!applyQuote(qRegPrice, qChangePct, 'regular', regTs) && isFinite(prevClose)) {
+            applyQuote(prevClose, 0, 'regular', regTs);
+          }
+        }
+
         if (isFinite(qLow)) low = qLow;
         if (isFinite(qHigh)) high = qHigh;
         if (isFinite(qVol)) volume = qVol;
-      } catch {}
-    }
+      }
+    } catch {}
 
     // Fallback to chart meta's regularMarketPrice if quote failed or was missing
-    if (priceSource !== 'regular' && isFinite(metaRegPrice)) {
+    if (!Number.isFinite(price) && isFinite(metaRegPrice)) {
+      price = metaRegPrice;
+      priceSource = 'regular';
+      tsOut = isFinite(metaRegTime) ? metaRegTime : tsOut;
+    } else if (priceSource === 'chart' && isFinite(metaRegPrice)) {
       price = metaRegPrice;
       priceSource = 'regular';
       tsOut = isFinite(metaRegTime) ? metaRegTime : tsOut;

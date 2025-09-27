@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Clock } from "lucide-react";
 
 type TF = '5m' | '15m' | '1h';
 
@@ -14,6 +14,10 @@ interface TFResult {
   roc?: number; // %
   state: 'bullish' | 'bearish' | 'neutral';
   confidence: number; // 0..100
+  lastTimestamp?: number; // ms since epoch of most recent bar
+  exchangeTimezone?: string;
+  marketState?: string;
+  lastRegularTimestamp?: number;
 }
 
 const YAHOO_BASE = (import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined)
@@ -90,30 +94,138 @@ function tfToYahoo(tf: TF): { interval: YahooInterval; range: string } {
   }
 }
 
-async function fetchMstrCloses(tf: TF, limit = 320): Promise<number[]> {
+interface FetchMstrClosesResult {
+  closes: number[];
+  timestamps: number[];
+  exchangeTimezone?: string;
+  marketState?: string;
+  regularMarketTime?: number;
+  regularSessionClose?: number;
+}
+
+interface MomentumContext {
+  exchangeTimezone: string;
+  marketState?: string;
+  latestTimestamp?: number;
+  lastRegularTimestamp?: number;
+}
+
+interface StaleInfo {
+  message: string;
+  exchangeTimezone: string;
+  referenceTimestamp?: number;
+}
+
+function formatInTimeZone(ms: number, timeZone: string): string {
+  const date = new Date(ms);
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  }).format(date);
+}
+
+function isWeekendInTimeZone(ms: number, timeZone: string): boolean {
+  const date = new Date(ms);
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'long' }).format(date);
+  return weekday === 'Saturday' || weekday === 'Sunday';
+}
+
+function determineStaleInfo(context: MomentumContext, nowMs: number): StaleInfo | null {
+  const exchangeTimezone = context.exchangeTimezone || 'America/New_York';
+  const referenceTimestamp = context.lastRegularTimestamp ?? context.latestTimestamp;
+  const marketState = (context.marketState ?? '').toUpperCase();
+  const weekend = isWeekendInTimeZone(nowMs, exchangeTimezone);
+  const hoursSinceReference = referenceTimestamp ? (nowMs - referenceTimestamp) / 3_600_000 : Number.POSITIVE_INFINITY;
+  const isWeekendClosure = weekend;
+  const isExtendedClosure = !weekend && marketState === 'CLOSED' && hoursSinceReference >= 36;
+  if (!isWeekendClosure && !isExtendedClosure) return null;
+  const messageBase = isWeekendClosure ? 'Market closed for weekend' : 'Market closed';
+  if (!referenceTimestamp || !isFinite(referenceTimestamp)) {
+    return { message: messageBase, exchangeTimezone };
+  }
+  const formatted = formatInTimeZone(referenceTimestamp, exchangeTimezone);
+  return {
+    message: `${messageBase} — showing data from ${formatted}`,
+    exchangeTimezone,
+    referenceTimestamp,
+  };
+}
+
+async function fetchMstrCloses(tf: TF, limit = 320): Promise<FetchMstrClosesResult> {
   const { interval, range } = tfToYahoo(tf);
   const url = `${YAHOO_BASE}/v8/finance/chart/MSTR?interval=${interval}&range=${range}&includePrePost=true`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('MSTR chart fetch failed');
   const j = await r.json();
-  const closes: Array<number | null | undefined> = j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close ?? [];
-  const filtered = (closes || []).filter((v): v is number => typeof v === 'number' && isFinite(v));
-  return filtered.slice(-limit);
+  const result = j?.chart?.result?.[0];
+  const meta: Record<string, any> | undefined = result?.meta ?? undefined;
+  const timestampsRaw: Array<number | null | undefined> = Array.isArray(result?.timestamp) ? result?.timestamp ?? [] : [];
+  const quote = result?.indicators?.quote?.[0];
+  const closesRaw: Array<number | null | undefined> = Array.isArray(quote?.close) ? quote.close : [];
+
+  const filteredCloses: number[] = [];
+  const filteredTs: number[] = [];
+  const len = Math.min(closesRaw.length, timestampsRaw.length);
+  for (let i = 0; i < len; i++) {
+    const close = closesRaw[i];
+    const ts = timestampsRaw[i];
+    if (typeof close === 'number' && isFinite(close) && typeof ts === 'number' && isFinite(ts)) {
+      filteredCloses.push(close);
+      filteredTs.push(ts);
+    }
+  }
+
+  const end = filteredCloses.length;
+  const start = Math.max(0, end - limit);
+  return {
+    closes: filteredCloses.slice(start),
+    timestamps: filteredTs.slice(start),
+    exchangeTimezone: typeof meta?.exchangeTimezoneName === 'string' ? meta.exchangeTimezoneName : undefined,
+    marketState: typeof meta?.marketState === 'string' ? meta.marketState : undefined,
+    regularMarketTime: typeof meta?.regularMarketTime === 'number' ? meta.regularMarketTime : undefined,
+    regularSessionClose: typeof meta?.currentTradingPeriod?.regular?.end === 'number'
+      ? meta.currentTradingPeriod.regular.end
+      : undefined,
+  };
 }
 
 export function ShortTermMomentumMSTR() {
   const [results, setResults] = useState<TFResult[] | null>(null);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [momentumContext, setMomentumContext] = useState<MomentumContext | null>(null);
+  const [staleInfo, setStaleInfo] = useState<StaleInfo | null>(null);
 
   const computeFor = useCallback(async (tf: TF): Promise<TFResult> => {
     try {
-      const closes = await fetchMstrCloses(tf, 320);
+      const data = await fetchMstrCloses(tf, 320);
+      const closes = data.closes;
       const rsi = calcRSI14(closes);
       const { macd, signal } = calcMACD(closes);
       const roc = calcROC(closes, 10);
       const { state, confidence } = scoreAndState(rsi, macd, signal, roc);
-      return { timeframe: tf, rsi, macd, signal, roc, state, confidence };
+      const lastTimestampSec = data.timestamps[data.timestamps.length - 1];
+      const lastTimestamp = typeof lastTimestampSec === 'number' ? lastTimestampSec * 1000 : undefined;
+      const regularMarketMs = typeof data.regularMarketTime === 'number' ? data.regularMarketTime * 1000 : undefined;
+      const regularSessionCloseMs = typeof data.regularSessionClose === 'number' ? data.regularSessionClose * 1000 : undefined;
+      const lastRegularTimestamp = regularMarketMs ?? regularSessionCloseMs ?? lastTimestamp;
+          return {
+            timeframe: tf,
+            rsi,
+            macd,
+            signal,
+            roc,
+            state,
+            confidence,
+            lastTimestamp,
+            exchangeTimezone: data.exchangeTimezone,
+            marketState: data.marketState,
+            lastRegularTimestamp,
+          };
     } catch {
       return { timeframe: tf, state: 'neutral', confidence: 0 };
     }
@@ -124,7 +236,47 @@ export function ShortTermMomentumMSTR() {
     async function run() {
       setStatus('loading');
       const res = await Promise.all([computeFor('5m'), computeFor('15m'), computeFor('1h')]);
-      if (!cancelled) { setResults(res); setUpdatedAt(Date.now()); setStatus('ready'); }
+      if (cancelled) return;
+      setResults(res);
+      const latestTimestampValue = res.reduce<number>((max, r) => {
+        const ts = typeof r.lastTimestamp === 'number' ? r.lastTimestamp : 0;
+        return ts > max ? ts : max;
+      }, 0);
+      const latestTimestamp = latestTimestampValue > 0 ? latestTimestampValue : undefined;
+
+      const exchangeTimezone = (() => {
+        for (const r of res) {
+          if (r.exchangeTimezone) return r.exchangeTimezone;
+        }
+        return 'America/New_York';
+      })();
+
+      const marketState = (() => {
+        for (const r of res) {
+          if (r.marketState) return r.marketState;
+        }
+        return undefined;
+      })();
+
+      let lastRegularTimestamp: number | undefined;
+      for (const r of res) {
+        if (typeof r.lastRegularTimestamp === 'number') {
+          lastRegularTimestamp = r.lastRegularTimestamp;
+          break;
+        }
+      }
+
+      const context: MomentumContext = {
+        exchangeTimezone,
+        marketState,
+        latestTimestamp,
+        lastRegularTimestamp,
+      };
+
+      setMomentumContext(context);
+      setStaleInfo(determineStaleInfo(context, Date.now()));
+      setUpdatedAt(latestTimestamp ?? Date.now());
+      setStatus('ready');
     }
     run();
     const id = setInterval(run, 60_000);
@@ -173,6 +325,17 @@ export function ShortTermMomentumMSTR() {
     ];
   }, [results]);
 
+  const exchangeTimezone = useMemo(() => {
+    if (momentumContext?.exchangeTimezone) return momentumContext.exchangeTimezone;
+    if (results) {
+      for (const r of results) {
+        if (r.exchangeTimezone) return r.exchangeTimezone;
+      }
+    }
+    if (staleInfo?.exchangeTimezone) return staleInfo.exchangeTimezone;
+    return 'America/New_York';
+  }, [momentumContext, results, staleInfo]);
+
   return (
     <Card className="p-4">
       <div className="space-y-4">
@@ -182,6 +345,13 @@ export function ShortTermMomentumMSTR() {
             {composite.state.charAt(0).toUpperCase() + composite.state.slice(1)}
           </Badge>
         </div>
+
+        {staleInfo && (
+          <div className="flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-200">
+            <Clock className="h-3 w-3" />
+            <span>{staleInfo.message}</span>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {displayResults.map((item) => (
@@ -239,8 +409,15 @@ export function ShortTermMomentumMSTR() {
           />
         </div>
 
-        <div className="mt-2 text-xs text-muted-foreground">
-          For each timeframe (5m, 15m, 1h), we pull the latest intraday MSTR closes from Yahoo Finance via the app proxy and apply the same RSI/MACD/ROC blend.
+        <div className="mt-2 text-xs text-muted-foreground space-y-1">
+          <div>
+            For each timeframe (5m, 15m, 1h), we pull the latest intraday MSTR closes from Yahoo Finance via the app proxy and apply the same RSI/MACD/ROC blend.
+          </div>
+          {updatedAt && (
+            <div>
+              Last update: {formatInTimeZone(updatedAt, exchangeTimezone)}
+            </div>
+          )}
         </div>
       </div>
     </Card>

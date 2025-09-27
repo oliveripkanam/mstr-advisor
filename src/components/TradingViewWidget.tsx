@@ -152,9 +152,19 @@ function resolveTVSymbol(input: string): string {
   if (sym === "BTC" || sym === "BTCUSD" || sym === "XBT" || sym === "XBTUSD") {
     return "BINANCE:BTCUSDT"; // popular and supported without API keys
   }
-  if (sym === "MSTR" || sym === "NASDAQ:MSTR") {
-    return sym.includes(":") ? sym : "NASDAQ:MSTR";
+
+  // Normalize exchange prefixes so that any variation of MSTR resolves to NASDAQ
+  const colonIdx = sym.indexOf(":");
+  if (colonIdx > -1) {
+    const base = sym.slice(colonIdx + 1);
+    if (base === "MSTR") {
+      return "NASDAQ:MSTR";
+    }
   }
+  if (sym === "MSTR") {
+    return "NASDAQ:MSTR";
+  }
+
   // If user passes already qualified symbol, use as-is
   if (sym.includes(":")) return sym;
   // Fallback to TradingView generic
