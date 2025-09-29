@@ -42,7 +42,7 @@ function tfToYahoo(tf: Timeframe): { interval: string; range: string } {
 // --- BTC (Binance) ---
 export async function fetchBtcSummary(tf: Timeframe): Promise<Summary> {
   try {
-    const tickerUrl = 'https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT';
+    const tickerUrl = '/proxy/binance-fapi/api/v3/ticker/24hr?symbol=BTCUSDT';
     const tickerRes = await fetch(tickerUrl);
     if (!tickerRes.ok) throw new Error('Binance ticker failed');
     const t = await tickerRes.json();
@@ -53,7 +53,7 @@ export async function fetchBtcSummary(tf: Timeframe): Promise<Summary> {
     const high = parseFloat(t.highPrice);
 
     // Sparkline for last ~24h using 5m klines (288 points)
-    const klinesUrl = `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=288`;
+  const klinesUrl = `/proxy/binance-fapi/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=288`;
     const kRes = await fetch(klinesUrl);
     const sparkline = kRes.ok ? (await kRes.json()).map((k: any) => parseFloat(k[4])) as number[] : undefined;
 
@@ -81,8 +81,7 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
   const VERCEL = import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined; // Optional Vercel function base e.g. https://your-app.vercel.app/api/yahoo
   const YAHOO_BASE = PROXY ?? VERCEL ?? '/api/yahoo';
   const RAW_SYMBOL = 'MSTR';
-  const TV_SYMBOL = 'NASDAQ:MSTR';
-  const ENABLE_QUOTE = String(import.meta.env.VITE_ENABLE_YAHOO_QUOTE ?? '').toLowerCase() === 'true';
+  const ENABLE_QV7 = String(import.meta.env.VITE_ENABLE_YAHOO_QUOTE_V7 || '').toLowerCase() === 'true';
 
     // 1) Prefer chart endpoint (more CORS-friendly via proxy) and derive price/change/range from it
   const chartParams = `interval=${interval}&range=${range}&includePrePost=false`;
@@ -113,19 +112,19 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
   let priceSource: Summary['priceSource'] = 'chart';
   let tsOut: number | undefined = undefined;
 
-    // 2) Enhance with quote endpoint for live NASDAQ pricing to align with TradingView
-    if (ENABLE_QUOTE) {
-      try {
+    // 2) Enhance with quote endpoint for live pricing, gated via env to avoid 401 noise
+    try {
+      if (ENABLE_QV7) {
         const quoteParams = new URLSearchParams({
-          symbols: TV_SYMBOL,
+          symbols: RAW_SYMBOL,
           region: 'US',
           lang: 'en-US',
         });
         const quoteUrl = `${YAHOO_BASE}/v7/finance/quote?${quoteParams.toString()}`;
         const q = await fetchJson(quoteUrl);
-        const items: any[] | undefined = q?.quoteResponse?.result;
-        const item = Array.isArray(items) ? items.find((it) => String(it?.symbol || '').toUpperCase().includes('MSTR')) : undefined;
-        if (item) {
+      const items: any[] | undefined = q?.quoteResponse?.result;
+      const item = Array.isArray(items) ? items.find((it) => String(it?.symbol || '').toUpperCase().includes('MSTR')) : undefined;
+      if (item) {
         const marketState = String(item.marketState || '').toUpperCase();
         const qRegPrice = Number(item.regularMarketPrice);
         const qPostPrice = Number(item.postMarketPrice);
@@ -175,9 +174,9 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
         if (isFinite(qLow)) low = qLow;
         if (isFinite(qHigh)) high = qHigh;
         if (isFinite(qVol)) volume = qVol;
-        }
-      } catch {}
-    }
+      }
+      }
+    } catch {}
 
     // Fallback to chart meta's regularMarketPrice if quote failed or was missing
     if (!Number.isFinite(price) && isFinite(metaRegPrice)) {

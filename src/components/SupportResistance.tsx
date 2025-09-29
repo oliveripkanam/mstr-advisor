@@ -39,10 +39,10 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
     async function load() {
       try {
         setLoading(true);
-        const prem = await getJson('/proxy/binance-fapi/fapi/v1/premiumIndex?symbol=BTCUSDT');
+  const prem = await getJson('/proxy/binance-fapi/fapi/v1/premiumIndex?symbol=BTCUSDT');
         const mark = Number(prem?.markPrice);
         if (!cancelled && isFinite(mark)) setCurrentPrice(mark);
-        const ks = await getJson('/proxy/binance-fapi/fapi/v1/klines?symbol=BTCUSDT&interval=5m&limit=1000');
+  const ks = await getJson('/proxy/binance-fapi/fapi/v1/klines?symbol=BTCUSDT&interval=5m&limit=1000');
         if (!cancelled && Array.isArray(ks)) setKlines(ks);
       } catch {
         

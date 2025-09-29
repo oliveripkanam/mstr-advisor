@@ -4,7 +4,7 @@
 
 [[redirects]]
   from = "/proxy/binance-fapi/*"
-  to = "https://fapi.binance.com/:splat"
+  to = "/.netlify/functions/binance/:splat"
   status = 200
 
 [[redirects]]
