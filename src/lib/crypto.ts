@@ -134,7 +134,10 @@ export async function fetchBybitOpenInterestSeries(interval: '5min' | '15min', l
   const r = await fetch(`/proxy/bybit/v5/market/open-interest?category=linear&symbol=BTCUSDT&intervalTime=${encodeURIComponent(interval)}&limit=${limit}`);
   if (!isOk(r)) throw new Error('bybit oi failed');
   const j = await r.json();
+  const retCode = Number(j?.retCode);
+  if (retCode !== 0) throw new Error(`bybit oi retCode ${retCode}`);
   const list: any[] = j?.result?.list || [];
+  if (!Array.isArray(list) || list.length === 0) throw new Error('bybit oi empty');
   const rows = list.map((row: any) => {
     const ts = Number(row?.timestamp ?? row?.ts ?? row?.t);
     const val = Number(row?.openInterestValue ?? row?.openInterestUsd ?? row?.value);

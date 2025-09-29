@@ -61,16 +61,21 @@ export default function PerpFundingOI() {
         } catch {}
       }
 
-      // OI: prefer Bybit 5min series (limit 200), fallback to OKX current point if needed
+      // OI: prefer Bybit 5min series (limit 200), fallback to Bybit 15min, then OKX current point
       let series: SeriesPoint[] = [];
       try {
         const list = await fetchBybitOpenInterestSeries('5min', 200);
         series = list.map(p => ({ ts: p.ts, value: p.value }));
       } catch {
         try {
-          const okxPt = await fetchOkxCurrentOpenInterestUsd();
-          if (okxPt) series = [okxPt];
-        } catch {}
+          const list15 = await fetchBybitOpenInterestSeries('15min', 200);
+          series = list15.map(p => ({ ts: p.ts, value: p.value }));
+        } catch {
+          try {
+            const okxPt = await fetchOkxCurrentOpenInterestUsd();
+            if (okxPt) series = [okxPt];
+          } catch {}
+        }
       }
 
       const oiNotionalUsd = series.length ? series[series.length - 1].value : undefined;
