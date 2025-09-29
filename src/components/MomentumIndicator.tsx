@@ -1,3 +1,4 @@
+import { binanceJson } from "../lib/binance";
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -90,10 +91,7 @@ function scoreAndState(rsi?: number, macd?: number, signal?: number, roc?: numbe
 }
 
 async function fetchCloses(interval: TF, limit = 300): Promise<number[]> {
-  const url = `/proxy/binance-fapi/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('klines fetch failed');
-  const j = await r.json();
+  const j = await binanceJson<any[]>(`/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`);
   if (!Array.isArray(j)) throw new Error('bad klines');
   return j.map((k: any) => Number(k[4])).filter((v: any) => isFinite(v));
 }

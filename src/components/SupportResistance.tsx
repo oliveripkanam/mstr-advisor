@@ -1,3 +1,4 @@
+import { binanceJson } from "../lib/binance";
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -39,10 +40,10 @@ export function SupportResistance({ onLevelHover, onTargetClick }: SupportResist
     async function load() {
       try {
         setLoading(true);
-  const prem = await getJson('/proxy/binance-fapi/fapi/v1/premiumIndex?symbol=BTCUSDT');
+  const prem = await binanceJson<any>('/fapi/v1/premiumIndex?symbol=BTCUSDT');
         const mark = Number(prem?.markPrice);
         if (!cancelled && isFinite(mark)) setCurrentPrice(mark);
-  const ks = await getJson('/proxy/binance-fapi/fapi/v1/klines?symbol=BTCUSDT&interval=5m&limit=1000');
+  const ks = await binanceJson<any[]>('/fapi/v1/klines?symbol=BTCUSDT&interval=5m&limit=1000');
         if (!cancelled && Array.isArray(ks)) setKlines(ks);
       } catch {
         
