@@ -9,12 +9,12 @@
 
 [[redirects]]
   from = "/proxy/okx/*"
-  to = "https://www.okx.com/:splat"
+  to = "/.netlify/functions/okx/:splat"
   status = 200
 
 [[redirects]]
   from = "/proxy/bybit/*"
-  to = "https://api.bybit.com/:splat"
+  to = "/.netlify/functions/bybit/:splat"
   status = 200
 
 [[redirects]]
