@@ -140,10 +140,35 @@ export async function fetchBybitOpenInterestSeries(interval: '5min' | '15min', l
   if (!Array.isArray(list) || list.length === 0) throw new Error('bybit oi empty');
   const rows = list.map((row: any) => {
     const ts = Number(row?.timestamp ?? row?.ts ?? row?.t);
-    const val = Number(row?.openInterestValue ?? row?.openInterestUsd ?? row?.value);
+    // "openInterest" is contracts (for linear BTCUSDT it aligns with BTC size); multiply by price to get USD later
+    const val = Number(row?.openInterestValue ?? row?.openInterestUsd ?? row?.openInterest ?? row?.value);
     return { ts, value: val } as OiPoint;
   }).filter(p => isFinite(p.ts) && isFinite(p.value));
   return asc(rows, (p) => p.ts);
+}
+
+// Compute USD notional series by combining Bybit OI (contracts/BTC) with Bybit kline closes from the same interval
+export async function fetchBybitOpenInterestNotionalSeries(interval: '5min' | '15min', limit: number): Promise<OiPoint[]> {
+  const [oi, klines] = await Promise.all([
+    fetchBybitOpenInterestSeries(interval, limit),
+    fetchBybitKlinesNormalized(interval === '5min' ? '5m' : '15m', limit + 5),
+  ]);
+  // Build a lookup of close price by rounded interval timestamp
+  const bucketMs = interval === '5min' ? 5 * 60 * 1000 : 15 * 60 * 1000;
+  const priceByTs = new Map<number, number>();
+  for (const k of klines) {
+    const ts = Math.floor(k[0] / bucketMs) * bucketMs;
+    priceByTs.set(ts, k[4]);
+  }
+  const out: OiPoint[] = [];
+  for (const p of oi) {
+    const bucket = Math.floor(p.ts / bucketMs) * bucketMs;
+    const price = priceByTs.get(bucket);
+    if (isFinite(price as number)) {
+      out.push({ ts: bucket, value: p.value * (price as number) });
+    }
+  }
+  return asc(out, (x) => x.ts);
 }
 
 export async function fetchOkxCurrentOpenInterestUsd(): Promise<OiPoint | undefined> {

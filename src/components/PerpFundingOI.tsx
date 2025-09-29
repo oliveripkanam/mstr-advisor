@@ -45,7 +45,7 @@ export default function PerpFundingOI() {
 
   async function fetchPerpData() {
     try {
-      const { fetchOkxFunding, fetchBybitFundingFromTicker, fetchBybitOpenInterestSeries, fetchOkxCurrentOpenInterestUsd } = await import('../lib/crypto');
+  const { fetchOkxFunding, fetchBybitFundingFromTicker, fetchBybitOpenInterestSeries, fetchOkxCurrentOpenInterestUsd, fetchBybitOpenInterestNotionalSeries } = await import('../lib/crypto');
       // Funding: prefer OKX, fallback Bybit ticker
       let fundingRate8h: number | undefined = undefined;
       let nextFundingTime: number | undefined = undefined;
@@ -61,20 +61,26 @@ export default function PerpFundingOI() {
         } catch {}
       }
 
-      // OI: prefer Bybit 5min series (limit 200), fallback to Bybit 15min, then OKX current point
+      // OI: prefer Bybit 5min notional USD series, fallback to 15min notional, then raw series, then OKX current point
       let series: SeriesPoint[] = [];
       try {
-        const list = await fetchBybitOpenInterestSeries('5min', 200);
+        const list = await fetchBybitOpenInterestNotionalSeries('5min', 200);
         series = list.map(p => ({ ts: p.ts, value: p.value }));
       } catch {
         try {
-          const list15 = await fetchBybitOpenInterestSeries('15min', 200);
-          series = list15.map(p => ({ ts: p.ts, value: p.value }));
+          const list15n = await fetchBybitOpenInterestNotionalSeries('15min', 200);
+          series = list15n.map(p => ({ ts: p.ts, value: p.value }));
         } catch {
           try {
-            const okxPt = await fetchOkxCurrentOpenInterestUsd();
-            if (okxPt) series = [okxPt];
-          } catch {}
+            const listRaw = await fetchBybitOpenInterestSeries('5min', 200);
+            // Last resort multiply latest with current ticker if available later; for now keep contracts
+            series = listRaw.map(p => ({ ts: p.ts, value: p.value }));
+          } catch {
+            try {
+              const okxPt = await fetchOkxCurrentOpenInterestUsd();
+              if (okxPt) series = [okxPt];
+            } catch {}
+          }
         }
       }
 
