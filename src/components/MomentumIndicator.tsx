@@ -1,4 +1,4 @@
-import { binanceJson } from "../lib/binance";
+import { fetchBtcCloses } from "../lib/crypto";
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -91,9 +91,9 @@ function scoreAndState(rsi?: number, macd?: number, signal?: number, roc?: numbe
 }
 
 async function fetchCloses(interval: TF, limit = 300): Promise<number[]> {
-  const j = await binanceJson<any[]>(`/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`);
-  if (!Array.isArray(j)) throw new Error('bad klines');
-  return j.map((k: any) => Number(k[4])).filter((v: any) => isFinite(v));
+  const tf = interval as TF;
+  const closes = await fetchBtcCloses(tf, limit);
+  return closes;
 }
 
 export function MomentumIndicator() {

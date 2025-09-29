@@ -42,24 +42,18 @@ function tfToYahoo(tf: Timeframe): { interval: string; range: string } {
 // --- BTC (Binance) ---
 export async function fetchBtcSummary(tf: Timeframe): Promise<Summary> {
   try {
-    const tickerUrl = '/proxy/binance-fapi/api/v3/ticker/24hr?symbol=BTCUSDT';
-    const tickerRes = await fetch(tickerUrl);
-    if (!tickerRes.ok) throw new Error('Binance ticker failed');
-    const t = await tickerRes.json();
-    const price = parseFloat(t.lastPrice);
-    const changePct = parseFloat(t.priceChangePercent);
-    const volume = parseFloat(t.quoteVolume); // USDT value traded
-    const low = parseFloat(t.lowPrice);
-    const high = parseFloat(t.highPrice);
-
-    // Sparkline for last ~24h using 5m klines (288 points)
-  const klinesUrl = `/proxy/binance-fapi/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=288`;
-    const kRes = await fetch(klinesUrl);
-    const sparkline = kRes.ok ? (await kRes.json()).map((k: any) => parseFloat(k[4])) as number[] : undefined;
-
-  return { price, changePct, volume, low, high, sparkline, priceSource: 'ticker' };
+    // Ticker from OKX (fallback Bybit)
+    const { fetchBtcTicker, fetchBtcKlinesNormalized } = await import('./crypto');
+    const price = await fetchBtcTicker();
+    // Sparkline (5m x 288 ~ 24h)
+    const ks = await fetchBtcKlinesNormalized('5m' as any, 288);
+    const sparkline = ks.map(k => k[4]);
+    const low = sparkline.length ? Math.min(...sparkline) : undefined;
+    const high = sparkline.length ? Math.max(...sparkline) : undefined;
+    const base = sparkline.length ? sparkline[0] : undefined;
+    const changePct = base && isFinite(price) ? ((price - base) / base) * 100 : 0;
+    return { price, changePct, low, high, sparkline, priceSource: 'ticker' };
   } catch {
-    // Fallback to safe defaults if network/CORS fails
     return {
       price: 64000,
       changePct: 0,
