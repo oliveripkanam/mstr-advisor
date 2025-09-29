@@ -16,15 +16,28 @@ function asc<T>(arr: T[], getTs: (t: T) => number): T[] {
 
 function isOk(res: Response) { return res.ok && res.status >= 200 && res.status < 300; }
 
+// Region lock/backoff: if OKX returns 403 once, skip OKX for a cooldown to avoid noisy logs and wasted calls
+let okxBlockedUntil = 0;
+function isOkxAllowed() {
+  return Date.now() > okxBlockedUntil;
+}
+function backoffOkx(minutes = 30) {
+  okxBlockedUntil = Date.now() + minutes * 60 * 1000;
+}
+
 // Normalized Kline tuple shape (compatible subset with Binance indices used in code):
 // [0] openTime(ms), [1] open, [2] high, [3] low, [4] close, [5] baseVol, [7] quoteVol
 export type NormKline = [number, number, number, number, number, number, undefined?, number?];
 
 export async function fetchOkxKlinesNormalized(tf: TF, limit: number): Promise<NormKline[]> {
+  if (!isOkxAllowed()) throw new Error('okx skipped');
   const bar = okxBar(tf);
   const url = `/proxy/okx/api/v5/market/candles?instId=BTC-USDT-SWAP&bar=${encodeURIComponent(bar)}&limit=${limit}`;
   const r = await fetch(url);
-  if (!isOk(r)) throw new Error('okx klines failed');
+  if (!isOk(r)) {
+    if (r.status === 403) backoffOkx();
+    throw new Error('okx klines failed');
+  }
   const j = await r.json();
   const data: any[] = j?.data || [];
   const rows = data.map((row) => {
@@ -61,8 +74,14 @@ export async function fetchBybitKlinesNormalized(tf: TF, limit: number): Promise
 }
 
 export async function fetchBtcKlinesNormalized(tf: TF, limit: number): Promise<NormKline[]> {
-  try { return await fetchOkxKlinesNormalized(tf, limit); } catch {}
-  return await fetchBybitKlinesNormalized(tf, limit);
+  // Prefer OKX unless blocked, else Bybit
+  if (isOkxAllowed()) {
+    try { return await fetchOkxKlinesNormalized(tf, limit); } catch {}
+  }
+  try { return await fetchBybitKlinesNormalized(tf, limit); } catch {}
+  // If both fail, and OKX was attempted and blocked, extend backoff a bit
+  if (isOkxAllowed()) backoffOkx();
+  throw new Error('both klines failed');
 }
 
 export async function fetchBtcCloses(tf: TF, limit: number): Promise<number[]> {
@@ -71,16 +90,20 @@ export async function fetchBtcCloses(tf: TF, limit: number): Promise<number[]> {
 }
 
 export async function fetchBtcTicker(): Promise<number> {
-  // OKX primary
-  try {
-    const r = await fetch('/proxy/okx/api/v5/market/ticker?instId=BTC-USDT-SWAP');
-    if (isOk(r)) {
-      const j = await r.json();
-      const row = j?.data?.[0];
-      const last = Number(row?.last ?? row?.lastPx);
-      if (isFinite(last)) return last;
-    }
-  } catch {}
+  // OKX primary unless blocked
+  if (isOkxAllowed()) {
+    try {
+      const r = await fetch('/proxy/okx/api/v5/market/ticker?instId=BTC-USDT-SWAP');
+      if (isOk(r)) {
+        const j = await r.json();
+        const row = j?.data?.[0];
+        const last = Number(row?.last ?? row?.lastPx);
+        if (isFinite(last)) return last;
+      } else if (r.status === 403) {
+        backoffOkx();
+      }
+    } catch {}
+  }
   // Bybit fallback
   try {
     const r2 = await fetch('/proxy/bybit/v5/market/tickers?category=linear&symbol=BTCUSDT');
@@ -102,8 +125,12 @@ export interface FundingSnapshot {
 }
 
 export async function fetchOkxFunding(): Promise<FundingSnapshot> {
+  if (!isOkxAllowed()) throw new Error('okx funding skipped');
   const r = await fetch('/proxy/okx/api/v5/public/funding-rate?instId=BTC-USDT-SWAP');
-  if (!isOk(r)) throw new Error('okx funding failed');
+  if (!isOk(r)) {
+    if (r.status === 403) backoffOkx();
+    throw new Error('okx funding failed');
+  }
   const j = await r.json();
   const row = j?.data?.[0];
   const fundingRate8h = Number(row?.fundingRate);
@@ -114,7 +141,7 @@ export async function fetchOkxFunding(): Promise<FundingSnapshot> {
            ts: isFinite(ts) ? ts : undefined };
 }
 
-export async function fetchBybitFundingFromTicker(): Promise<FundingSnapshot> {
+export async function fetchBybitFundingFromTicker(): Promise<FundingSnapshot & { oiNotionalUsd?: number }> {
   const r = await fetch('/proxy/bybit/v5/market/tickers?category=linear&symbol=BTCUSDT');
   if (!isOk(r)) throw new Error('bybit ticker funding failed');
   const j = await r.json();
@@ -122,9 +149,11 @@ export async function fetchBybitFundingFromTicker(): Promise<FundingSnapshot> {
   const fr = Number(it?.fundingRate);
   const nft = Number(it?.nextFundingTime);
   const ts = Number(j?.time ?? Date.now());
+  const oiVal = Number(it?.openInterestValue ?? it?.openInterestUsd);
   return { fundingRate8h: isFinite(fr) ? fr : undefined,
            nextFundingTime: isFinite(nft) ? nft : undefined,
-           ts: isFinite(ts) ? ts : undefined };
+           ts: isFinite(ts) ? ts : undefined,
+           oiNotionalUsd: isFinite(oiVal) ? oiVal : undefined };
 }
 
 // --- Open Interest (Bybit 5m series primary, OKX current fallback) ---
@@ -158,7 +187,10 @@ export async function fetchBybitOpenInterestNotionalSeries(interval: '5min' | '1
   const priceByTs = new Map<number, number>();
   for (const k of klines) {
     const ts = Math.floor(k[0] / bucketMs) * bucketMs;
-    priceByTs.set(ts, k[4]);
+    const close = k[4];
+    // Map both candle start and end to the same close to handle OI timestamps marking end-of-bucket
+    priceByTs.set(ts, close);
+    priceByTs.set(ts + bucketMs, close);
   }
   const out: OiPoint[] = [];
   for (const p of oi) {
