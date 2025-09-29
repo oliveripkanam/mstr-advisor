@@ -7,7 +7,6 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 type TF = '5m' | '15m' | '1h';
 
 const BTC_TIMEZONE = 'America/New_York';
-const FALLBACK_BTC_BASE = 64000;
 
 function formatInTimeZone(ms: number, timeZone: string): string {
   const date = new Date(ms);
@@ -90,33 +89,13 @@ function scoreAndState(rsi?: number, macd?: number, signal?: number, roc?: numbe
   return { state, confidence };
 }
 
-function buildFallbackCloses(interval: TF, limit: number, base = FALLBACK_BTC_BASE): number[] {
-  const stepMinutes = interval === '5m' ? 5 : interval === '15m' ? 15 : 60;
-  const variance = stepMinutes * 0.75; // larger timeframe -> larger wiggle
-  const out: number[] = [];
-  let price = base;
-  for (let i = 0; i < limit; i++) {
-    const drift = Math.sin(i / 18) * variance;
-    const noise = (Math.random() - 0.5) * variance * 0.6;
-    price = Math.max(1000, price + drift + noise);
-    out.push(Number(price.toFixed(2)));
-  }
-  return out;
-}
-
 async function fetchCloses(interval: TF, limit = 300): Promise<number[]> {
   const url = `/proxy/binance-fapi/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`;
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`klines fetch failed with ${r.status}`);
-    const j = await r.json();
-    if (!Array.isArray(j)) throw new Error('bad klines');
-    const closes = j.map((k: any) => Number(k[4])).filter((v: any) => isFinite(v));
-    if (!closes.length) throw new Error('empty klines');
-    return closes;
-  } catch {
-    return buildFallbackCloses(interval, limit);
-  }
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('klines fetch failed');
+  const j = await r.json();
+  if (!Array.isArray(j)) throw new Error('bad klines');
+  return j.map((k: any) => Number(k[4])).filter((v: any) => isFinite(v));
 }
 
 export function MomentumIndicator() {
