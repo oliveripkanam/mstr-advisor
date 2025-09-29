@@ -83,6 +83,36 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
   const RAW_SYMBOL = 'MSTR';
   const TV_SYMBOL = 'NASDAQ:MSTR';
 
+  let yahooQuoteBlocked = false;
+
+  async function fetchYahooQuote(symbols: string[]): Promise<any | null> {
+    if (yahooQuoteBlocked) return null;
+    for (const symbol of symbols) {
+      try {
+        const params = new URLSearchParams({
+          symbols: symbol,
+          region: 'US',
+          lang: 'en-US',
+        });
+        const url = `${YAHOO_BASE}/v7/finance/quote?${params.toString()}`;
+        const resp = await fetch(url);
+        if (!resp.ok) {
+          if (resp.status === 401 || resp.status === 403) {
+            yahooQuoteBlocked = true;
+            return null;
+          }
+          continue;
+        }
+        const json = await resp.json();
+        const item = json?.quoteResponse?.result?.[0];
+        if (item) return item;
+      } catch {
+        // try next symbol
+      }
+    }
+    return null;
+  }
+
     // 1) Prefer chart endpoint (more CORS-friendly via proxy) and derive price/change/range from it
   const chartParams = `interval=${interval}&range=${range}&includePrePost=false`;
   const chartUrl = `${YAHOO_BASE}/v8/finance/chart/${RAW_SYMBOL}?${chartParams}`;
@@ -114,15 +144,7 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
 
     // 2) Enhance with quote endpoint for live NASDAQ pricing to align with TradingView
     try {
-      const quoteParams = new URLSearchParams({
-        symbols: TV_SYMBOL,
-        region: 'US',
-        lang: 'en-US',
-      });
-      const quoteUrl = `${YAHOO_BASE}/v7/finance/quote?${quoteParams.toString()}`;
-      const q = await fetchJson(quoteUrl);
-      const items: any[] | undefined = q?.quoteResponse?.result;
-      const item = Array.isArray(items) ? items.find((it) => String(it?.symbol || '').toUpperCase().includes('MSTR')) : undefined;
+      const item = await fetchYahooQuote([TV_SYMBOL, RAW_SYMBOL]);
       if (item) {
         const marketState = String(item.marketState || '').toUpperCase();
         const qRegPrice = Number(item.regularMarketPrice);
