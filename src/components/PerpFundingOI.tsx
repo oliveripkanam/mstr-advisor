@@ -43,23 +43,44 @@ export default function PerpFundingOI() {
     return r.json();
   }
 
-  async function fetchBinance() {
+  async function fetchPerpData() {
     try {
-      const prem = await getJson('/proxy/binance-fapi/fapi/v1/premiumIndex?symbol=BTCUSDT');
-      const fundingRate8h = Number(prem?.lastFundingRate ?? prem?.lastFundingRate);
-      const nextFundingTime = Number(prem?.nextFundingTime);
-      const oiHist = await getJson('/proxy/binance-fapi/futures/data/openInterestHist?symbol=BTCUSDT&period=5m&limit=200');
-      const series: SeriesPoint[] = Array.isArray(oiHist)
-        ? oiHist.map((p: any) => ({ ts: Number(p.timestamp), value: Number(p.sumOpenInterestValue) }))
-        : [];
+      const { fetchOkxFunding, fetchBybitFundingFromTicker, fetchBybitOpenInterestSeries, fetchOkxCurrentOpenInterestUsd } = await import('../lib/crypto');
+      // Funding: prefer OKX, fallback Bybit ticker
+      let fundingRate8h: number | undefined = undefined;
+      let nextFundingTime: number | undefined = undefined;
+      try {
+        const f = await fetchOkxFunding();
+        fundingRate8h = f.fundingRate8h;
+        nextFundingTime = f.nextFundingTime;
+      } catch {
+        try {
+          const b = await fetchBybitFundingFromTicker();
+          fundingRate8h = b.fundingRate8h;
+          nextFundingTime = b.nextFundingTime;
+        } catch {}
+      }
+
+      // OI: prefer Bybit 5min series (limit 200), fallback to OKX current point if needed
+      let series: SeriesPoint[] = [];
+      try {
+        const list = await fetchBybitOpenInterestSeries('5min', 200);
+        series = list.map(p => ({ ts: p.ts, value: p.value }));
+      } catch {
+        try {
+          const okxPt = await fetchOkxCurrentOpenInterestUsd();
+          if (okxPt) series = [okxPt];
+        } catch {}
+      }
+
       const oiNotionalUsd = series.length ? series[series.length - 1].value : undefined;
       setOiSeries(series);
       setSnap({ fundingRate8h, nextFundingTime, oiNotionalUsd, lastUpdated: Date.now() });
     } catch {}
   }
 
-  useEffect(() => { fetchBinance(); }, []);
-  useInterval(() => { fetchBinance(); }, 30_000);
+  useEffect(() => { fetchPerpData(); }, []);
+  useInterval(() => { fetchPerpData(); }, 30_000);
 
   const activeSeries = oiSeries;
   const latest = snap;
@@ -89,7 +110,7 @@ export default function PerpFundingOI() {
   return (
     <Card className="p-3">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-medium">BTC Perp (Binance): Funding + Open Interest</h3>
+        <h3 className="font-medium">BTC Perp (OKX/Bybit): Funding + Open Interest</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">

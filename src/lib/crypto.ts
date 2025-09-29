@@ -93,3 +93,63 @@ export async function fetchBtcTicker(): Promise<number> {
   } catch {}
   return 0;
 }
+
+// --- Funding (OKX primary, Bybit fallback) ---
+export interface FundingSnapshot {
+  fundingRate8h?: number; // decimal per 8h
+  nextFundingTime?: number; // ms
+  ts?: number; // ms
+}
+
+export async function fetchOkxFunding(): Promise<FundingSnapshot> {
+  const r = await fetch('/proxy/okx/api/v5/public/funding-rate?instId=BTC-USDT-SWAP');
+  if (!isOk(r)) throw new Error('okx funding failed');
+  const j = await r.json();
+  const row = j?.data?.[0];
+  const fundingRate8h = Number(row?.fundingRate);
+  const nextFundingTime = Number(row?.nextFundingTime);
+  const ts = Number(row?.ts ?? row?.fundingTime);
+  return { fundingRate8h: isFinite(fundingRate8h) ? fundingRate8h : undefined,
+           nextFundingTime: isFinite(nextFundingTime) ? nextFundingTime : undefined,
+           ts: isFinite(ts) ? ts : undefined };
+}
+
+export async function fetchBybitFundingFromTicker(): Promise<FundingSnapshot> {
+  const r = await fetch('/proxy/bybit/v5/market/tickers?category=linear&symbol=BTCUSDT');
+  if (!isOk(r)) throw new Error('bybit ticker funding failed');
+  const j = await r.json();
+  const it = j?.result?.list?.[0];
+  const fr = Number(it?.fundingRate);
+  const nft = Number(it?.nextFundingTime);
+  const ts = Number(j?.time ?? Date.now());
+  return { fundingRate8h: isFinite(fr) ? fr : undefined,
+           nextFundingTime: isFinite(nft) ? nft : undefined,
+           ts: isFinite(ts) ? ts : undefined };
+}
+
+// --- Open Interest (Bybit 5m series primary, OKX current fallback) ---
+export interface OiPoint { ts: number; value: number; }
+
+export async function fetchBybitOpenInterestSeries(interval: '5min' | '15min', limit: number): Promise<OiPoint[]> {
+  const r = await fetch(`/proxy/bybit/v5/market/open-interest?category=linear&symbol=BTCUSDT&intervalTime=${encodeURIComponent(interval)}&limit=${limit}`);
+  if (!isOk(r)) throw new Error('bybit oi failed');
+  const j = await r.json();
+  const list: any[] = j?.result?.list || [];
+  const rows = list.map((row: any) => {
+    const ts = Number(row?.timestamp ?? row?.ts ?? row?.t);
+    const val = Number(row?.openInterestValue ?? row?.openInterestUsd ?? row?.value);
+    return { ts, value: val } as OiPoint;
+  }).filter(p => isFinite(p.ts) && isFinite(p.value));
+  return asc(rows, (p) => p.ts);
+}
+
+export async function fetchOkxCurrentOpenInterestUsd(): Promise<OiPoint | undefined> {
+  const r = await fetch('/proxy/okx/api/v5/public/open-interest?instId=BTC-USDT-SWAP');
+  if (!isOk(r)) return undefined;
+  const j = await r.json();
+  const row = j?.data?.[0];
+  const ts = Number(row?.ts);
+  const val = Number(row?.oiUsd ?? row?.oiCcy);
+  if (!isFinite(ts) || !isFinite(val)) return undefined;
+  return { ts, value: val };
+}
