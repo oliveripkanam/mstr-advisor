@@ -92,6 +92,7 @@ export default function TradingViewWidget({
       // TradingView expects symbols like "NASDAQ:MSTR" or "CRYPTO:BTCUSD"
       // We'll try a smart mapping with safe defaults
       const tvSymbol = resolveTVSymbol(symbol);
+      console.log(`[TradingViewWidget] Resolved symbol="${symbol}" -> tvSymbol="${tvSymbol}"`);
 
       const widget = new window.TradingView.widget({
         symbol: tvSymbol,
@@ -108,13 +109,15 @@ export default function TradingViewWidget({
         withdateranges: true,
         autosize,
         studies,
-        allow_symbol_change: allowCompare,
+        allow_symbol_change: false, // disable symbol changing to prevent Cboe fallback
         details: true,
         hotlist: false,
         calendar: false,
         disabled_features: [
           "use_localstorage_for_settings",
           "save_chart_properties_to_local_storage",
+          "symbol_search_hot_key",
+          "header_symbol_search",
         ],
         studies_overrides: {},
         overrides: {
@@ -129,10 +132,15 @@ export default function TradingViewWidget({
       widget.onChartReady?.(() => {
         if (cancelled) return;
         const chart = widget.activeChart?.();
+        console.log(`[TradingViewWidget] onChartReady: forcing symbol="${tvSymbol}"`);
         if (chart && typeof chart.setSymbol === "function") {
           try {
-            chart.setSymbol(tvSymbol, interval);
-          } catch {}
+            chart.setSymbol(tvSymbol, () => {
+              console.log(`[TradingViewWidget] setSymbol callback completed for ${tvSymbol}`);
+            });
+          } catch (err) {
+            console.error(`[TradingViewWidget] setSymbol failed:`, err);
+          }
         }
       });
 
