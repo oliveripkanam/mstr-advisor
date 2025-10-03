@@ -112,6 +112,10 @@ export default function TradingViewWidget({
         details: true,
         hotlist: false,
         calendar: false,
+        disabled_features: [
+          "use_localstorage_for_settings",
+          "save_chart_properties_to_local_storage",
+        ],
         studies_overrides: {},
         overrides: {
           "paneProperties.background": "rgba(0,0,0,0)",
