@@ -122,6 +122,16 @@ export default function TradingViewWidget({
         },
       });
 
+      widget.onChartReady?.(() => {
+        if (cancelled) return;
+        const chart = widget.activeChart?.();
+        if (chart && typeof chart.setSymbol === "function") {
+          try {
+            chart.setSymbol(tvSymbol, interval);
+          } catch {}
+        }
+      });
+
       widgetRef.current = widget;
     }
 
@@ -153,6 +163,10 @@ function resolveTVSymbol(input: string): string {
     return "BITSTAMP:BTCUSD";
   }
 
+  if (sym.includes("MSTR")) {
+    return "NASDAQ:MSTR";
+  }
+
   // Normalize exchange prefixes so that any variation of MSTR resolves to NASDAQ
   const colonIdx = sym.indexOf(":");
   if (colonIdx > -1) {
@@ -161,10 +175,6 @@ function resolveTVSymbol(input: string): string {
       return "NASDAQ:MSTR";
     }
   }
-  if (sym === "MSTR") {
-    return "NASDAQ:MSTR";
-  }
-
   // If user passes already qualified symbol, use as-is
   if (sym.includes(":")) return sym;
   // Fallback to TradingView generic
