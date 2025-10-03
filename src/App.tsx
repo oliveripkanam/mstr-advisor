@@ -5,6 +5,7 @@ import { MonitorTiles } from "./components/MonitorTiles";
 import { MomentumIndicator } from "./components/MomentumIndicator";
 import ShortTermMomentumMSTR from "./components/ShortTermMomentumMSTR";
 import PerpFundingOI from "./components/PerpFundingOI";
+import { MstrNav } from "./components/MstrNav";
 import { SupportResistance } from "./components/SupportResistance";
 import { Footer } from "./components/Footer";
 
@@ -12,6 +13,8 @@ export default function App() {
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>(['Compare']);
   const [selectedTimeframes, setSelectedTimeframes] = useState<string[]>(['15m']);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [btcPrice, setBtcPrice] = useState<number>(0);
+  const [mstrPrice, setMstrPrice] = useState<number>(0);
 
   // Apply theme to <html> element
   useEffect(() => {
@@ -33,6 +36,11 @@ export default function App() {
     } else {
       setSelectedSymbols([symbol]);
     }
+  };
+
+  const handlePriceUpdate = (btc: number, mstr: number) => {
+    setBtcPrice(btc);
+    setMstrPrice(mstr);
   };
 
   const handlePriceHover = (price: number) => {
@@ -106,7 +114,7 @@ export default function App() {
           })()}
         </div>
 
-  <MonitorTiles onTileClick={handleTileClick} timeframe={(selectedTimeframes[0] as any) ?? '15m'} />
+  <MonitorTiles onTileClick={handleTileClick} timeframe={(selectedTimeframes[0] as any) ?? '15m'} onPriceUpdate={handlePriceUpdate} />
 
   <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-6 px-3 sm:px-4">
           {/* Row: Perp Funding + OI full width */}
@@ -118,6 +126,11 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <MomentumIndicator />
             <ShortTermMomentumMSTR />
+          </div>
+
+          {/* Row: MSTR mNAV full width */}
+          <div>
+            <MstrNav btcPrice={btcPrice} mstrPrice={mstrPrice} />
           </div>
 
           {/* Row: Support/Resistance full width */}

@@ -23,10 +23,15 @@
     - A blended take from common indicators (RSI/MACD/ROC) across a few timeframes.
     - Updates regularly and surfaces a simple “how it feels right now”.
 
+  - MSTR Net Asset Value (mNAV)
+    - Shows if MSTR is trading at a premium or discount to its Bitcoin holdings.
+    - Compares the stock price to the actual Bitcoin value per share in real-time.
+    - Positive premium means you're paying extra for MSTR's benefits; negative means it's on sale.
+
   - Support/Resistance + Targets (BTC)
     - Finds nearby levels using swing points, volume hotspots, and simple fibs.
     - Merges confluence, shows distance, a rough probability, and a target in that direction.
-    
+
   ## Old Website (Unused)
 
   - https://oliveripkanam.github.io/mstr-advisor/

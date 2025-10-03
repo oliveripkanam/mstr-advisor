@@ -34,6 +34,7 @@
             "cmdk": "^1.1.1",
             "embla-carousel-react": "^8.6.0",
             "input-otp": "^1.4.2",
+            "lightweight-charts": "^5.0.9",
             "lucide-react": "^0.487.0",
             "next-themes": "^0.4.6",
             "react": "^18.3.1",
@@ -56,8 +57,8 @@
       "scripts": {
             "dev": "vite",
             "build": "vite build"
-            },
-            "engines": {
-                  "node": ">=18.0.0"
-            }
+      },
+      "engines": {
+            "node": ">=18.0.0"
+      }
 }

@@ -225,6 +225,57 @@ async function fetchJsonWithCorsFallback(url: string): Promise<any> {
   throw new Error('CORS fallback failed');
 }
 
+export interface OHLCVBar {
+  time: number; // unix timestamp in seconds
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number;
+}
+
+export async function fetchMstrOHLCV(tf: Timeframe): Promise<OHLCVBar[]> {
+  try {
+    const { interval, range } = tfToYahoo(tf);
+    const PROXY = import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined;
+    const VERCEL = import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined;
+    const YAHOO_BASE = PROXY ?? VERCEL ?? '/api/yahoo';
+    const chartUrl = `${YAHOO_BASE}/v8/finance/chart/MSTR?interval=${interval}&range=${range}&includePrePost=false`;
+    const data = await fetchJson(chartUrl);
+    
+    const result = data?.chart?.result?.[0];
+    const timestamps: number[] = result?.timestamp || [];
+    const quote = result?.indicators?.quote?.[0];
+    const opens: (number | null)[] = quote?.open || [];
+    const highs: (number | null)[] = quote?.high || [];
+    const lows: (number | null)[] = quote?.low || [];
+    const closes: (number | null)[] = quote?.close || [];
+    const volumes: (number | null)[] = quote?.volume || [];
+    
+    const bars: OHLCVBar[] = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      if (
+        typeof opens[i] === 'number' &&
+        typeof highs[i] === 'number' &&
+        typeof lows[i] === 'number' &&
+        typeof closes[i] === 'number'
+      ) {
+        bars.push({
+          time: timestamps[i],
+          open: opens[i] as number,
+          high: highs[i] as number,
+          low: lows[i] as number,
+          close: closes[i] as number,
+          volume: typeof volumes[i] === 'number' ? (volumes[i] as number) : undefined,
+        });
+      }
+    }
+    return bars;
+  } catch {
+    return [];
+  }
+}
+
 export function formatCompactNumber(n?: number | string, currency = false): string {
   if (n == null) return '-';
   const num = typeof n === 'string' ? Number(n) : n;

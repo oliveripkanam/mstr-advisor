@@ -1,0 +1,15 @@
+{
+  "bitcoinHoldings": 640031,
+  "sharesOutstandingBasic": 244800000,
+  "sharesOutstandingDiluted": 272400000,
+  "totalDebt": 7530000000,
+  "cashAndEquivalents": 86000000,
+  "lastUpdated": "2025-10-01",
+  "updateSource": "BitcoinTreasuries.net",
+  "referenceData": {
+    "btcPriceAtUpdate": 63500,
+    "mstrPriceAtUpdate": 410,
+    "mnavBasicAtUpdate": 1.269,
+    "mnavDilutedAtUpdate": 1.416
+  }
+}

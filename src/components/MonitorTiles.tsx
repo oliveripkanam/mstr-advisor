@@ -11,6 +11,7 @@ import type { Summary } from "../lib/marketData";
 interface MonitorTilesProps {
   onTileClick: (symbol: string) => void;
   timeframe?: Timeframe; // single selected timeframe drives summaries
+  onPriceUpdate?: (btcPrice: number, mstrPrice: number) => void;
 }
 
 // --- Compare card helpers (Yahoo daily closes) ---
@@ -46,7 +47,7 @@ async function fetchYahooDailyCloses(symbol: string): Promise<DailyClose[]> {
   }
 }
 
-export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesProps) {
+export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: MonitorTilesProps) {
   const isMobile = useIsMobile();
   const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0 });
   const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0 });
@@ -57,6 +58,13 @@ export function MonitorTiles({ onTileClick, timeframe = '15m' }: MonitorTilesPro
   const [corrLastTs, setCorrLastTs] = useState<number | undefined>(undefined);
   const fmt2 = (v?: number) => (v != null && isFinite(v)) ? v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
   const wsRef = useRef<WebSocket | null>(null);
+
+  // Notify parent of price updates
+  useEffect(() => {
+    if (onPriceUpdate && btc.price > 0 && mstr.price > 0) {
+      onPriceUpdate(btc.price, mstr.price);
+    }
+  }, [btc.price, mstr.price, onPriceUpdate]);
 
   useEffect(() => {
     let cancel = false;
