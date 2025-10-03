@@ -147,10 +147,10 @@ export default function TradingViewWidget({
 }
 
 function resolveTVSymbol(input: string): string {
-  // Common mappings. For BTC in USD we’ll default to BINANCE:BTCUSDT, else try CRYPTO:BTCUSD
+  // Common mappings. For BTC in USD default to BITSTAMP:BTCUSD (cash market reference)
   const sym = input.trim().toUpperCase();
-  if (sym === "BTC" || sym === "BTCUSD" || sym === "XBT" || sym === "XBTUSD") {
-    return "BINANCE:BTCUSDT"; // popular and supported without API keys
+  if (sym === "BTC" || sym === "BTCUSD" || sym === "XBT" || sym === "XBTUSD" || sym === "BTCUSDT") {
+    return "BITSTAMP:BTCUSD";
   }
 
   // Normalize exchange prefixes so that any variation of MSTR resolves to NASDAQ
