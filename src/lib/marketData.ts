@@ -12,6 +12,8 @@ export interface Summary {
   sparkline?: number[]; // recent close prices for a small sparkline
   priceSource?: 'regular' | 'pre' | 'post' | 'chart' | 'ticker';
   ts?: number; // unix seconds when price was observed (if known)
+  error?: string; // error message if fetch failed
+  loading?: boolean; // indicates data is being fetched
 }
 
 // --- Timeframe mappers ---
@@ -53,14 +55,16 @@ export async function fetchBtcSummary(tf: Timeframe): Promise<Summary> {
     const base = sparkline.length ? sparkline[0] : undefined;
     const changePct = base && isFinite(price) ? ((price - base) / base) * 100 : 0;
     return { price, changePct, low, high, sparkline, priceSource: 'ticker' };
-  } catch {
+  } catch (error) {
+    console.error('Failed to fetch BTC data:', error);
     return {
-      price: 64000,
+      price: 0,
       changePct: 0,
       volume: undefined,
       low: undefined,
       high: undefined,
-      sparkline: Array.from({ length: 24 }, (_, i) => 64000 + Math.sin(i / 3) * 200),
+      sparkline: [],
+      error: 'Failed to load BTC data',
     };
   }
 }
@@ -185,14 +189,16 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
     // If we picked previous close above (market not REGULAR), ensure changePct is 0
 
     return { price, changePct, volume, low, high, sparkline, priceSource, ts: tsOut };
-  } catch {
+  } catch (error) {
+    console.error('Failed to fetch MSTR data:', error);
     return {
-      price: 185,
+      price: 0,
       changePct: 0,
       volume: undefined,
       low: undefined,
       high: undefined,
-      sparkline: Array.from({ length: 24 }, (_, i) => 185 + Math.cos(i / 3) * 2.5),
+      sparkline: [],
+      error: 'Failed to load MSTR data',
     };
   }
 }
@@ -223,57 +229,6 @@ async function fetchJsonWithCorsFallback(url: string): Promise<any> {
     }
   } catch {}
   throw new Error('CORS fallback failed');
-}
-
-export interface OHLCVBar {
-  time: number; // unix timestamp in seconds
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume?: number;
-}
-
-export async function fetchMstrOHLCV(tf: Timeframe): Promise<OHLCVBar[]> {
-  try {
-    const { interval, range } = tfToYahoo(tf);
-    const PROXY = import.meta.env.VITE_YAHOO_PROXY_URL as string | undefined;
-    const VERCEL = import.meta.env.VITE_YAHOO_VERCEL_URL as string | undefined;
-    const YAHOO_BASE = PROXY ?? VERCEL ?? '/api/yahoo';
-    const chartUrl = `${YAHOO_BASE}/v8/finance/chart/MSTR?interval=${interval}&range=${range}&includePrePost=false`;
-    const data = await fetchJson(chartUrl);
-    
-    const result = data?.chart?.result?.[0];
-    const timestamps: number[] = result?.timestamp || [];
-    const quote = result?.indicators?.quote?.[0];
-    const opens: (number | null)[] = quote?.open || [];
-    const highs: (number | null)[] = quote?.high || [];
-    const lows: (number | null)[] = quote?.low || [];
-    const closes: (number | null)[] = quote?.close || [];
-    const volumes: (number | null)[] = quote?.volume || [];
-    
-    const bars: OHLCVBar[] = [];
-    for (let i = 0; i < timestamps.length; i++) {
-      if (
-        typeof opens[i] === 'number' &&
-        typeof highs[i] === 'number' &&
-        typeof lows[i] === 'number' &&
-        typeof closes[i] === 'number'
-      ) {
-        bars.push({
-          time: timestamps[i],
-          open: opens[i] as number,
-          high: highs[i] as number,
-          low: lows[i] as number,
-          close: closes[i] as number,
-          volume: typeof volumes[i] === 'number' ? (volumes[i] as number) : undefined,
-        });
-      }
-    }
-    return bars;
-  } catch {
-    return [];
-  }
 }
 
 export function formatCompactNumber(n?: number | string, currency = false): string {

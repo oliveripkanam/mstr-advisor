@@ -27,7 +27,6 @@
       port: 3000,
       open: true,
       proxy: {
-        // Dev-only proxy to bypass CORS for Yahoo Finance endpoints
         '/api/yahoo': {
           target: 'https://query1.finance.yahoo.com',
           changeOrigin: true,
@@ -38,21 +37,12 @@
             'Accept': 'application/json,text/plain,*/*',
           },
         },
-        // Binance Futures API (REST preload)
-        '/proxy/binance-fapi': {
-          target: 'https://fapi.binance.com',
-          changeOrigin: true,
-          secure: true,
-          rewrite: (path) => path.replace(/^\/proxy\/binance-fapi/, ''),
-        },
-        // OKX Public API (REST preload)
         '/proxy/okx': {
           target: 'https://www.okx.com',
           changeOrigin: true,
           secure: true,
           rewrite: (path) => path.replace(/^\/proxy\/okx/, ''),
         },
-        // Bybit Public API
         '/proxy/bybit': {
           target: 'https://api.bybit.com',
           changeOrigin: true,

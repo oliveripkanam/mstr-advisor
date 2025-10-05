@@ -49,13 +49,14 @@ async function fetchYahooDailyCloses(symbol: string): Promise<DailyClose[]> {
 
 export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: MonitorTilesProps) {
   const isMobile = useIsMobile();
-  const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0 });
-  const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0 });
+  const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0, loading: true });
+  const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0, loading: true });
   // Compare card analytics (MSTR/BTC)
   const [corr, setCorr] = useState<number | undefined>(undefined);
   const [beta, setBeta] = useState<number | undefined>(undefined);
   const [corrLoading, setCorrLoading] = useState<boolean>(false);
   const [corrLastTs, setCorrLastTs] = useState<number | undefined>(undefined);
+  const [corrError, setCorrError] = useState<string | undefined>(undefined);
   const fmt2 = (v?: number) => (v != null && isFinite(v)) ? v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -120,6 +121,7 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
 
     async function compute() {
       setCorrLoading(true);
+      setCorrError(undefined);
       try {
         const [mstrDaily, btcDaily] = await Promise.all([
           fetchYahooDailyCloses('MSTR'),
@@ -133,10 +135,13 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
         setCorr(c);
         setBeta(be);
         setCorrLastTs(Date.now());
-      } catch {
+        setCorrError(undefined);
+      } catch (error) {
+        console.error('Failed to compute correlation/beta:', error);
         if (!mounted) return;
         setCorr(undefined);
         setBeta(undefined);
+        setCorrError('Failed to load analytics');
       } finally {
         if (mounted) setCorrLoading(false);
       }
@@ -169,8 +174,8 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
   // percent removed; the mini-graph conveys direction/magnitude
   const ratioNum = btc.price > 0 ? (mstr.price / btc.price * 1000) : 0;
   const ratio = ratioNum ? ratioNum.toFixed(3) : '-';
-  const corrStr = corrLoading ? '...' : (corr != null && isFinite(corr) ? Number(corr).toFixed(2) : '-');
-  const betaStr = corrLoading ? '...' : (beta != null && isFinite(beta) ? `${Number(beta).toFixed(2)}x` : '-');
+  const corrStr = corrLoading ? '...' : corrError ? 'Error' : (corr != null && isFinite(corr) ? Number(corr).toFixed(2) : '-');
+  const betaStr = corrLoading ? '...' : corrError ? 'Error' : (beta != null && isFinite(beta) ? `${Number(beta).toFixed(2)}x` : '-');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 px-3 sm:px-4">
@@ -182,29 +187,39 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">BTC</Badge>
-            <div className="h-8 w-16">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={btcSparkline}>
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#f59e0b" 
-                    strokeWidth={1.5}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {btc.loading && <Badge variant="secondary" className="text-xs">Loading...</Badge>}
+            {btc.error && <Badge variant="destructive" className="text-xs">Error</Badge>}
+            {!btc.loading && !btc.error && (
+              <div className="h-8 w-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={btcSparkline}>
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="#f59e0b" 
+                      strokeWidth={1.5}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
           {/* percent removed */}
         </div>
         
         <div className="space-y-2">
-          <div className="text-2xl font-mono">${btc.price ? btc.price.toLocaleString() : '-'}</div>
-          <div className="text-xs text-muted-foreground space-y-1">
-            <div>Range: ${fmt2(btc.low)} - ${fmt2(btc.high)}</div>
-            <div>24h Volume: {formatCompactNumber(btc.volume, true)}</div>
-          </div>
+          {btc.error ? (
+            <div className="text-sm text-destructive">{btc.error}</div>
+          ) : (
+            <>
+              <div className="text-2xl font-mono">${btc.price ? btc.price.toLocaleString() : '-'}</div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>Range: ${fmt2(btc.low)} - ${fmt2(btc.high)}</div>
+                <div>24h Volume: {formatCompactNumber(btc.volume, true)}</div>
+              </div>
+            </>
+          )}
         </div>
       </Card>
 
@@ -216,42 +231,52 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">MSTR</Badge>
-            <div className="h-8 w-16">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={mstrSparkline}>
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#22c55e" 
-                    strokeWidth={1.5}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {mstr.loading && <Badge variant="secondary" className="text-xs">Loading...</Badge>}
+            {mstr.error && <Badge variant="destructive" className="text-xs">Error</Badge>}
+            {!mstr.loading && !mstr.error && (
+              <div className="h-8 w-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={mstrSparkline}>
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="#22c55e" 
+                      strokeWidth={1.5}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
           {/* percent removed */}
         </div>
         
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-mono">${mstr.price ? mstr.price.toFixed(2) : '-'}</div>
-              {(() => {
-                switch (mstr.priceSource) {
-                  case 'regular':
-                    return <Badge variant="outline" className="text-[10px] uppercase">Reg</Badge>;
-                  case 'pre':
-                    return <Badge variant="outline" className="text-[10px] uppercase">Pre</Badge>;
-                  case 'post':
-                    return <Badge variant="outline" className="text-[10px] uppercase">Post</Badge>;
-                  default:
-                    return null;
-                }
-              })()}
-          </div>
-          <div className="text-xs text-muted-foreground space-y-1">
-            <div>Range: ${fmt2(mstr.low)} - ${fmt2(mstr.high)} </div>
-          </div>
+          {mstr.error ? (
+            <div className="text-sm text-destructive">{mstr.error}</div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-mono">${mstr.price ? mstr.price.toFixed(2) : '-'}</div>
+                  {(() => {
+                    switch (mstr.priceSource) {
+                      case 'regular':
+                        return <Badge variant="outline" className="text-[10px] uppercase">Reg</Badge>;
+                      case 'pre':
+                        return <Badge variant="outline" className="text-[10px] uppercase">Pre</Badge>;
+                      case 'post':
+                        return <Badge variant="outline" className="text-[10px] uppercase">Post</Badge>;
+                      default:
+                        return null;
+                    }
+                  })()}
+              </div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>Range: ${fmt2(mstr.low)} - ${fmt2(mstr.high)} </div>
+              </div>
+            </>
+          )}
         </div>
       </Card>
 

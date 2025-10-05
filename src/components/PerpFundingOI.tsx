@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/card';
+import { Badge } from './ui/badge';
 
 interface SeriesPoint { ts: number; value: number; }
 
@@ -36,6 +37,8 @@ function useInterval(cb: () => void, ms: number) {
 export default function PerpFundingOI() {
   const [snap, setSnap] = useState<Snapshot>({});
   const [oiSeries, setOiSeries] = useState<SeriesPoint[]>([]);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true);
 
   async function getJson(url: string) {
     const r = await fetch(url);
@@ -44,6 +47,8 @@ export default function PerpFundingOI() {
   }
 
   async function fetchPerpData() {
+    setLoading(true);
+    setError(undefined);
     try {
   const { fetchOkxFunding, fetchBybitFundingFromTicker, fetchBybitOpenInterestSeries, fetchOkxCurrentOpenInterestUsd, fetchBybitOpenInterestNotionalSeries } = await import('../lib/crypto');
       // Funding: prefer OKX, fallback Bybit ticker
@@ -87,7 +92,13 @@ export default function PerpFundingOI() {
       const oiNotionalUsd = series.length ? series[series.length - 1].value : undefined;
       setOiSeries(series);
       setSnap({ fundingRate8h, nextFundingTime, oiNotionalUsd, lastUpdated: Date.now() });
-    } catch {}
+      setError(undefined);
+    } catch (err) {
+      console.error('Failed to fetch perp data:', err);
+      setError('Failed to load perpetual futures data');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => { fetchPerpData(); }, []);
@@ -122,7 +133,13 @@ export default function PerpFundingOI() {
     <Card className="p-3">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium">BTC Perp (OKX/Bybit): Funding + Open Interest</h3>
+        {loading && <Badge variant="secondary" className="text-xs">Loading...</Badge>}
+        {error && <Badge variant="destructive" className="text-xs">Error</Badge>}
       </div>
+
+      {error ? (
+        <div className="text-sm text-destructive mb-3">{error}</div>
+      ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <Card className="p-3">

@@ -92,7 +92,6 @@ export default function TradingViewWidget({
       // TradingView expects symbols like "NASDAQ:MSTR" or "CRYPTO:BTCUSD"
       // We'll try a smart mapping with safe defaults
       const tvSymbol = resolveTVSymbol(symbol);
-      console.log(`[TradingViewWidget] Resolved symbol="${symbol}" -> tvSymbol="${tvSymbol}"`);
 
       const widget = new window.TradingView.widget({
         symbol: tvSymbol,
@@ -109,16 +108,10 @@ export default function TradingViewWidget({
         withdateranges: true,
         autosize,
         studies,
-        allow_symbol_change: false, // disable symbol changing to prevent Cboe fallback
+        allow_symbol_change: allowCompare,
         details: true,
         hotlist: false,
         calendar: false,
-        disabled_features: [
-          "use_localstorage_for_settings",
-          "save_chart_properties_to_local_storage",
-          "symbol_search_hot_key",
-          "header_symbol_search",
-        ],
         studies_overrides: {},
         overrides: {
           "paneProperties.background": "rgba(0,0,0,0)",
@@ -127,21 +120,6 @@ export default function TradingViewWidget({
           "scalesProperties.lineColor": theme === "dark" ? "#666" : "#999",
           "scalesProperties.textColor": theme === "dark" ? "#9CA3AF" : "#4B5563",
         },
-      });
-
-      widget.onChartReady?.(() => {
-        if (cancelled) return;
-        const chart = widget.activeChart?.();
-        console.log(`[TradingViewWidget] onChartReady: forcing symbol="${tvSymbol}"`);
-        if (chart && typeof chart.setSymbol === "function") {
-          try {
-            chart.setSymbol(tvSymbol, () => {
-              console.log(`[TradingViewWidget] setSymbol callback completed for ${tvSymbol}`);
-            });
-          } catch (err) {
-            console.error(`[TradingViewWidget] setSymbol failed:`, err);
-          }
-        }
       });
 
       widgetRef.current = widget;
@@ -169,14 +147,10 @@ export default function TradingViewWidget({
 }
 
 function resolveTVSymbol(input: string): string {
-  // Common mappings. For BTC in USD default to BITSTAMP:BTCUSD (cash market reference)
+  // Common mappings. For BTC in USD we’ll default to BINANCE:BTCUSDT, else try CRYPTO:BTCUSD
   const sym = input.trim().toUpperCase();
-  if (sym === "BTC" || sym === "BTCUSD" || sym === "XBT" || sym === "XBTUSD" || sym === "BTCUSDT") {
-    return "BITSTAMP:BTCUSD";
-  }
-
-  if (sym.includes("MSTR")) {
-    return "NASDAQ:MSTR";
+  if (sym === "BTC" || sym === "BTCUSD" || sym === "XBT" || sym === "XBTUSD") {
+    return "BINANCE:BTCUSDT"; // popular and supported without API keys
   }
 
   // Normalize exchange prefixes so that any variation of MSTR resolves to NASDAQ
@@ -187,6 +161,10 @@ function resolveTVSymbol(input: string): string {
       return "NASDAQ:MSTR";
     }
   }
+  if (sym === "MSTR") {
+    return "NASDAQ:MSTR";
+  }
+
   // If user passes already qualified symbol, use as-is
   if (sym.includes(":")) return sym;
   // Fallback to TradingView generic

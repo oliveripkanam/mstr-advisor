@@ -28,6 +28,8 @@ interface MstrMetrics {
 export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
   const metrics = mstrMetricsConfig as MstrMetrics;
 
+  const isLoading = btcPrice === 0 || mstrPrice === 0;
+
   // Calculate real-time mNAV and premium
   const navData = useMemo(() => {
     if (!btcPrice || !mstrPrice || btcPrice <= 0 || mstrPrice <= 0) {
@@ -114,28 +116,40 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
           <div className="p-3 rounded-lg border bg-card">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Basic Premium</span>
-              {getPremiumIcon(navData.premiumBasic)}
+              {!isLoading && getPremiumIcon(navData.premiumBasic)}
             </div>
-            <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumBasic)}`}>
-              {navData.premiumBasic > 0 ? '+' : ''}{formatNumber(navData.premiumBasic, 1)}%
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Implied NAV: ${formatNumber(navData.impliedNavBasic)}
-            </div>
+            {isLoading ? (
+              <div className="text-sm text-muted-foreground">Waiting for price data...</div>
+            ) : (
+              <>
+                <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumBasic)}`}>
+                  {navData.premiumBasic > 0 ? '+' : ''}{formatNumber(navData.premiumBasic, 1)}%
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Implied NAV: ${formatNumber(navData.impliedNavBasic)}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Diluted mNAV Premium */}
           <div className="p-3 rounded-lg border bg-card">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Diluted Premium</span>
-              {getPremiumIcon(navData.premiumDiluted)}
+              {!isLoading && getPremiumIcon(navData.premiumDiluted)}
             </div>
-            <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumDiluted)}`}>
-              {navData.premiumDiluted > 0 ? '+' : ''}{formatNumber(navData.premiumDiluted, 1)}%
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">
-              Implied NAV: ${formatNumber(navData.impliedNavDiluted)}
-            </div>
+            {isLoading ? (
+              <div className="text-sm text-muted-foreground">Waiting for price data...</div>
+            ) : (
+              <>
+                <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumDiluted)}`}>
+                  {navData.premiumDiluted > 0 ? '+' : ''}{formatNumber(navData.premiumDiluted, 1)}%
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Implied NAV: ${formatNumber(navData.impliedNavDiluted)}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
