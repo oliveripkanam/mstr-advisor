@@ -107,6 +107,54 @@ export default function PerpFundingOI() {
     const mins = (points - 1) * 5;
     return Math.max(0.1, mins / 60);
   }, [activeSeries]);
+
+  // Memoize SVG path calculation to prevent recalculation on every render
+  const { chartPath, areaPath } = useMemo(() => {
+    if (activeSeries.length === 0) {
+      return { chartPath: '', areaPath: '' };
+    }
+
+    // Decimate to at most ~250 points for smoothness
+    const maxPts = 250;
+    const vals = activeSeries.map(p => p.value);
+    let min = Math.min(...vals);
+    let max = Math.max(...vals);
+    const span0 = max - min || 1;
+    const pad = span0 * 0.06; // 6% vertical padding
+    min -= pad; max += pad;
+    const span = max - min || 1;
+    const step = Math.max(1, Math.ceil(activeSeries.length / maxPts));
+    const sampled = activeSeries.filter((_, i) => i % step === 0);
+    const n = sampled.length;
+    const points = sampled.map((p, i) => {
+      const x = n > 1 ? (i / (n - 1)) * 1000 : 0;
+      const y = 100 - ((p.value - min) / span) * 100;
+      return { x, y };
+    });
+
+    function crToBezierPath(pts: {x:number,y:number}[]) {
+      if (pts.length === 0) return '';
+      if (pts.length === 1) return `M ${pts[0].x},${pts[0].y}`;
+      let d = `M ${pts[0].x},${pts[0].y}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[i - 1] || pts[i];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[i + 2] || p2;
+        const c1x = p1.x + (p2.x - p0.x) / 6;
+        const c1y = p1.y + (p2.y - p0.y) / 6;
+        const c2x = p2.x - (p3.x - p1.x) / 6;
+        const c2y = p2.y - (p3.y - p1.y) / 6;
+        d += ` C ${c1x},${c1y} ${c2x},${c2y} ${p2.x},${p2.y}`;
+      }
+      return d;
+    }
+
+    const d = crToBezierPath(points);
+    const areaD = d + ` L ${points[points.length - 1]?.x || 0},100 L ${points[0]?.x || 0},100 Z`;
+
+    return { chartPath: d, areaPath: areaD };
+  }, [activeSeries]);
   const countdown = useMemo(() => {
     if (!latest?.nextFundingTime) return '';
     const ms = Math.max(0, latest.nextFundingTime - Date.now());
@@ -120,12 +168,12 @@ export default function PerpFundingOI() {
     <Card className="p-3">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium">BTC Perp (OKX/Bybit): Funding + Open Interest</h3>
-        {loading && <Badge variant="secondary" className="text-xs">Loading...</Badge>}
-        {error && <Badge variant="destructive" className="text-xs">Error</Badge>}
+        {loading && <Badge variant="secondary" className="text-xs" role="status" aria-live="polite">Loading...</Badge>}
+        {error && <Badge variant="destructive" className="text-xs" role="alert" aria-live="assertive">Error</Badge>}
       </div>
 
       {error ? (
-        <div className="text-sm text-destructive mb-3">{error}</div>
+        <div className="text-sm text-destructive mb-3" role="alert" aria-live="assertive">{error}</div>
       ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -152,63 +200,26 @@ export default function PerpFundingOI() {
 
       <div className="rounded-sm border border-border p-1">
         {activeSeries.length === 0 ? (
-          <div className="text-xs text-muted-foreground">No data yet. Waiting for exchange responses...</div>
+          <div className="text-xs text-muted-foreground" role="status" aria-live="polite">
+            No data yet. Waiting for exchange responses...
+          </div>
         ) : (
-          <svg className="w-full h-10" viewBox={`0 0 1000 100`} preserveAspectRatio="none">
-            {(() => {
-              // Decimate to at most ~250 points for smoothness
-              const maxPts = 250;
-              const vals = activeSeries.map(p => p.value);
-              let min = Math.min(...vals);
-              let max = Math.max(...vals);
-              const span0 = max - min || 1;
-              const pad = span0 * 0.06; // 6% vertical padding
-              min -= pad; max += pad;
-              const span = max - min || 1;
-              const step = Math.max(1, Math.ceil(activeSeries.length / maxPts));
-              const sampled = activeSeries.filter((_, i) => i % step === 0);
-              const n = sampled.length;
-              const points = sampled.map((p, i) => {
-                const x = n > 1 ? (i / (n - 1)) * 1000 : 0;
-                const y = 100 - ((p.value - min) / span) * 100;
-                return { x, y };
-              });
-
-              function crToBezierPath(pts: {x:number,y:number}[]) {
-                if (pts.length === 0) return '';
-                if (pts.length === 1) return `M ${pts[0].x},${pts[0].y}`;
-                let d = `M ${pts[0].x},${pts[0].y}`;
-                for (let i = 0; i < pts.length - 1; i++) {
-                  const p0 = pts[i - 1] || pts[i];
-                  const p1 = pts[i];
-                  const p2 = pts[i + 1];
-                  const p3 = pts[i + 2] || p2;
-                  const c1x = p1.x + (p2.x - p0.x) / 6;
-                  const c1y = p1.y + (p2.y - p0.y) / 6;
-                  const c2x = p2.x - (p3.x - p1.x) / 6;
-                  const c2y = p2.y - (p3.y - p1.y) / 6;
-                  d += ` C ${c1x},${c1y} ${c2x},${c2y} ${p2.x},${p2.y}`;
-                }
-                return d;
-              }
-
-              const d = crToBezierPath(points);
-              const areaD = d + ` L ${points[points.length - 1]?.x || 0},100 L ${points[0]?.x || 0},100 Z`;
-
-              return (
-                <>
-                  <defs>
-                    <linearGradient id="oiGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(99,102,241,0.22)" />
-                      <stop offset="100%" stopColor="rgba(99,102,241,0.0)" />
-                    </linearGradient>
-                  </defs>
-                  <path d={areaD} fill="url(#oiGrad)" />
-                  <path d={d} stroke="rgba(99, 102, 241, 0.28)" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d={d} stroke="rgba(120, 125, 255, 0.98)" strokeWidth={1.6} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                </>
-              );
-            })()}
+          <svg 
+            className="w-full h-10" 
+            viewBox="0 0 1000 100" 
+            preserveAspectRatio="none"
+            role="img"
+            aria-label="Open interest chart showing recent trend"
+          >
+            <defs>
+              <linearGradient id="oiGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(99,102,241,0.22)" />
+                <stop offset="100%" stopColor="rgba(99,102,241,0.0)" />
+              </linearGradient>
+            </defs>
+            <path d={areaPath} fill="url(#oiGrad)" />
+            <path d={chartPath} stroke="rgba(99, 102, 241, 0.28)" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={chartPath} stroke="rgba(120, 125, 255, 0.98)" strokeWidth={1.6} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </div>

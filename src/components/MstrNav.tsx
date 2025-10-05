@@ -85,9 +85,9 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
   };
 
   const getPremiumIcon = (premium: number) => {
-    if (premium > 5) return <TrendingUp className="h-4 w-4 text-green-400" />;
-    if (premium < -5) return <TrendingDown className="h-4 w-4 text-red-400" />;
-    return <Minus className="h-4 w-4 text-muted-foreground" />;
+    if (premium > 5) return <TrendingUp className="h-4 w-4 text-green-400" aria-label="Strong premium" />;
+    if (premium < -5) return <TrendingDown className="h-4 w-4 text-red-400" aria-label="Strong discount" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" aria-label="Neutral" />;
   };
 
   return (

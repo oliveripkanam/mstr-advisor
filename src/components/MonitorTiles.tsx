@@ -188,12 +188,16 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
       <Card 
         className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
         onClick={() => onTileClick('BTC')}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTileClick('BTC'); } }}
+        aria-label="View Bitcoin chart"
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">BTC</Badge>
-            {btc.loading && <Badge variant="secondary" className="text-xs">Loading...</Badge>}
-            {btc.error && <Badge variant="destructive" className="text-xs">Error</Badge>}
+            {btc.loading && <Badge variant="secondary" className="text-xs" role="status" aria-live="polite">Loading...</Badge>}
+            {btc.error && <Badge variant="destructive" className="text-xs" role="alert" aria-live="assertive">Error</Badge>}
             {!btc.loading && !btc.error && (
               <div className="h-8 w-16">
                 <ResponsiveContainer width="100%" height="100%">
@@ -232,12 +236,16 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
       <Card 
         className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
         onClick={() => onTileClick('MSTR')}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTileClick('MSTR'); } }}
+        aria-label="View MicroStrategy stock chart"
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">MSTR</Badge>
-            {mstr.loading && <Badge variant="secondary" className="text-xs">Loading...</Badge>}
-            {mstr.error && <Badge variant="destructive" className="text-xs">Error</Badge>}
+            {mstr.loading && <Badge variant="secondary" className="text-xs" role="status" aria-live="polite">Loading...</Badge>}
+            {mstr.error && <Badge variant="destructive" className="text-xs" role="alert" aria-live="assertive">Error</Badge>}
             {!mstr.loading && !mstr.error && (
               <div className="h-8 w-16">
                 <ResponsiveContainer width="100%" height="100%">
@@ -289,6 +297,10 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
       <Card 
         className="p-4 cursor-pointer hover:bg-accent/50 transition-colors md:col-span-2 lg:col-span-1"
         onClick={() => onTileClick('Compare')}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTileClick('Compare'); } }}
+        aria-label="View comparison charts for Bitcoin and MicroStrategy"
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -371,13 +383,18 @@ function InfoTooltip({
   isMobile: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  
+  const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if ('key' in e && e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen((v) => !v);
+  };
+
   const triggerProps = isMobile
     ? {
-        onClick: (e: React.MouseEvent) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen((v) => !v);
-        },
+        onClick: handleInteraction,
+        onKeyDown: handleInteraction,
       }
     : {};
   const contentClass = isMobile
@@ -386,8 +403,7 @@ function InfoTooltip({
   return (
     <Tooltip {...(isMobile ? { open, onOpenChange: setOpen } : {})}>
       <TooltipTrigger asChild {...triggerProps}>
-        {/* span to ensure focusability when needed */}
-        <span tabIndex={0}>{children}</span>
+        <span tabIndex={0} role="button" aria-label="More information">{children}</span>
       </TooltipTrigger>
       <TooltipContent side="top" align="center" sideOffset={8} className={contentClass}>
         {content}
