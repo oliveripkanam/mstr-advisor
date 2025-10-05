@@ -231,10 +231,4 @@ async function fetchJsonWithCorsFallback(url: string): Promise<any> {
   throw new Error('CORS fallback failed');
 }
 
-export function formatCompactNumber(n?: number | string, currency = false): string {
-  if (n == null) return '-';
-  const num = typeof n === 'string' ? Number(n) : n;
-  if (!isFinite(num)) return '-';
-  if (currency) return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(num);
-  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(num);
-}
+// Moved to src/lib/formatting.ts - import formatCompact() from there

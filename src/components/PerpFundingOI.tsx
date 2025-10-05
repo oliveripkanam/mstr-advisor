@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
+import { formatPercentage, formatPercentageRaw, formatLargeCurrency } from '../lib/formatting';
 
 interface SeriesPoint { ts: number; value: number; }
 
@@ -9,20 +10,6 @@ interface Snapshot {
   nextFundingTime?: number; // ms
   oiNotionalUsd?: number; // USD
   lastUpdated?: number; // ms
-}
-
-function fmtPct(x?: number) {
-  if (!x && x !== 0) return '-';
-  return `${(x * 100).toFixed(3)}%`;
-}
-function fmtMoney(x?: number) {
-  if (!x && x !== 0) return '-';
-  const n = Number(x);
-  if (!isFinite(n)) return '-';
-  if (n >= 1e9) return `$${(n/1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `$${(n/1e6).toFixed(2)}M`;
-  if (n >= 1e3) return `$${(n/1e3).toFixed(1)}K`;
-  return `$${n.toFixed(0)}`;
 }
 
 function useInterval(cb: () => void, ms: number) {
@@ -144,8 +131,8 @@ export default function PerpFundingOI() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         <Card className="p-3">
           <div className="text-xs text-muted-foreground">Funding (8h)</div>
-          <div className="text-lg">{fmtPct(latest?.fundingRate8h)}</div>
-          <div className="text-xs text-muted-foreground">Annualized: {(annualized != null ? (annualized*100).toFixed(2) + '%' : '-')}</div>
+          <div className="text-lg">{formatPercentage(latest?.fundingRate8h, 3)}</div>
+          <div className="text-xs text-muted-foreground">Annualized: {formatPercentageRaw(annualized != null ? annualized * 100 : undefined)}</div>
         </Card>
 
         <Card className="p-3">
@@ -156,9 +143,9 @@ export default function PerpFundingOI() {
 
         <Card className="p-3">
           <div className="text-xs text-muted-foreground">Open Interest (Notional)</div>
-          <div className="text-lg">{fmtMoney(latest?.oiNotionalUsd)}</div>
+          <div className="text-lg">{formatLargeCurrency(latest?.oiNotionalUsd)}</div>
           <div className="text-xs text-muted-foreground">
-            Δ OI: {oiDelta != null ? `${(oiDelta*100).toFixed(2)}%` : '-'} {windowHours != null ? `(≈${windowHours.toFixed(1)}h)` : ''}
+            Δ OI: {formatPercentageRaw(oiDelta != null ? oiDelta * 100 : undefined)} {windowHours != null ? `(≈${windowHours.toFixed(1)}h)` : ''}
           </div>
         </Card>
       </div>

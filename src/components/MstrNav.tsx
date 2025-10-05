@@ -3,6 +3,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import mstrMetricsConfig from "../config/mstrMetrics.json";
+import { formatCurrency, formatLargeCurrency } from "../lib/formatting";
 
 interface MstrNavProps {
   btcPrice: number;
@@ -89,16 +90,6 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
     return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 
-  const formatNumber = (num: number, decimals = 2) => {
-    return num.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  };
-
-  const formatLargeNumber = (num: number) => {
-    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-    return `$${num.toLocaleString()}`;
-  };
-
   return (
     <Card className="p-4">
       <div className="space-y-4">
@@ -123,10 +114,10 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
             ) : (
               <>
                 <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumBasic)}`}>
-                  {navData.premiumBasic > 0 ? '+' : ''}{formatNumber(navData.premiumBasic, 1)}%
+                  {navData.premiumBasic > 0 ? '+' : ''}{navData.premiumBasic.toFixed(1)}%
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Implied NAV: ${formatNumber(navData.impliedNavBasic)}
+                  Implied NAV: ${formatCurrency(navData.impliedNavBasic)}
                 </div>
               </>
             )}
@@ -143,10 +134,10 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
             ) : (
               <>
                 <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumDiluted)}`}>
-                  {navData.premiumDiluted > 0 ? '+' : ''}{formatNumber(navData.premiumDiluted, 1)}%
+                  {navData.premiumDiluted > 0 ? '+' : ''}{navData.premiumDiluted.toFixed(1)}%
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Implied NAV: ${formatNumber(navData.impliedNavDiluted)}
+                  Implied NAV: ${formatCurrency(navData.impliedNavDiluted)}
                 </div>
               </>
             )}
@@ -162,15 +153,15 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
             </div>
             <div>
               <div className="text-muted-foreground mb-1">BTC Value</div>
-              <div className="font-mono">{formatLargeNumber(navData.totalBtcValue)}</div>
+              <div className="font-mono">{formatLargeCurrency(navData.totalBtcValue)}</div>
             </div>
             <div>
               <div className="text-muted-foreground mb-1">BTC/Share (Basic)</div>
-              <div className="font-mono">{formatNumber(navData.btcPerShareBasic, 4)}</div>
+              <div className="font-mono">{formatCurrency(navData.btcPerShareBasic, 4)}</div>
             </div>
             <div>
               <div className="text-muted-foreground mb-1">BTC/Share (Diluted)</div>
-              <div className="font-mono">{formatNumber(navData.btcPerShareDiluted, 4)}</div>
+              <div className="font-mono">{formatCurrency(navData.btcPerShareDiluted, 4)}</div>
             </div>
           </div>
         </div>

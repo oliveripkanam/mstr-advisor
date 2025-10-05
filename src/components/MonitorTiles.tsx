@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-// percent indicators removed
 import { LineChart, Line, ResponsiveContainer } from "recharts";
-import { fetchBtcSummary, fetchMstrSummary, formatCompactNumber, type Timeframe } from "../lib/marketData";
+import { fetchBtcSummary, fetchMstrSummary, type Timeframe } from "../lib/marketData";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 import { useIsMobile } from "./ui/use-mobile";
 import type { Summary } from "../lib/marketData";
+import { formatCurrency, formatCompact, formatRatio, formatMultiplier } from "../lib/formatting";
 
 interface MonitorTilesProps {
   onTileClick: (symbol: string) => void;
@@ -57,7 +57,6 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
   const [corrLoading, setCorrLoading] = useState<boolean>(false);
   const [corrLastTs, setCorrLastTs] = useState<number | undefined>(undefined);
   const [corrError, setCorrError] = useState<string | undefined>(undefined);
-  const fmt2 = (v?: number) => (v != null && isFinite(v)) ? v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
   const wsRef = useRef<WebSocket | null>(null);
 
   // Notify parent of price updates
@@ -67,6 +66,7 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
     }
   }, [btc.price, mstr.price, onPriceUpdate]);
 
+  // Fetch BTC/MSTR summaries periodically
   useEffect(() => {
     let cancel = false;
     async function load() {
@@ -79,8 +79,15 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
       if (m.status === 'fulfilled') setMstr(m.value);
     }
     load();
-  const id = setInterval(load, 5_000); // refresh MSTR every 5s; BTC will stream via WS
+    const id = setInterval(load, 5_000); // refresh every 5s
+    return () => {
+      cancel = true;
+      clearInterval(id);
+    };
+  }, [timeframe]);
 
+  // Separate effect for WebSocket (no dependencies to prevent recreation)
+  useEffect(() => {
     // Live BTC via Binance WS to match TradingView BINANCE:BTCUSDT
     try {
       const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
@@ -107,12 +114,10 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
     } catch {}
 
     return () => {
-      cancel = true;
-      clearInterval(id);
       try { wsRef.current?.close(); } catch {}
       wsRef.current = null;
     };
-  }, [timeframe]);
+  }, []); // Empty deps - only create once
 
   // Compute 30D correlation and beta (hourly cadence)
   useEffect(() => {
@@ -173,9 +178,9 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
   })();
   // percent removed; the mini-graph conveys direction/magnitude
   const ratioNum = btc.price > 0 ? (mstr.price / btc.price * 1000) : 0;
-  const ratio = ratioNum ? ratioNum.toFixed(3) : '-';
-  const corrStr = corrLoading ? '...' : corrError ? 'Error' : (corr != null && isFinite(corr) ? Number(corr).toFixed(2) : '-');
-  const betaStr = corrLoading ? '...' : corrError ? 'Error' : (beta != null && isFinite(beta) ? `${Number(beta).toFixed(2)}x` : '-');
+  const ratio = formatRatio(ratioNum || undefined);
+  const corrStr = corrLoading ? '...' : corrError ? 'Error' : formatCurrency(corr);
+  const betaStr = corrLoading ? '...' : corrError ? 'Error' : formatMultiplier(beta);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6 px-3 sm:px-4">
@@ -215,8 +220,8 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
             <>
               <div className="text-2xl font-mono">${btc.price ? btc.price.toLocaleString() : '-'}</div>
               <div className="text-xs text-muted-foreground space-y-1">
-                <div>Range: ${fmt2(btc.low)} - ${fmt2(btc.high)}</div>
-                <div>24h Volume: {formatCompactNumber(btc.volume, true)}</div>
+                <div>Range: ${formatCurrency(btc.low)} - ${formatCurrency(btc.high)}</div>
+                <div>24h Volume: {formatCompact(btc.volume, true)}</div>
               </div>
             </>
           )}
@@ -258,7 +263,7 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <div className="text-2xl font-mono">${mstr.price ? mstr.price.toFixed(2) : '-'}</div>
+                <div className="text-2xl font-mono">${formatCurrency(mstr.price)}</div>
                   {(() => {
                     switch (mstr.priceSource) {
                       case 'regular':
@@ -273,7 +278,7 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
                   })()}
               </div>
               <div className="text-xs text-muted-foreground space-y-1">
-                <div>Range: ${fmt2(mstr.low)} - ${fmt2(mstr.high)} </div>
+                <div>Range: ${formatCurrency(mstr.low)} - ${formatCurrency(mstr.high)} </div>
               </div>
             </>
           )}
