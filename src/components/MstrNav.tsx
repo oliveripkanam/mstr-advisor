@@ -39,8 +39,8 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
         btcPerShareDiluted: 0,
         impliedNavBasic: 0,
         impliedNavDiluted: 0,
-        premiumBasic: 0,
-        premiumDiluted: 0,
+        mnavBasic: 0,
+        mnavDiluted: 0,
         totalBtcValue: 0,
         netAssetValue: 0,
       };
@@ -54,9 +54,9 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
     const impliedNavBasic = btcPerShareBasic * btcPrice;
     const impliedNavDiluted = btcPerShareDiluted * btcPrice;
 
-    // Premium = (MSTR price / implied NAV) - 1
-    const premiumBasic = ((mstrPrice / impliedNavBasic) - 1) * 100;
-    const premiumDiluted = ((mstrPrice / impliedNavDiluted) - 1) * 100;
+    // mNAV Ratio = MSTR price / implied NAV
+    const mnavBasic = mstrPrice / impliedNavBasic;
+    const mnavDiluted = mstrPrice / impliedNavDiluted;
 
     // Total BTC value
     const totalBtcValue = metrics.bitcoinHoldings * btcPrice;
@@ -69,25 +69,25 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
       btcPerShareDiluted,
       impliedNavBasic,
       impliedNavDiluted,
-      premiumBasic,
-      premiumDiluted,
+      mnavBasic,
+      mnavDiluted,
       totalBtcValue,
       netAssetValue,
     };
   }, [btcPrice, mstrPrice, metrics]);
 
-  const getPremiumColor = (premium: number) => {
-    if (premium > 20) return "text-green-400";
-    if (premium > 0) return "text-green-500";
-    if (premium < -20) return "text-red-400";
-    if (premium < 0) return "text-red-500";
+  const getMnavColor = (mnav: number) => {
+    if (mnav > 1.20) return "text-green-400";
+    if (mnav > 1.0) return "text-green-500";
+    if (mnav < 0.80) return "text-red-400";
+    if (mnav < 1.0) return "text-red-500";
     return "text-muted-foreground";
   };
 
-  const getPremiumIcon = (premium: number) => {
-    if (premium > 5) return <TrendingUp className="h-4 w-4 text-green-400" aria-label="Strong premium" />;
-    if (premium < -5) return <TrendingDown className="h-4 w-4 text-red-400" aria-label="Strong discount" />;
-    return <Minus className="h-4 w-4 text-muted-foreground" aria-label="Neutral" />;
+  const getMnavIcon = (mnav: number) => {
+    if (mnav > 1.05) return <TrendingUp className="h-4 w-4 text-green-400" aria-label="Trading at premium" />;
+    if (mnav < 0.95) return <TrendingDown className="h-4 w-4 text-red-400" aria-label="Trading at discount" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" aria-label="Near parity" />;
   };
 
   return (
@@ -103,18 +103,18 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
 
         {/* Premium Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Basic mNAV Premium */}
+          {/* Basic mNAV */}
           <div className="p-3 rounded-lg border bg-card">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Basic Premium</span>
-              {!isLoading && getPremiumIcon(navData.premiumBasic)}
+              <span className="text-sm font-medium">Basic mNAV</span>
+              {!isLoading && getMnavIcon(navData.mnavBasic)}
             </div>
             {isLoading ? (
               <div className="text-sm text-muted-foreground">Waiting for price data...</div>
             ) : (
               <>
-                <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumBasic)}`}>
-                  {navData.premiumBasic > 0 ? '+' : ''}{navData.premiumBasic.toFixed(1)}%
+                <div className={`text-2xl font-mono ${getMnavColor(navData.mnavBasic)}`}>
+                  {navData.mnavBasic.toFixed(2)}x
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   Implied NAV: ${formatCurrency(navData.impliedNavBasic)}
@@ -123,18 +123,18 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
             )}
           </div>
 
-          {/* Diluted mNAV Premium */}
+          {/* Diluted mNAV */}
           <div className="p-3 rounded-lg border bg-card">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Diluted Premium</span>
-              {!isLoading && getPremiumIcon(navData.premiumDiluted)}
+              <span className="text-sm font-medium">Diluted mNAV</span>
+              {!isLoading && getMnavIcon(navData.mnavDiluted)}
             </div>
             {isLoading ? (
               <div className="text-sm text-muted-foreground">Waiting for price data...</div>
             ) : (
               <>
-                <div className={`text-2xl font-mono ${getPremiumColor(navData.premiumDiluted)}`}>
-                  {navData.premiumDiluted > 0 ? '+' : ''}{navData.premiumDiluted.toFixed(1)}%
+                <div className={`text-2xl font-mono ${getMnavColor(navData.mnavDiluted)}`}>
+                  {navData.mnavDiluted.toFixed(2)}x
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   Implied NAV: ${formatCurrency(navData.impliedNavDiluted)}
@@ -169,11 +169,11 @@ export function MstrNav({ btcPrice, mstrPrice }: MstrNavProps) {
         {/* Explanation */}
         <div className="text-xs text-muted-foreground">
           <div className="mb-1">
-            <strong>mNAV Premium</strong> shows whether MSTR trades at a premium or discount to its Bitcoin holdings.
+            <strong>mNAV Ratio</strong> shows MSTR's price relative to its Bitcoin holdings per share.
           </div>
           <div>
-            Positive premium means the market values MSTR above its BTC holdings (bullish sentiment). 
-            Negative means trading below BTC value (discount opportunity or market concerns).
+            Above 1.0x = trading at premium (market values MSTR above BTC holdings). 
+            Below 1.0x = trading at discount (opportunity to buy BTC through MSTR at discount).
           </div>
         </div>
       </div>
