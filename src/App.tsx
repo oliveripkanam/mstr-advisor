@@ -118,15 +118,15 @@ export default function App() {
   <MonitorTiles onTileClick={handleTileClick} timeframe={(selectedTimeframes[0] as any) ?? '15m'} onPriceUpdate={handlePriceUpdate} />
 
   <div className="grid grid-cols-1 gap-4 sm:gap-6 mt-6 px-3 sm:px-4">
-          {/* Row: Perp Funding + OI full width */}
-          <div>
-            <PerpFundingOI />
-          </div>
-
           {/* Row: Two-column momentum cards (BTC left, MSTR right) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <MomentumIndicator />
             <ShortTermMomentumMSTR />
+          </div>
+
+          {/* Row: Perp Funding + OI full width (moved below momentum) */}
+          <div>
+            <PerpFundingOI />
           </div>
 
           {/* Row: MSTR mNAV full width */}
