@@ -171,7 +171,7 @@ export default function DailyCloseTracker() {
 			<CardHeader className="border-b">
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>Daily Close (Latest 10)</CardTitle>
+						<CardTitle>Daily Close — Last 365 Days (showing latest 10)</CardTitle>
 						<CardDescription>
 							{asset === 'BTC' ? 'UTC daily closes' : 'US/Eastern regular session closes'}
 						</CardDescription>
@@ -201,21 +201,11 @@ export default function DailyCloseTracker() {
 					<span className="text-xs text-muted-foreground">Closed days only</span>
 				</div>
 
-				{/* Stacked bar (based on displayed rows) */}
-				<div className="w-full h-3 rounded-full bg-muted overflow-hidden mb-4 flex" role="img" aria-label={`Green ${Math.round((() => {const t=pageRows.length||1;return (pageRows.filter(r=>r.status==='up').length/t)*100;})())}%, Flat ${Math.round((() => {const t=pageRows.length||1;return (pageRows.filter(r=>r.status==='flat').length/t)*100;})())}%, Red ${Math.round((() => {const t=pageRows.length||1;return (pageRows.filter(r=>r.status==='down').length/t)*100;})())}%`}>
-					{(() => {
-						const total = pageRows.length || 1;
-						const g = pageRows.filter(r=>r.status==='up').length / total * 100;
-						const f = pageRows.filter(r=>r.status==='flat').length / total * 100;
-						const d = 100 - g - f;
-						return (
-							<>
-								<div className="h-full bg-green-400" style={{ width: `${g}%` }} />
-								<div className="h-full bg-border" style={{ width: `${f}%` }} />
-								<div className="h-full bg-red-400" style={{ width: `${d}%` }} />
-							</>
-						);
-					})()}
+				{/* Stacked bar (aggregated over last 365 days) */}
+				<div className="w-full h-3 rounded-full bg-muted overflow-hidden mb-4 flex" role="img" aria-label={`Green ${Math.round(counts.greenPct*100)}%, Flat ${Math.round(counts.flatPct*100)}%, Red ${Math.round(counts.redPct*100)}%`}>
+					<div className="h-full bg-green-400" style={{ width: `${counts.greenPct * 100}%` }} />
+					<div className="h-full bg-border" style={{ width: `${counts.flatPct * 100}%` }} />
+					<div className="h-full bg-red-400" style={{ width: `${counts.redPct * 100}%` }} />
 				</div>
 
 				{/* List */}
