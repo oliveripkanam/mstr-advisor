@@ -168,7 +168,7 @@ export default function DailyCloseTracker() {
 
 	return (
 		<Card>
-			<CardHeader className="border-b">
+			<CardHeader className="border-b pt-4 pb-4">
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle className="font-medium">UTC daily close</CardTitle>
