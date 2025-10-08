@@ -171,7 +171,7 @@ export default function DailyCloseTracker() {
 			<CardHeader className="border-b">
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>UTC daily close</CardTitle>
+						<CardTitle className="font-medium">UTC daily close</CardTitle>
 					</div>
 					<div>
 						<Select value={asset} onValueChange={(v) => setAsset(v as Asset)}>
