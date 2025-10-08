@@ -171,10 +171,7 @@ export default function DailyCloseTracker() {
 			<CardHeader className="border-b">
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>UTC Daily Close</CardTitle>
-						<CardDescription>
-							{asset === 'BTC' ? 'UTC daily closes' : 'US/Eastern regular session closes'}
-						</CardDescription>
+						<CardTitle>UTC daily close</CardTitle>
 					</div>
 					<div>
 						<Select value={asset} onValueChange={(v) => setAsset(v as Asset)}>
