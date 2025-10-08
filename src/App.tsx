@@ -7,6 +7,7 @@ import ShortTermMomentumMSTR from "./components/ShortTermMomentumMSTR";
 import PerpFundingOI from "./components/PerpFundingOI";
 import { MstrNav } from "./components/MstrNav";
 import { SupportResistance } from "./components/SupportResistance";
+import DailyCloseTracker from "./components/daily-close/DailyCloseTracker";
 import { Footer } from "./components/Footer";
 
 export default function App() {
@@ -139,6 +140,11 @@ export default function App() {
               onLevelHover={handlePriceHover}
               onTargetClick={handleTargetClick}
             />
+          </div>
+
+          {/* Row: Week-to-Date Daily Close Tracker */}
+          <div>
+            <DailyCloseTracker />
           </div>
         </div>
       </main>
