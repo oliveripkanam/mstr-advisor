@@ -171,7 +171,7 @@ export default function DailyCloseTracker() {
 			<CardHeader className="border-b">
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>Daily Close — Last 365 Days (showing latest 10)</CardTitle>
+						<CardTitle>UTC Daily Close</CardTitle>
 						<CardDescription>
 							{asset === 'BTC' ? 'UTC daily closes' : 'US/Eastern regular session closes'}
 						</CardDescription>
@@ -241,6 +241,11 @@ export default function DailyCloseTracker() {
 						})}
 					</div>
 				)}
+
+				{/* Caption */}
+				<div className="mt-4 text-xs text-muted-foreground">
+					Tracks daily closes over the past year and displays the nearest 10 closes.
+				</div>
 			</CardContent>
 		</Card>
 	);
