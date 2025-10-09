@@ -84,7 +84,7 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
     // 1) Prefer chart endpoint (more CORS-friendly via proxy) and derive price/change/range from it
   const chartParams = `interval=${interval}&range=${range}&includePrePost=false`;
   const chartUrl = `${YAHOO_BASE}/v8/finance/chart/${RAW_SYMBOL}?${chartParams}`;
-    const c = await fetchJson(chartUrl);
+  const c = await fetchJson(chartUrl);
 
   const result = c?.chart?.result?.[0];
   const meta = result?.meta;
@@ -105,7 +105,7 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
     let changePct = base > 0 ? ((price - base) / base) * 100 : 0;
     let low = series.length ? Math.min(...series) : undefined;
     let high = series.length ? Math.max(...series) : undefined;
-    const sparkline = series;
+  let sparkline = series;
   let volume = undefined as number | undefined;
   let priceSource: Summary['priceSource'] = 'chart';
   let tsOut: number | undefined = undefined;
@@ -173,6 +173,32 @@ export async function fetchMstrSummary(tf: Timeframe): Promise<Summary> {
         if (isFinite(qHigh)) high = qHigh;
         if (isFinite(qVol)) volume = qVol;
       }
+      }
+    } catch {}
+
+    // If series is flat or too short (market closed), fallback to 5m over 5d to build a more informative sparkline (latest session)
+    try {
+      const isFlat = sparkline.length > 1 ? (Math.max(...sparkline) - Math.min(...sparkline) === 0) : true;
+      if (sparkline.length < 2 || isFlat) {
+        const fallbackParams = `interval=5m&range=5d&includePrePost=false`;
+        const fbUrl = `${YAHOO_BASE}/v8/finance/chart/${RAW_SYMBOL}?${fallbackParams}`;
+        const fb = await fetchJson(fbUrl);
+        const fbRes = fb?.chart?.result?.[0];
+        const fbt: number[] | undefined = fbRes?.timestamp;
+        const fbCloses: Array<number | null | undefined> | undefined = fbRes?.indicators?.quote?.[0]?.close;
+        if (Array.isArray(fbt) && Array.isArray(fbCloses)) {
+          // Take the last trading day's worth (approx last 78-84 points at 5m over 6.5h). Use last 100 numeric points for safety.
+          const numeric = fbCloses.filter((v): v is number => typeof v === 'number');
+          sparkline = numeric.slice(-100);
+          if (sparkline.length >= 2) {
+            low = Math.min(...sparkline);
+            high = Math.max(...sparkline);
+            const baseFb = sparkline[0];
+            if (baseFb > 0 && Number.isFinite(price)) {
+              changePct = ((price - baseFb) / baseFb) * 100;
+            }
+          }
+        }
       }
     } catch {}
 

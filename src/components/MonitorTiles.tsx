@@ -3,8 +3,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { fetchBtcSummary, fetchMstrSummary, type Timeframe } from "../lib/marketData";
-import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
-import { useIsMobile } from "./ui/use-mobile";
+// Removed tooltips for a cleaner card UI
 import type { Summary } from "../lib/marketData";
 import { formatCurrency, formatCompact, formatRatio, formatMultiplier } from "../lib/formatting";
 
@@ -48,7 +47,6 @@ async function fetchYahooDailyCloses(symbol: string): Promise<DailyClose[]> {
 }
 
 export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: MonitorTilesProps) {
-  const isMobile = useIsMobile();
   const [btc, setBtc] = useState<Summary>({ price: 0, changePct: 0, loading: true });
   const [mstr, setMstr] = useState<Summary>({ price: 0, changePct: 0, loading: true });
   // Compare card analytics (MSTR/BTC)
@@ -179,7 +177,12 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
   // percent removed; the mini-graph conveys direction/magnitude
   const ratioNum = btc.price > 0 ? (mstr.price / btc.price * 1000) : 0;
   const ratio = formatRatio(ratioNum || undefined);
-  const corrStr = corrLoading ? '...' : corrError ? 'Error' : formatCurrency(corr);
+  // Clamp correlation to the valid range [-1, 1] before formatting to avoid impossible values from numerical issues.
+  const corrClamped = ((): number | undefined => {
+    if (corr == null || !isFinite(corr)) return undefined;
+    return Math.max(-1, Math.min(1, corr));
+  })();
+  const corrStr = corrLoading ? '...' : corrError ? 'Error' : formatCurrency(corrClamped);
   const betaStr = corrLoading ? '...' : corrError ? 'Error' : formatMultiplier(beta);
 
   return (
@@ -334,81 +337,14 @@ export function MonitorTiles({ onTileClick, timeframe = '15m', onPriceUpdate }: 
         </div>
         
         <div className="space-y-2">
-          <InfoTooltip
-            isMobile={isMobile}
-            content={
-              "MSTR/BTC ratio = MSTR price / BTC price × 1000. Shows MSTR in mBTC; higher = MSTR relatively stronger vs BTC; lower = relatively weaker."
-            }
-          >
-            <span className="text-2xl font-mono cursor-help inline-block" aria-label="MSTR/BTC ratio help">{ratio}</span>
-          </InfoTooltip>
+          <span className="text-2xl font-mono inline-block">{ratio}</span>
           <div className="text-xs text-muted-foreground space-y-1">
-            <div>
-              30D Correlation: 
-              <InfoTooltip
-                isMobile={isMobile}
-                content={
-                  "Pearson correlation of daily log returns over ~30 days. +1 together, 0 unrelated, −1 opposite; higher means less diversification."
-                }
-              >
-                <span className="ml-1 underline decoration-dotted cursor-help" aria-label="correlation help">{corrStr}</span>
-              </InfoTooltip>
-            </div>
-            <div>
-              Beta vs BTC: 
-              <InfoTooltip
-                isMobile={isMobile}
-                content={
-                  "Slope from regressing MSTR returns (y) on BTC returns (x): cov(x,y)/var(x). >1 amplifies BTC moves; ~1 similar; <1 less sensitive."
-                }
-              >
-                <span className="ml-1 underline decoration-dotted cursor-help" aria-label="beta help">{betaStr}</span>
-              </InfoTooltip>
-            </div>
+            <div>30D Correlation: <span className="ml-1">{corrStr}</span></div>
+            <div>Beta vs BTC: <span className="ml-1">{betaStr}</span></div>
           </div>
         </div>
       </Card>
     </div>
-  );
-}
-
-// Small helper to unify tooltip behavior across desktop and mobile.
-function InfoTooltip({
-  children,
-  content,
-  isMobile,
-}: {
-  children: ReactNode;
-  content: ReactNode;
-  isMobile: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  
-  const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
-    if ('key' in e && e.key !== 'Enter' && e.key !== ' ') return;
-    e.preventDefault();
-    e.stopPropagation();
-    setOpen((v) => !v);
-  };
-
-  const triggerProps = isMobile
-    ? {
-        onClick: handleInteraction,
-        onKeyDown: handleInteraction,
-      }
-    : {};
-  const contentClass = isMobile
-    ? "max-w-[240px] whitespace-normal break-words leading-snug"
-    : "max-w-[420px] whitespace-normal break-words leading-snug";
-  return (
-    <Tooltip {...(isMobile ? { open, onOpenChange: setOpen } : {})}>
-      <TooltipTrigger asChild {...triggerProps}>
-        <span tabIndex={0} role="button" aria-label="More information">{children}</span>
-      </TooltipTrigger>
-      <TooltipContent side="top" align="center" sideOffset={8} className={contentClass}>
-        {content}
-      </TooltipContent>
-    </Tooltip>
   );
 }
 
