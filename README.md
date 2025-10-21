@@ -32,6 +32,9 @@
     - Finds nearby levels using swing points, volume hotspots, and simple fibs.
     - Merges confluence, shows distance, a rough probability, and a target in that direction.
 
+  - UTC Daily Closes (BTC and MSTR)
+    - Tracks green/red daily closes for BTC and MSTR using UTC time.
+
   ## Old Website (Unused)
 
   - https://oliveripkanam.github.io/mstr-advisor/
